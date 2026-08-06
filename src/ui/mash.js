@@ -67,10 +67,10 @@ export function renderMashTable(recalculateCallback) {
         </select>
       </td>
       <td class="col-value">
-        <input type="number" value="${s.temp}" min="20" max="100" step="1" data-id="${s.id}" data-field="temp">
+        <input type="number" inputmode="decimal" value="${s.temp}" min="20" max="100" step="1" data-id="${s.id}" data-field="temp">
       </td>
       <td class="col-value">
-        <input type="number" value="${s.time}" min="0" max="240" step="5" data-id="${s.id}" data-field="time">
+        <input type="number" inputmode="decimal" value="${s.time}" min="0" max="240" step="5" data-id="${s.id}" data-field="time">
       </td>
       <td class="col-action">
         <button class="btn btn-danger btn-icon" data-remove="mash" data-id="${s.id}" title="Ta bort">✕</button>

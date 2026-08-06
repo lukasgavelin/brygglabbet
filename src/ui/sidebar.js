@@ -111,6 +111,38 @@ function updateSidebarStats({ sg, plato, fg_sg, fg_plato, abv, ibu, ebc, bugu, a
     swatch.style.boxShadow = `0 0 12px ${ebcToColor(ebc)}, 0 0 4px rgba(0,0,0,0.6)`;
   }
   if (label) label.textContent = ebc > 0 ? ebcToLabel(ebc) : '—';
+
+  // Uppdatera mobil flytande snabbknapp (FAB)
+  const fabSummary = document.getElementById('fab-summary');
+  if (fabSummary) {
+    const ogStr = sg > 1 ? formatSG(sg) : '—';
+    const abvStr = abv > 0 ? `${abv.toFixed(1)}%` : '—';
+    const ibuStr = ibu > 0 ? `${ibu.toFixed(0)} IBU` : '—';
+    fabSummary.textContent = `${ogStr} • ${abvStr} • ${ibuStr}`;
+  }
+}
+
+export function setupMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  const toggleBtn = document.getElementById('btn-toggle-sidebar');
+  const closeBtn = document.getElementById('btn-close-sidebar');
+  const fab = document.getElementById('mobile-stats-fab');
+
+  const openSidebar = () => {
+    sidebar?.classList.add('open');
+    backdrop?.classList.add('active');
+  };
+
+  const closeSidebar = () => {
+    sidebar?.classList.remove('open');
+    backdrop?.classList.remove('active');
+  };
+
+  toggleBtn?.addEventListener('click', openSidebar);
+  fab?.addEventListener('click', openSidebar);
+  closeBtn?.addEventListener('click', closeSidebar);
+  backdrop?.addEventListener('click', closeSidebar);
 }
 
 function updatePreboilDisplay(preboilSG, preboilPlato, evapPct) {

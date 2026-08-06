@@ -46,13 +46,13 @@ export function renderFermentablesTable(recalculateCallback) {
         </div>
       </td>
       <td class="col-amount">
-        <input type="number" value="${f.amount}" min="0" step="0.05" data-id="${f.id}" data-field="amount">
+        <input type="number" inputmode="decimal" value="${f.amount}" min="0" step="0.05" data-id="${f.id}" data-field="amount">
       </td>
       <td class="col-value">
-        <input type="number" value="${f.ebc}" min="0" max="2000" step="1" data-id="${f.id}" data-field="ebc">
+        <input type="number" inputmode="decimal" value="${f.ebc}" min="0" max="2000" step="1" data-id="${f.id}" data-field="ebc">
       </td>
       <td class="col-value">
-        <input type="number" value="${f.yield}" min="0" max="100" step="0.5" data-id="${f.id}" data-field="yield">
+        <input type="number" inputmode="decimal" value="${f.yield}" min="0" max="100" step="0.5" data-id="${f.id}" data-field="yield">
       </td>
       <td class="col-result">${pct}%</td>
       <td class="col-result">${gu}</td>

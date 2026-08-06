@@ -17,6 +17,7 @@
   </div>
   <input type="text" id="recipe-name-input" placeholder="Receptnamn..." value="Mitt nya öl" autocomplete="off">
   <div class="header-actions">
+    <button class="btn btn-secondary btn-sm mobile-only-btn" id="btn-toggle-sidebar" title="Visa nyckeltal & beräkningar"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg> <span>Nyckeltal</span></button>
     <button class="btn btn-ghost btn-sm" id="btn-swe-info" title="Guide till utrustning, råvaror & butiker"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> Brygguide</button>
     <button class="btn btn-ghost btn-sm" id="btn-new" title="Nytt recept"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Nytt</button>
     <button class="btn btn-secondary btn-sm" id="btn-open" title="Öppna sparat recept"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Öppna</button>
@@ -100,7 +101,7 @@
               <div class="form-group" style="margin-bottom:10px">
                 <label class="form-label" for="batch-volume">Bryggvolym (Jäskärl)</label>
                 <div class="input-group">
-                  <input type="number" id="batch-volume" value="20" min="1" max="1000" step="0.5">
+                  <input type="number" inputmode="decimal" id="batch-volume" value="20" min="1" max="1000" step="0.5">
                   <span class="input-addon">L</span>
                 </div>
                 <span class="form-hint">Volym öl i fermentorn</span>
@@ -108,7 +109,7 @@
               <div class="form-group">
                 <label class="form-label" for="boil-volume">Kokvolym (Pre-boil)</label>
                 <div class="input-group">
-                  <input type="number" id="boil-volume" value="25" min="1" max="1000" step="0.5">
+                  <input type="number" inputmode="decimal" id="boil-volume" value="25" min="1" max="1000" step="0.5">
                   <span class="input-addon">L</span>
                 </div>
                 <span class="form-hint">Beräknas från utrustning</span>
@@ -120,14 +121,14 @@
               <div class="form-group" style="margin-bottom:10px">
                 <label class="form-label" for="boil-time">Koktid</label>
                 <div class="input-group">
-                  <input type="number" id="boil-time" value="60" min="0" max="240" step="5">
+                  <input type="number" inputmode="decimal" id="boil-time" value="60" min="0" max="240" step="5">
                   <span class="input-addon">min</span>
                 </div>
               </div>
               <div class="form-group">
                 <label class="form-label" for="efficiency">Bryggeffektivitet</label>
                 <div class="input-group">
-                  <input type="number" id="efficiency" value="75" min="10" max="100" step="1">
+                  <input type="number" inputmode="decimal" id="efficiency" value="75" min="10" max="100" step="1">
                   <span class="input-addon">%</span>
                 </div>
                 <span class="form-hint">Mäskeffektivitet för bryggningen</span>
@@ -139,14 +140,14 @@
               <div class="form-group" style="margin-bottom:10px">
                 <label class="form-label">Förjäsning min</label>
                 <div class="input-group">
-                  <input type="number" id="att-min" value="72" min="40" max="100" step="1">
+                  <input type="number" inputmode="decimal" id="att-min" value="72" min="40" max="100" step="1">
                   <span class="input-addon">%</span>
                 </div>
               </div>
               <div class="form-group">
                 <label class="form-label">Förjäsning max</label>
                 <div class="input-group">
-                  <input type="number" id="att-max" value="78" min="40" max="100" step="1">
+                  <input type="number" inputmode="decimal" id="att-max" value="78" min="40" max="100" step="1">
                   <span class="input-addon">%</span>
                 </div>
                 <span class="form-hint">Förväntad förjäsningsgrad</span>
@@ -640,6 +641,12 @@
   <!-- ===================== SIDEBAR ======================= -->
   <aside id="sidebar">
 
+    <!-- Mobil-head i sidebar (visas endast på mobila skärmar) -->
+    <div class="sidebar-mobile-header">
+      <h3 class="sidebar-mobile-title"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg> Nyckeltal & Stil</h3>
+      <button id="btn-close-sidebar" class="sidebar-close-btn" aria-label="Stäng nyckeltal">✕</button>
+    </div>
+
     <!-- Beräkningssammanfattning -->
     <div class="stat-card">
       <div class="stat-card-title"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> Beräkningar</div>
@@ -886,6 +893,15 @@
 
 <!-- Toast container -->
 <div id="toast-container" role="alert" aria-live="polite"></div>
+
+<!-- Mobil-sidopanel bakgrundsridå -->
+<div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+<!-- Mobil-flytande snabbknapp för nyckeltal -->
+<button id="mobile-stats-fab" class="mobile-stats-fab mobile-only-btn" title="Visa nyckeltal & beräkningar">
+  <span class="fab-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span>
+  <span class="fab-summary" id="fab-summary">OG — | —% | — IBU</span>
+</button>
 
 <!-- Scripts -->
 <script type="module" src="/src/main.js"></script>

@@ -41,13 +41,13 @@ export function renderHopsTable(recalculateCallback) {
         <input type="text" value="${escHtml(h.name)}" placeholder="Humlenamn" data-id="${h.id}" data-field="name">
       </td>
       <td class="col-amount">
-        <input type="number" value="${h.amount}" min="0" step="1" data-id="${h.id}" data-field="amount">
+        <input type="number" inputmode="decimal" value="${h.amount}" min="0" step="1" data-id="${h.id}" data-field="amount">
       </td>
       <td class="col-value">
-        <input type="number" value="${h.alpha}" min="0" max="30" step="0.1" data-id="${h.id}" data-field="alpha">
+        <input type="number" inputmode="decimal" value="${h.alpha}" min="0" max="30" step="0.1" data-id="${h.id}" data-field="alpha">
       </td>
       <td class="col-value">
-        <input type="number" value="${h.time}" min="0" max="300" step="5" data-id="${h.id}" data-field="time" ${h.use === 'torrhumle' ? 'disabled' : ''}>
+        <input type="number" inputmode="decimal" value="${h.time}" min="0" max="300" step="5" data-id="${h.id}" data-field="time" ${h.use === 'torrhumle' ? 'disabled' : ''}>
       </td>
       <td class="col-unit">
         <select data-id="${h.id}" data-field="form">
