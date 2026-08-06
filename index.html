@@ -12,17 +12,17 @@
 <!-- ===================== HEADER ========================= -->
 <header id="app-header">
   <div class="header-logo">
-    <span class="logo-icon">🍺</span>
+    <span class="logo-icon"><svg class="svg-icon svg-icon-lg" viewBox="0 0 24 24"><path d="M17 11h1a3 3 0 0 1 0 6h-1"/><path d="M9 12v6"/><path d="M13 12v6"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="M5 8a2.5 2.5 0 0 1 2.5-2.5h9A2.5 2.5 0 0 1 19 8"/><path d="M5 8c0-1.1.9-2 2-2 1.1 0 2 .9 2 2s.9 2 2 2 2-.9 2-2 .9-2 2-2 2 .9 2 2"/></svg></span>
     <h1>Brygglabbet</h1>
   </div>
   <input type="text" id="recipe-name-input" placeholder="Receptnamn..." value="Mitt nya öl" autocomplete="off">
   <div class="header-actions">
-    <button class="btn btn-ghost btn-sm" id="btn-swe-info" title="Guide till utrustning, råvaror & butiker">💡 Brygguide & Utrustning</button>
-    <button class="btn btn-ghost btn-sm" id="btn-preset-recipes" title="Skapa utifrån exempelrecept">✨ Exempelrecept</button>
-    <button class="btn btn-ghost btn-sm" id="btn-scale-recipe" title="Skala om ingredienser till ny batchstorlek">⚖️ Skala recept</button>
-    <button class="btn btn-ghost btn-sm" id="btn-new" title="Nytt recept">🆕 Nytt</button>
-    <button class="btn btn-secondary btn-sm" id="btn-open" title="Öppna sparat recept">📂 Öppna</button>
-    <button class="btn btn-primary btn-sm" id="btn-save" title="Spara recept">💾 Spara</button>
+    <button class="btn btn-ghost btn-sm" id="btn-swe-info" title="Guide till utrustning, råvaror & butiker"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> Brygguide & Utrustning</button>
+    <button class="btn btn-ghost btn-sm" id="btn-preset-recipes" title="Skapa utifrån exempelrecept"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3m-3.5-6.5l-2 2m-7 7l-2 2m0-11l2 2m7 7l2 2"/></svg> Exempelrecept</button>
+    <button class="btn btn-ghost btn-sm" id="btn-scale-recipe" title="Skala om ingredienser till ny batchstorlek"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 16l3-8 3 8a3 3 0 0 1-6 0zM2 16l3-8 3 8a3 3 0 0 1-6 0zM12 3v18M3 7h18"/></svg> Skala recept</button>
+    <button class="btn btn-ghost btn-sm" id="btn-new" title="Nytt recept"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Nytt</button>
+    <button class="btn btn-secondary btn-sm" id="btn-open" title="Öppna sparat recept"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Öppna</button>
+    <button class="btn btn-primary btn-sm" id="btn-save" title="Spara recept"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Spara</button>
   </div>
 </header>
 
@@ -35,22 +35,22 @@
     <!-- Tab Navigation -->
     <nav id="tab-nav" role="tablist">
       <button class="tab-btn active" data-tab="recipe"   role="tab" aria-selected="true"  aria-controls="tab-recipe">
-        <span class="tab-icon">📋</span> Recept
+        <span class="tab-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Recept
       </button>
       <button class="tab-btn" data-tab="fermentables"    role="tab" aria-selected="false" aria-controls="tab-fermentables">
-        <span class="tab-icon">🌾</span> Malt & Råvaror
+        <span class="tab-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></span> Malt & Råvaror
       </button>
       <button class="tab-btn" data-tab="hops"            role="tab" aria-selected="false" aria-controls="tab-hops">
-        <span class="tab-icon">🌿</span> Humle
+        <span class="tab-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></span> Humle
       </button>
       <button class="tab-btn" data-tab="yeast"           role="tab" aria-selected="false" aria-controls="tab-yeast">
-        <span class="tab-icon">🧫</span> Jäst
+        <span class="tab-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 2v7.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V2"/><line x1="8" y1="2" x2="16" y2="2"/><circle cx="9" cy="15" r="1"/><circle cx="14" cy="16" r="1"/><circle cx="11" cy="18" r="1.5"/></svg></span> Jäst
       </button>
       <button class="tab-btn" data-tab="mash"            role="tab" aria-selected="false" aria-controls="tab-mash">
-        <span class="tab-icon">🔥</span> Mäsk
+        <span class="tab-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></span> Mäsk
       </button>
       <button class="tab-btn" data-tab="water"           role="tab" aria-selected="false" aria-controls="tab-water">
-        <span class="tab-icon">💧</span> Vatten
+        <span class="tab-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span> Vatten
       </button>
     </nav>
 
@@ -60,10 +60,10 @@
       <!-- ===== RECEPT TAB ============================= -->
       <section id="tab-recipe" class="tab-panel active" role="tabpanel">
         <div class="panel-header">
-          <h2 class="panel-title"><span class="title-icon">📋</span> Receptinformation</h2>
+          <h2 class="panel-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Receptinformation</h2>
           <div style="display:flex; gap:8px">
-            <button class="btn btn-ghost btn-sm" id="tab-btn-preset-recipes">✨ Exempelrecept</button>
-            <button class="btn btn-secondary btn-sm" id="tab-btn-scale-recipe">⚖️ Skala recept</button>
+            <button class="btn btn-ghost btn-sm" id="tab-btn-preset-recipes"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3m-3.5-6.5l-2 2m-7 7l-2 2m0-11l2 2m7 7l2 2"/></svg> Exempelrecept</button>
+            <button class="btn btn-secondary btn-sm" id="tab-btn-scale-recipe"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 16l3-8 3 8a3 3 0 0 1-6 0zM2 16l3-8 3 8a3 3 0 0 1-6 0zM12 3v18M3 7h18"/></svg> Skala recept</button>
           </div>
         </div>
 
@@ -149,7 +149,7 @@
         <!-- Utrustningsprofil & Vattenberäkningskort -->
         <div class="card" style="margin-top:16px">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px">
-            <p class="section-label" style="margin:0">🛠️ Utrustningsprofil & Vattenkalkylator</p>
+            <p class="section-label" style="margin:0"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Utrustningsprofil & Vattenkalkylator</p>
             <div style="display:flex; align-items:center; gap:8px">
               <label class="form-label" for="equipment-profile-select" style="margin:0">Förinställning:</label>
               <select id="equipment-profile-select" style="width:auto; min-width:200px; font-size:0.82rem; padding:6px 28px 6px 10px">
@@ -222,7 +222,7 @@
       <!-- ===== MALTER TAB ============================= -->
       <section id="tab-fermentables" class="tab-panel" role="tabpanel">
         <div class="panel-header">
-          <h2 class="panel-title"><span class="title-icon">🌾</span> Malt & Jäsbara Råvaror</h2>
+          <h2 class="panel-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></span> Malt & Jäsbara Råvaror</h2>
           <button class="btn btn-primary btn-sm" id="btn-add-fermentable">＋ Lägg till</button>
         </div>
 
@@ -257,7 +257,7 @@
         </div>
 
         <div id="fermentables-empty" class="empty-state" style="display:none">
-          <div class="empty-icon">🌾</div>
+          <div class="empty-icon"><svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></div>
           <p>Inga malter tillagda ännu.<br>Klicka på "Lägg till" för att välja malt.</p>
         </div>
       </section>
@@ -265,7 +265,7 @@
       <!-- ===== HUMLE TAB ============================== -->
       <section id="tab-hops" class="tab-panel" role="tabpanel">
         <div class="panel-header">
-          <h2 class="panel-title"><span class="title-icon">🌿</span> Humle</h2>
+          <h2 class="panel-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></span> Humle</h2>
           <button class="btn btn-primary btn-sm" id="btn-add-hop">＋ Lägg till</button>
         </div>
 
@@ -299,7 +299,7 @@
         </div>
 
         <div id="hops-empty" class="empty-state" style="display:none">
-          <div class="empty-icon">🌿</div>
+          <div class="empty-icon"><svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></div>
           <p>Inga humletillsatser tillagda.<br>Klicka på "Lägg till" för att välja humle.</p>
         </div>
       </section>
@@ -382,7 +382,7 @@
       <!-- ===== MÄSK TAB =============================== -->
       <section id="tab-mash" class="tab-panel" role="tabpanel">
         <div class="panel-header">
-          <h2 class="panel-title"><span class="title-icon">🔥</span> Mäskschema</h2>
+          <h2 class="panel-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></span> Mäskschema</h2>
           <button class="btn btn-primary btn-sm" id="btn-add-mash-step">＋ Lägg till steg</button>
         </div>
 
@@ -393,10 +393,10 @@
         <div class="card" style="margin-bottom:16px">
           <p class="section-label">Förinställda mäskprogram</p>
           <div class="preset-grid">
-            <button class="preset-btn" data-preset="single_infusion">🔥 Enkel infusion</button>
-            <button class="preset-btn" data-preset="step_mash">📶 Stegmäskning</button>
-            <button class="preset-btn" data-preset="full_step">🔬 Stegmäskning m. proteinrast</button>
-            <button class="preset-btn" data-preset="decoction">🫕 Dekoktion (enkel)</button>
+            <button class="preset-btn" data-preset="single_infusion"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg> Enkel infusion</button>
+            <button class="preset-btn" data-preset="step_mash"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> Stegmäskning</button>
+            <button class="preset-btn" data-preset="full_step"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 2v7.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V2"/></svg> Stegmäskning m. proteinrast</button>
+            <button class="preset-btn" data-preset="decoction"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Dekoktion (enkel)</button>
           </div>
         </div>
 
@@ -419,7 +419,7 @@
         </div>
 
         <div id="mash-empty" class="empty-state" style="display:none">
-          <div class="empty-icon">🔥</div>
+          <div class="empty-icon"><svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></div>
           <p>Inget mäskschema definierat.<br>Välj ett förinställt program eller lägg till steg manuellt.</p>
           <button class="btn btn-primary btn-sm" data-preset="single_infusion">Enkel infusion</button>
         </div>
@@ -592,7 +592,7 @@
 
     <!-- Beräkningssammanfattning -->
     <div class="stat-card">
-      <div class="stat-card-title">📊 Beräkningar</div>
+      <div class="stat-card-title"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> Beräkningar</div>
 
       <div class="stat-row">
         <span class="stat-label">Stammvörtstyrka (OG)</span>
@@ -671,7 +671,7 @@
 
     <!-- Stilmatchning -->
     <div class="style-match-card" id="style-match-section">
-      <div class="style-match-title">🎯 Stilmatchning</div>
+      <div class="style-match-title"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Stilmatchning</div>
       <div class="style-name-display" id="style-match-name">Välj en stil i Recept-fliken</div>
       <div id="style-bars-container">
         <!-- Genereras dynamiskt -->
@@ -680,9 +680,9 @@
 
     <!-- Åtgärdsknappar -->
     <div class="sidebar-actions">
-      <button class="btn btn-primary w-full" id="sb-btn-save">💾 Spara recept</button>
-      <button class="btn btn-secondary w-full" id="sb-btn-export">📤 Exportera JSON</button>
-      <button class="btn btn-ghost w-full" id="sb-btn-import">📥 Importera JSON</button>
+      <button class="btn btn-primary w-full" id="sb-btn-save"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Spara recept</button>
+      <button class="btn btn-secondary w-full" id="sb-btn-export"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Exportera JSON</button>
+      <button class="btn btn-ghost w-full" id="sb-btn-import"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Importera JSON</button>
       <input type="file" id="import-file-input" accept=".json" style="display:none">
     </div>
   </aside>
@@ -727,14 +727,14 @@
 <div class="modal-overlay hidden" id="modal-recipes">
   <div class="modal">
     <div class="modal-header">
-      <h3 class="modal-title">📂 Sparade recept</h3>
+      <h3 class="modal-title"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Sparade recept</h3>
       <button class="modal-close" data-close="modal-recipes">✕</button>
     </div>
     <div class="modal-list" id="recipes-list">
       <!-- Fylls i av JavaScript -->
     </div>
     <div id="no-recipes-msg" class="empty-state" style="display:none">
-      <div class="empty-icon">📂</div>
+      <div class="empty-icon"><svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
       <p>Inga sparade recept hittades.<br>Spara ett recept för att se det här.</p>
     </div>
   </div>
@@ -744,7 +744,7 @@
 <div class="modal-overlay hidden" id="modal-preset-recipes">
   <div class="modal" style="max-width:600px">
     <div class="modal-header">
-      <h3 class="modal-title">✨ Exempelrecept (Receptmallar)</h3>
+      <h3 class="modal-title"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3m-3.5-6.5l-2 2m-7 7l-2 2m0-11l2 2m7 7l2 2"/></svg> Exempelrecept (Receptmallar)</h3>
       <button class="modal-close" data-close="modal-preset-recipes">✕</button>
     </div>
     <div class="modal-body" style="padding:16px 0">
@@ -762,7 +762,7 @@
 <div class="modal-overlay hidden" id="modal-scale-recipe">
   <div class="modal" style="max-width:440px">
     <div class="modal-header">
-      <h3 class="modal-title">⚖️ Skala recept</h3>
+      <h3 class="modal-title"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 16l3-8 3 8a3 3 0 0 1-6 0zM2 16l3-8 3 8a3 3 0 0 1-6 0zM12 3v18M3 7h18"/></svg> Skala recept</h3>
       <button class="modal-close" data-close="modal-scale-recipe">✕</button>
     </div>
     <div style="padding:16px 0">
@@ -795,7 +795,7 @@
 <div class="modal-overlay hidden" id="modal-swe-info">
   <div class="modal" style="max-width:680px">
     <div class="modal-header">
-      <h3 class="modal-title">💡 Brygguide – Utrustning, Råvaror & Butiker</h3>
+      <h3 class="modal-title"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> Brygguide – Utrustning, Råvaror & Butiker</h3>
       <button class="modal-close" data-close="modal-swe-info">✕</button>
     </div>
     <div class="modal-body" style="padding:16px 0; font-size:0.88rem; line-height:1.6; color:var(--text-secondary)">
