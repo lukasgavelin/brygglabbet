@@ -1,0 +1,284 @@
+// ============================================================
+//  data.js  –  Databaser & referensdata för bryggkalkylatorn
+// ============================================================
+
+// ----------------------------------------------------------
+//  MALT-DATABAS
+//  yield: extraktutbyte i % (torrviktsbasis, fine grind)
+//  ebc:   mältets färgvärde i EBC
+//  type:  'base' | 'cara' | 'roasted' | 'adjunct' | 'sugar'
+// ----------------------------------------------------------
+const MALTS = [
+  // Basmalter
+  { name: 'Pale Malt (2-rad)',           ebc: 5,    yield: 78, type: 'base',    desc: 'Klassisk engelsk basemalt. Passar till ales och stouts.' },
+  { name: 'Pale Malt (6-rad)',           ebc: 6,    yield: 76, type: 'base',    desc: 'Hög diastatisk kraft. Bra för adjunkter.' },
+  { name: 'Pilsnermalt',                 ebc: 3,    yield: 79, type: 'base',    desc: 'Ljus, neutral basemalt. Perfekt för lager och pilsner.' },
+  { name: 'Münchenmalt typ 1',           ebc: 14,   yield: 77, type: 'base',    desc: 'Brödig, maltigt aromatisk. Ger kropp och fyllig smak.' },
+  { name: 'Münchenmalt typ 2',           ebc: 25,   yield: 76, type: 'base',    desc: 'Mörkare München. Djupare, karamelliga toner.' },
+  { name: 'Wienermalt',                  ebc: 8,    yield: 77, type: 'base',    desc: 'Mellan pilsner och München. Bra till Märzen och amber ales.' },
+  { name: 'Vetemalt (ljus)',             ebc: 4,    yield: 78, type: 'base',    desc: 'Ger dimighet och vetekaraktär. Essentiell i Hefeweizen.' },
+  { name: 'Vetemalt (mörk)',             ebc: 10,   yield: 77, type: 'base',    desc: 'Mörkare vete, används i Dunkelweizen.' },
+  { name: 'Rågmalt',                     ebc: 6,    yield: 74, type: 'base',    desc: 'Kryddig, torr karaktär. Bra i Roggenbier och saison.' },
+  { name: 'Havregrynsmalt',             ebc: 4,    yield: 72, type: 'base',    desc: 'Ger silkig munkänsla. Populär i Oatmeal Stout och NEIPA.' },
+  { name: 'Maris Otter',                 ebc: 6,    yield: 78, type: 'base',    desc: 'Klassisk brittisk basemalt. Rik, brödig och komplex.' },
+  { name: 'Golden Promise',              ebc: 6,    yield: 77, type: 'base',    desc: 'Skotsk basemalt med mild, lite söt karaktär.' },
+
+  // Karamelmalter
+  { name: 'CaraPils / Dextrinmalt',      ebc: 5,    yield: 72, type: 'cara',    desc: 'Ger skum och kropp utan sötma. Kan inte ersätta basemalt.' },
+  { name: 'Caramalt / Crystal 20',       ebc: 40,   yield: 71, type: 'cara',    desc: 'Lätt kola och sötma. Bra i engelska ales.' },
+  { name: 'Crystal 60 / Cara 60',        ebc: 120,  yield: 70, type: 'cara',    desc: 'Söt karamell och toffee. Klassisk pale ale-ingrediens.' },
+  { name: 'Crystal 80 / Cara 80',        ebc: 160,  yield: 69, type: 'cara',    desc: 'Djupare kola och torkad frukt.' },
+  { name: 'Crystal 120 / Cara 150',      ebc: 295,  yield: 68, type: 'cara',    desc: 'Mörk karamell och russin. Sparsam användning rekommenderas.' },
+  { name: 'Caramünchen I',               ebc: 50,   yield: 70, type: 'cara',    desc: 'Tyskkaramelsmalt med bröd och lättkaramell.' },
+  { name: 'Caramünchen II',              ebc: 110,  yield: 69, type: 'cara',    desc: 'Djupare Caramünchen med fyllig karamell.' },
+  { name: 'Caramünchen III',             ebc: 160,  yield: 67, type: 'cara',    desc: 'Mörk Caramünchen, torkad frukt och mörk kola.' },
+  { name: 'Caravienne',                  ebc: 40,   yield: 71, type: 'cara',    desc: 'Belgisk karamelmalt med mild sötma och kolatoner.' },
+  { name: 'Melanoidinmalt',              ebc: 60,   yield: 73, type: 'cara',    desc: 'Ger rik Maillard-reaktionskaraktär. Bra i märzen och bock.' },
+  { name: 'Special B',                   ebc: 300,  yield: 68, type: 'cara',    desc: 'Intensivt belgisk. Mörk frukt, russin, plommon.' },
+  { name: 'Aromazenmalt / Amber',        ebc: 40,   yield: 73, type: 'cara',    desc: 'Brödig, nötaktig karaktär. Bra i engelska ales och porter.' },
+
+  // Rostade malter
+  { name: 'Biscuit Malt',               ebc: 50,   yield: 72, type: 'roasted', desc: 'Kex och rostbröd. Bra i amber ales och porter.' },
+  { name: 'Brown Malt',                  ebc: 150,  yield: 70, type: 'roasted', desc: 'Klassisk porter-malt. Nöt och kaffe.' },
+  { name: 'Chokladmalt',                 ebc: 900,  yield: 65, type: 'roasted', desc: 'Intensivt choklad och kaffe. Stout och porter.' },
+  { name: 'Svartmalt / Black Patent',    ebc: 1400, yield: 60, type: 'roasted', desc: 'Extrem rostning. Används sparsamt för färg och sträva toner.' },
+  { name: 'Rostat korn (Roasted Barley)',ebc: 1300, yield: 60, type: 'roasted', desc: 'Omaltat, rostat. Ger torr kaffesmak. Typisk i Dry Stout.' },
+  { name: 'Carafa Special I (avhästat)', ebc: 600,  yield: 67, type: 'roasted', desc: 'Mjukare, avhästat chokladmalt. Fin mörk färg utan strävhet.' },
+  { name: 'Carafa Special III (avhästat)',ebc:1200,  yield: 62, type: 'roasted', desc: 'Djup svart färg med mjuk smak. Bra i schwarzbier.' },
+
+  // Rökmalter
+  { name: 'Rökrad Malt (Buchenrauch)',   ebc: 5,    yield: 77, type: 'base',    desc: 'Bokrökad malt. Klassisk i Bamberg-öl (Rauchbier).' },
+  { name: 'Torvrökrad Malt (Peated)',    ebc: 5,    yield: 75, type: 'base',    desc: 'Torvrökt, whisky-liknande karaktär. Sparsam användning!' },
+
+  // Adjunkter
+  { name: 'Korn (omaltat, flingor)',     ebc: 3,    yield: 65, type: 'adjunct', desc: 'Ger lätt kropp. Kräver diastatisk stödmalt.' },
+  { name: 'Veteflingor (omaltat)',       ebc: 3,    yield: 68, type: 'adjunct', desc: 'Protein och dimighet. Används i wit- och lambic-öl.' },
+  { name: 'Havreflingor (omaltat)',      ebc: 3,    yield: 65, type: 'adjunct', desc: 'Silkig textur. Typisk i Oatmeal Stout och NEIPA.' },
+  { name: 'Majs (flingor)',             ebc: 2,    yield: 65, type: 'adjunct', desc: 'Neutral smak. Används i amerikanska lagers.' },
+  { name: 'Ris (flingor)',               ebc: 1,    yield: 64, type: 'adjunct', desc: 'Ger en torr och ren smakprofil.' },
+
+  // Socker & extrakt
+  { name: 'Sackaros (strösocker)',       ebc: 0,    yield: 100, type: 'sugar',  desc: 'Rent socker. Ökar ABV utan att ge kropp.' },
+  { name: 'Honung',                      ebc: 3,    yield: 75,  type: 'sugar',  desc: 'Ger subtil honungsarom. Tillsätts efter koket.' },
+  { name: 'Kandissocker (ljust)',         ebc: 5,    yield: 96,  type: 'sugar',  desc: 'Belgisk kandis. Ökar alkohol och torkar ut slutsmaken.' },
+  { name: 'Kandissocker (mörkt)',         ebc: 400,  yield: 96,  type: 'sugar',  desc: 'Mörk belgisk kandis. Ger russin, plommon, kola.' },
+  { name: 'Maltextrakt (LME, ljust)',    ebc: 6,    yield: 80,  type: 'sugar',  desc: 'Flytande maltextrakt. Enkelt alternativ till all-grain.' },
+  { name: 'Maltextrakt (DME, ljust)',    ebc: 6,    yield: 97,  type: 'sugar',  desc: 'Torrt maltextrakt. Hög förjäsbarhet.' },
+];
+
+// ----------------------------------------------------------
+//  HUMLE-DATABAS
+//  alpha: typisk alpha-syrahalt i % (min-max)
+//  use:   'aroma' | 'bittering' | 'dual'
+//  origin: ursprungsland
+// ----------------------------------------------------------
+const HOPS = [
+  // Europeiska ädelaromahumle
+  { name: 'Saaz',                  alpha_min: 2.5, alpha_max: 4.5,  use: 'aroma',     origin: 'CZ', desc: 'Klassisk tjeckisk ädelhumle. Mild, kryddig, örtlig.' },
+  { name: 'Hallertau Mittelfrüh',  alpha_min: 3.0, alpha_max: 5.5,  use: 'aroma',     origin: 'DE', desc: 'Fin blomster- och kryddarom. Klassisk lagerhumle.' },
+  { name: 'Tettnanger',            alpha_min: 3.0, alpha_max: 5.5,  use: 'aroma',     origin: 'DE', desc: 'Mild, kryddig med lätt blomsterarom.' },
+  { name: 'Spalter Select',        alpha_min: 4.0, alpha_max: 6.0,  use: 'aroma',     origin: 'DE', desc: 'Fin och delikat arom. Bra till lager och pilsner.' },
+  { name: 'Hersbrucker',           alpha_min: 2.0, alpha_max: 4.0,  use: 'aroma',     origin: 'DE', desc: 'Fruktig och blommig. Mjuk beska.' },
+  { name: 'Perle',                 alpha_min: 6.0, alpha_max: 9.0,  use: 'dual',      origin: 'DE', desc: 'Fin kryddig arom. Mångsidig för beska och arom.' },
+  { name: 'Northern Brewer',       alpha_min: 8.0, alpha_max: 11.0, use: 'dual',      origin: 'DE/US', desc: 'Stabil och ren beska. God i porter och stout.' },
+  { name: 'Magnum',                alpha_min: 11.0,alpha_max: 14.0, use: 'bittering', origin: 'DE', desc: 'Europeisk beskehumle. Ren, neutral – låter aromen tala.' },
+  { name: 'Hallertau Blanc',       alpha_min: 9.0, alpha_max: 12.0, use: 'aroma',     origin: 'DE', desc: 'Passionsfrukt, vindruvor, citrus. Modern tysk aroma.' },
+  { name: 'Polaris',               alpha_min: 18.0,alpha_max: 23.0, use: 'dual',      origin: 'DE', desc: 'Hög alpha. Mintiga och fräscha toner.' },
+
+  // Brittiska
+  { name: 'Fuggles',               alpha_min: 3.5, alpha_max: 6.0,  use: 'dual',      origin: 'UK', desc: 'Jordnära, örtlig, träig. Klassisk engelsk porter/bitter.' },
+  { name: 'East Kent Goldings',    alpha_min: 4.0, alpha_max: 6.5,  use: 'aroma',     origin: 'UK', desc: 'Silkeslen honungskrydda. Den brittiska klassikern.' },
+  { name: 'Challenger',            alpha_min: 6.5, alpha_max: 9.0,  use: 'dual',      origin: 'UK', desc: 'Fruktig och grön med fin styrka. Bra i pale ales.' },
+  { name: 'Target',                alpha_min: 9.5, alpha_max: 12.0, use: 'bittering', origin: 'UK', desc: 'Stark och robust beska. God i bitter och strong ales.' },
+  { name: 'Admiral',               alpha_min: 13.0,alpha_max: 16.0, use: 'bittering', origin: 'UK', desc: 'Hög alpha med citrus- och kryddtoner.' },
+
+  // Amerikanska
+  { name: 'Cascade',               alpha_min: 4.5, alpha_max: 7.0,  use: 'dual',      origin: 'US', desc: 'Grapefrukt, citrus, blommig. Den klassiska APA-humlen.' },
+  { name: 'Centennial',            alpha_min: 9.0, alpha_max: 12.0, use: 'dual',      origin: 'US', desc: 'Citrus och blomster. Kallad "Super Cascade".' },
+  { name: 'Chinook',               alpha_min: 12.0,alpha_max: 14.0, use: 'dual',      origin: 'US', desc: 'Barrträdsaktig, jordnära och kryddig med citrus.' },
+  { name: 'Columbus / CTZ',        alpha_min: 14.0,alpha_max: 16.0, use: 'dual',      origin: 'US', desc: 'Kraftig beska och kryddig, pepprig arom.' },
+  { name: 'Simcoe',                alpha_min: 12.0,alpha_max: 14.0, use: 'aroma',     origin: 'US', desc: 'Passionsfrukt, tall, jordnära. IPA-favorit.' },
+  { name: 'Citra',                 alpha_min: 11.0,alpha_max: 13.0, use: 'aroma',     origin: 'US', desc: 'Intensiv tropisk frukt, lime, persika. Extremt populär.' },
+  { name: 'Amarillo',              alpha_min: 8.0, alpha_max: 11.0, use: 'dual',      origin: 'US', desc: 'Apelsin, grapefrukt, persika. Fruktig och aromatisk.' },
+  { name: 'Mosaic',                alpha_min: 11.5,alpha_max: 13.5, use: 'aroma',     origin: 'US', desc: 'Komplex tropisk frukt, bluberry, citrus. Mångsidig.' },
+  { name: 'Idaho 7',               alpha_min: 13.0,alpha_max: 15.0, use: 'aroma',     origin: 'US', desc: 'Passionsfrukt, guava, svart te. Modern NEIPA-humle.' },
+  { name: 'Strata',                alpha_min: 13.0,alpha_max: 17.0, use: 'aroma',     origin: 'US', desc: 'Passionsfrukt, jordgubb, kronärtskocka. Unik och komplex.' },
+  { name: 'Ekuanot',               alpha_min: 13.0,alpha_max: 15.0, use: 'aroma',     origin: 'US', desc: 'Melon, lime, tropisk frukt. Ny-skolehumle.' },
+
+  // Australiska & Nyzeeländska
+  { name: 'Galaxy',                alpha_min: 13.0,alpha_max: 15.0, use: 'aroma',     origin: 'AU', desc: 'Passionsfrukt, citrus, persika. Australisk stjärna.' },
+  { name: 'Vic Secret',            alpha_min: 14.0,alpha_max: 17.0, use: 'aroma',     origin: 'AU', desc: 'Passionsfrukt, talldoft och fruktiga toner.' },
+  { name: 'Nelson Sauvin',         alpha_min: 12.0,alpha_max: 13.5, use: 'aroma',     origin: 'NZ', desc: 'Vitvinskaraktär, vindruvor, gooseberry. Polariserande.' },
+  { name: 'Waimea',                alpha_min: 17.0,alpha_max: 19.0, use: 'dual',      origin: 'NZ', desc: 'Citrus, tall, tropisk frukt. Hög alpha.' },
+  { name: 'Motueka',               alpha_min: 6.5, alpha_max: 8.5,  use: 'aroma',     origin: 'NZ', desc: 'Lime, citrus, tropical. Lättanvänd aromahumle.' },
+];
+
+// ----------------------------------------------------------
+//  JÄSTDATABAS
+//  attenuation: förväntad förjäsning i % (min-max)
+//  temp:       optimal jästemperatur i °C (min-max)
+//  type:       'ale' | 'lager' | 'wheat' | 'belgian' | 'wild'
+// ----------------------------------------------------------
+const YEASTS = [
+  // Ale
+  { name: 'Safale US-05',          lab: 'Fermentis', type: 'ale',     att_min: 73, att_max: 77, temp_min: 15, temp_max: 22, desc: 'Ren, neutral amerikan. Standardjäst för APA, IPA.' },
+  { name: 'Safale S-04',           lab: 'Fermentis', type: 'ale',     att_min: 71, att_max: 75, temp_min: 18, temp_max: 22, desc: 'Brittisk ale. God skumstabilitet, lätt fruktighet.' },
+  { name: 'Nottingham Ale',        lab: 'Lallemand', type: 'ale',     att_min: 73, att_max: 82, temp_min: 14, temp_max: 21, desc: 'Hög förgäsning, neutral smak. Robust och snabb.' },
+  { name: 'Wyeast 1056 American Ale',  lab: 'Wyeast', type: 'ale',   att_min: 73, att_max: 77, temp_min: 15, temp_max: 22, desc: 'Ren och neutral ale. Equivalent till WLP001.' },
+  { name: 'WLP001 California Ale',     lab: 'White Labs', type: 'ale', att_min: 73, att_max: 80, temp_min: 18, temp_max: 23, desc: 'Professionell ren amerikan alräst. Klar kropp.' },
+  { name: 'Wyeast 1968 ESB Ale',   lab: 'Wyeast', type: 'ale',       att_min: 67, att_max: 71, temp_min: 18, temp_max: 22, desc: 'Låg förgäsning → fyllig kropp. Klassisk bitter/ESB.' },
+  { name: 'WLP002 English Ale',    lab: 'White Labs', type: 'ale',   att_min: 63, att_max: 70, temp_min: 18, temp_max: 22, desc: 'Traditionell brittisk. Måttlig förgäsning, brödig ton.' },
+  { name: 'WLP007 Dry English Ale',lab: 'White Labs', type: 'ale',   att_min: 70, att_max: 80, temp_min: 18, temp_max: 22, desc: 'Torr och ren brittisk. Hög förgäsning.' },
+  { name: 'Wyeast 1318 London Ale III',lab:'Wyeast', type: 'ale',    att_min: 71, att_max: 75, temp_min: 18, temp_max: 23, desc: 'Len fruktighet, brödig – NEIPA-favorit.' },
+  { name: 'Verdant IPA',           lab: 'Lallemand', type: 'ale',    att_min: 72, att_max: 76, temp_min: 19, temp_max: 23, desc: 'Tropisk frukt, len kropp – NEIPA, juicy IPA.' },
+  { name: 'WLP023 Burton Ale',     lab: 'White Labs', type: 'ale',   att_min: 69, att_max: 75, temp_min: 18, temp_max: 22, desc: 'Brittisk med fruktiga estersnoter. God i bitter och IPA.' },
+
+  // Belgisk
+  { name: 'Safbrew Abbaye BE-256', lab: 'Fermentis', type: 'belgian', att_min: 74, att_max: 80, temp_min: 18, temp_max: 24, desc: 'Belgisk abbostjäst. Fruktig och kryddig. Tripel, dubbel.' },
+  { name: 'Wyeast 3787 Trappist High Gravity', lab: 'Wyeast', type: 'belgian', att_min: 74, att_max: 78, temp_min: 18, temp_max: 26, desc: 'Komplex belgisk. Frukt och kryddor. Bra till stark öl.' },
+  { name: 'WLP530 Abbey Ale',      lab: 'White Labs', type: 'belgian', att_min: 75, att_max: 80, temp_min: 18, temp_max: 24, desc: 'Estig, fruktigt. Klassisk klosterjäst.' },
+  { name: 'WLP565 Belgian Saison I',lab:'White Labs', type: 'belgian', att_min: 65, att_max: 75, temp_min: 22, temp_max: 30, desc: 'Fruktig och kryddig saison-jäst. Varmt = mer karaktär.' },
+  { name: 'Wyeast 3724 Belgian Saison',lab:'Wyeast', type: 'belgian', att_min: 65, att_max: 80, temp_min: 21, temp_max: 35, desc: 'Autentisk Saison Dupont-jäst. Kräver hög jästemperatur.' },
+  { name: 'WLP500 Monastery Ale',  lab: 'White Labs', type: 'belgian', att_min: 75, att_max: 80, temp_min: 18, temp_max: 24, desc: 'Intensivt fruktiga estrar. Bra till belgisk strong ale.' },
+
+  // Vete
+  { name: 'Wyeast 3068 Weizen',    lab: 'Wyeast', type: 'wheat',     att_min: 73, att_max: 77, temp_min: 18, temp_max: 24, desc: 'Klassisk Hefeweizen. Banan och kryddnejlika i balans.' },
+  { name: 'WLP300 Hefeweizen Ale', lab: 'White Labs', type: 'wheat', att_min: 72, att_max: 76, temp_min: 18, temp_max: 24, desc: 'Stor bananesig fruktighet. Standard Hefeweizen-jäst.' },
+  { name: 'Safbrew WB-06',         lab: 'Fermentis', type: 'wheat',  att_min: 76, att_max: 80, temp_min: 18, temp_max: 24, desc: 'Torr vete-jäst. Mer kryddnejlika, lägre banan.' },
+  { name: 'Lallemand Munich Wheat',lab: 'Lallemand', type: 'wheat',  att_min: 72, att_max: 76, temp_min: 18, temp_max: 22, desc: 'Balanserad Hefeweizen. God banan/kryddnelika.' },
+
+  // Lager
+  { name: 'Saflager W-34/70',      lab: 'Fermentis', type: 'lager',  att_min: 71, att_max: 75, temp_min: 9,  temp_max: 15, desc: 'Klassisk Weihenstephan lagerjäst. Ren och robust.' },
+  { name: 'Saflager S-23',         lab: 'Fermentis', type: 'lager',  att_min: 70, att_max: 75, temp_min: 9,  temp_max: 15, desc: 'Sydtysk lagerjäst. Fruktiga undertoner, lätt maltartig.' },
+  { name: 'Wyeast 2124 Bohemian Lager',lab:'Wyeast', type: 'lager',  att_min: 73, att_max: 77, temp_min: 8,  temp_max: 14, desc: 'Tjeckisk malt- och humlekaraktär. Pilsner/bock.' },
+  { name: 'WLP830 German Lager',   lab: 'White Labs', type: 'lager', att_min: 74, att_max: 79, temp_min: 10, temp_max: 14, desc: 'Ren och neutral. Mångsidig lagerjäst.' },
+  { name: 'WLP820 Oktoberfest Märzen',lab:'White Labs', type: 'lager', att_min: 65, att_max: 73, temp_min: 10, temp_max: 14, desc: 'Måttlig förgäsning → fyllig maltighet. Märzen/Oktoberfest.' },
+  { name: 'Wyeast 2206 Bavarian Lager',lab:'Wyeast', type: 'lager',  att_min: 73, att_max: 77, temp_min: 9,  temp_max: 14, desc: 'Bayersk lagerjäst med ren smak. Bra till bock.' },
+];
+
+// ----------------------------------------------------------
+//  STILGUIDE (BJCP 2021 / europeisk standard)
+//  OG/FG: specifik gravitet (SG)
+//  ibu:   bitterhet i IBU
+//  ebc:   färg i EBC
+//  abv:   alkohol i %
+// ----------------------------------------------------------
+const STYLES = [
+  // Bohemska & tyska lagers
+  { id: '3A',  category: 'Lager – Ljus',         name: 'Bohemsk Pilsner',        og_min: 1.044, og_max: 1.060, fg_min: 1.013, fg_max: 1.017, ibu_min: 30, ibu_max: 45, ebc_min: 7,  ebc_max: 12, abv_min: 4.2, abv_max: 5.4 },
+  { id: '5D',  category: 'Lager – Ljus',         name: 'Tysk Pilsner',           og_min: 1.044, og_max: 1.050, fg_min: 1.008, fg_max: 1.013, ibu_min: 22, ibu_max: 40, ebc_min: 4,  ebc_max: 10, abv_min: 4.4, abv_max: 5.2 },
+  { id: '4A',  category: 'Lager – Ljus',         name: 'München Helles',         og_min: 1.044, og_max: 1.048, fg_min: 1.006, fg_max: 1.012, ibu_min: 16, ibu_max: 22, ebc_min: 6,  ebc_max: 10, abv_min: 4.7, abv_max: 5.4 },
+  { id: '6A',  category: 'Lager – Amber',        name: 'Märzen / Oktoberfest',   og_min: 1.054, og_max: 1.060, fg_min: 1.010, fg_max: 1.014, ibu_min: 18, ibu_max: 24, ebc_min: 16, ebc_max: 33, abv_min: 4.8, abv_max: 5.9 },
+  { id: '6C',  category: 'Lager – Mörk',         name: 'Helles Bock / Maibock',  og_min: 1.064, og_max: 1.072, fg_min: 1.011, fg_max: 1.018, ibu_min: 23, ibu_max: 35, ebc_min: 10, ebc_max: 20, abv_min: 6.3, abv_max: 7.4 },
+  { id: '6B',  category: 'Lager – Mörk',         name: 'Traditionell Bock',       og_min: 1.064, og_max: 1.072, fg_min: 1.013, fg_max: 1.019, ibu_min: 20, ibu_max: 27, ebc_min: 39, ebc_max: 59, abv_min: 6.3, abv_max: 7.2 },
+  { id: '8A',  category: 'Lager – Mörk',         name: 'München Dunkel',         og_min: 1.048, og_max: 1.056, fg_min: 1.010, fg_max: 1.016, ibu_min: 18, ibu_max: 28, ebc_min: 28, ebc_max: 55, abv_min: 4.5, abv_max: 5.6 },
+  { id: '8B',  category: 'Lager – Mörk',         name: 'Schwarzbier',            og_min: 1.046, og_max: 1.052, fg_min: 1.010, fg_max: 1.016, ibu_min: 20, ibu_max: 30, ebc_min: 37, ebc_max: 59, abv_min: 4.4, abv_max: 5.4 },
+  { id: '9C',  category: 'Lager – Mörk',         name: 'Baltic Porter',          og_min: 1.060, og_max: 1.090, fg_min: 1.016, fg_max: 1.024, ibu_min: 20, ibu_max: 40, ebc_min: 33, ebc_max: 79, abv_min: 6.5, abv_max: 9.5 },
+
+  // Brittiska ales
+  { id: '11A', category: 'Ale – Brittisk',        name: 'Ordinary Bitter',        og_min: 1.030, og_max: 1.039, fg_min: 1.007, fg_max: 1.011, ibu_min: 25, ibu_max: 35, ebc_min: 16, ebc_max: 28, abv_min: 3.2, abv_max: 3.8 },
+  { id: '11B', category: 'Ale – Brittisk',        name: 'Best Bitter',            og_min: 1.040, og_max: 1.048, fg_min: 1.008, fg_max: 1.012, ibu_min: 25, ibu_max: 40, ebc_min: 16, ebc_max: 31, abv_min: 3.8, abv_max: 4.6 },
+  { id: '11C', category: 'Ale – Brittisk',        name: 'Strong Bitter / ESB',    og_min: 1.048, og_max: 1.060, fg_min: 1.010, fg_max: 1.016, ibu_min: 30, ibu_max: 50, ebc_min: 16, ebc_max: 35, abv_min: 4.6, abv_max: 6.2 },
+  { id: '14A', category: 'Ale – Brittisk',        name: 'Scottish Heavy 70/-',    og_min: 1.035, og_max: 1.040, fg_min: 1.010, fg_max: 1.015, ibu_min: 10, ibu_max: 20, ebc_min: 26, ebc_max: 43, abv_min: 3.2, abv_max: 3.9 },
+  { id: '13C', category: 'Ale – Brittisk',        name: 'English Porter',         og_min: 1.040, og_max: 1.052, fg_min: 1.008, fg_max: 1.014, ibu_min: 18, ibu_max: 35, ebc_min: 39, ebc_max: 59, abv_min: 4.0, abv_max: 5.4 },
+  { id: '17C', category: 'Ale – Brittisk',        name: 'Old Ale',                og_min: 1.055, og_max: 1.088, fg_min: 1.015, fg_max: 1.022, ibu_min: 30, ibu_max: 60, ebc_min: 22, ebc_max: 79, abv_min: 5.5, abv_max: 9.0 },
+  { id: '17E', category: 'Ale – Brittisk',        name: 'English Barleywine',     og_min: 1.080, og_max: 1.120, fg_min: 1.018, fg_max: 1.030, ibu_min: 35, ibu_max: 70, ebc_min: 16, ebc_max: 43, abv_min: 8.0, abv_max: 12.0 },
+
+  // Stout
+  { id: '15A', category: 'Ale – Stout',           name: 'Dry Irish Stout',        og_min: 1.036, og_max: 1.044, fg_min: 1.007, fg_max: 1.011, ibu_min: 25, ibu_max: 40, ebc_min: 49, ebc_max: 79, abv_min: 4.0, abv_max: 4.5 },
+  { id: '15B', category: 'Ale – Stout',           name: 'Oatmeal Stout',          og_min: 1.045, og_max: 1.065, fg_min: 1.010, fg_max: 1.018, ibu_min: 25, ibu_max: 40, ebc_min: 43, ebc_max: 79, abv_min: 4.2, abv_max: 5.9 },
+  { id: '16D', category: 'Ale – Stout',           name: 'Foreign Extra Stout',    og_min: 1.056, og_max: 1.075, fg_min: 1.010, fg_max: 1.018, ibu_min: 30, ibu_max: 70, ebc_min: 59, ebc_max: 99, abv_min: 6.3, abv_max: 8.0 },
+  { id: '20A', category: 'Ale – Stout',           name: 'Russian Imperial Stout', og_min: 1.075, og_max: 1.115, fg_min: 1.018, fg_max: 1.030, ibu_min: 50, ibu_max: 90, ebc_min: 59, ebc_max: 99, abv_min: 8.0, abv_max: 12.0 },
+
+  // Amerikanska ales
+  { id: '18B', category: 'Ale – Amerikansk',      name: 'American Pale Ale',      og_min: 1.045, og_max: 1.060, fg_min: 1.010, fg_max: 1.015, ibu_min: 30, ibu_max: 50, ebc_min: 6,  ebc_max: 14, abv_min: 4.5, abv_max: 6.2 },
+  { id: '21A', category: 'Ale – Hoppy',           name: 'American IPA',           og_min: 1.056, og_max: 1.070, fg_min: 1.008, fg_max: 1.014, ibu_min: 40, ibu_max: 70, ebc_min: 12, ebc_max: 28, abv_min: 5.5, abv_max: 7.5 },
+  { id: '21C', category: 'Ale – Hoppy',           name: 'Hazy / NEIPA',           og_min: 1.060, og_max: 1.085, fg_min: 1.010, fg_max: 1.015, ibu_min: 25, ibu_max: 60, ebc_min: 6,  ebc_max: 14, abv_min: 6.0, abv_max: 9.0 },
+  { id: '22A', category: 'Ale – Hoppy',           name: 'Double IPA',             og_min: 1.065, og_max: 1.100, fg_min: 1.008, fg_max: 1.018, ibu_min: 60, ibu_max: 120,ebc_min: 12, ebc_max: 28, abv_min: 7.5, abv_max: 10.0 },
+
+  // Belgiska ales
+  { id: '24A', category: 'Ale – Belgisk',         name: 'Witbier',                og_min: 1.044, og_max: 1.052, fg_min: 1.008, fg_max: 1.012, ibu_min: 8,  ibu_max: 20, ebc_min: 4,  ebc_max: 8,  abv_min: 4.5, abv_max: 5.5 },
+  { id: '25B', category: 'Ale – Belgisk',         name: 'Saison',                 og_min: 1.048, og_max: 1.065, fg_min: 1.002, fg_max: 1.012, ibu_min: 20, ibu_max: 35, ebc_min: 10, ebc_max: 28, abv_min: 3.5, abv_max: 9.0 },
+  { id: '26B', category: 'Ale – Belgisk',         name: 'Belgian Dubbel',         og_min: 1.062, og_max: 1.075, fg_min: 1.008, fg_max: 1.018, ibu_min: 15, ibu_max: 25, ebc_min: 20, ebc_max: 33, abv_min: 6.0, abv_max: 7.6 },
+  { id: '26C', category: 'Ale – Belgisk',         name: 'Belgian Tripel',         og_min: 1.075, og_max: 1.085, fg_min: 1.008, fg_max: 1.014, ibu_min: 20, ibu_max: 40, ebc_min: 9,  ebc_max: 14, abv_min: 7.5, abv_max: 9.5 },
+  { id: '27A', category: 'Ale – Belgisk',         name: 'Belgian Strong Dark',    og_min: 1.075, og_max: 1.110, fg_min: 1.010, fg_max: 1.024, ibu_min: 20, ibu_max: 35, ebc_min: 24, ebc_max: 43, abv_min: 8.0, abv_max: 12.0 },
+
+  // Veteöl
+  { id: '10A', category: 'Ale – Vete',            name: 'Hefeweizen',             og_min: 1.044, og_max: 1.052, fg_min: 1.010, fg_max: 1.014, ibu_min: 8,  ibu_max: 15, ebc_min: 6,  ebc_max: 18, abv_min: 4.3, abv_max: 5.6 },
+  { id: '10B', category: 'Ale – Vete',            name: 'Dunkelweizen',           og_min: 1.044, og_max: 1.056, fg_min: 1.010, fg_max: 1.014, ibu_min: 10, ibu_max: 18, ebc_min: 28, ebc_max: 45, abv_min: 4.3, abv_max: 5.6 },
+  { id: '10C', category: 'Ale – Vete',            name: 'Weizenbock',             og_min: 1.064, og_max: 1.090, fg_min: 1.015, fg_max: 1.022, ibu_min: 15, ibu_max: 30, ebc_min: 14, ebc_max: 59, abv_min: 6.5, abv_max: 9.0 },
+];
+
+// ----------------------------------------------------------
+//  VATTENPROFILER (ppm / mg/L)
+// ----------------------------------------------------------
+const WATER_PROFILES = [
+  { name: 'Stockholm (Stockholm Vatten)', ca: 17,  mg: 3,  na: 14, cl: 20,  so4: 20,  hco3: 65 },
+  { name: 'Göteborg (Göta Älv)',          ca: 10,  mg: 2,  na: 10, cl: 15,  so4: 10,  hco3: 40 },
+  { name: 'Malmö (Sydvatten)',            ca: 32,  mg: 7,  na: 18, cl: 30,  so4: 30,  hco3: 120 },
+  { name: 'Pilsen (Tjeckien)',            ca: 7,   mg: 3,  na: 2,  cl: 5,   so4: 5,   hco3: 25 },
+  { name: 'München (Bayern)',             ca: 75,  mg: 18, na: 2,  cl: 2,   so4: 5,   hco3: 295 },
+  { name: 'Wien (Österrike)',             ca: 75,  mg: 15, na: 10, cl: 15,  so4: 70,  hco3: 225 },
+  { name: 'Dublin (Irland)',              ca: 119, mg: 4,  na: 12, cl: 19,  so4: 55,  hco3: 315 },
+  { name: 'Burton-on-Trent (England)',    ca: 352, mg: 24, na: 44, cl: 16,  so4: 820, hco3: 320 },
+  { name: 'Edinburgh (Skottland)',        ca: 100, mg: 20, na: 55, cl: 45,  so4: 140, hco3: 285 },
+  { name: 'Londra (England)',             ca: 90,  mg: 5,  na: 15, cl: 38,  so4: 40,  hco3: 123 },
+  { name: 'Destillerat vatten',           ca: 0,   mg: 0,  na: 0,  cl: 0,   so4: 0,   hco3: 0   },
+];
+
+// ----------------------------------------------------------
+//  SALTENS JONITBIDRAG (mg jon per gram salt)
+//  Beräknas utifrån molekylvikt.
+//  Dividera med volym_L för att få ppm (mg/L).
+// ----------------------------------------------------------
+const SALT_IONS = {
+  gypsum:         { ca: 232.8, mg: 0,     na: 0,     cl: 0,     so4: 557.9, hco3: 0     }, // CaSO4·2H2O
+  calciumChloride:{ ca: 272.6, mg: 0,     na: 0,     cl: 483.4, so4: 0,     hco3: 0     }, // CaCl2·2H2O
+  epsomSalt:      { ca: 0,     mg: 98.6,  na: 0,     cl: 0,     so4: 389.7, hco3: 0     }, // MgSO4·7H2O
+  tableSalt:      { ca: 0,     mg: 0,     na: 393.5, cl: 606.5, so4: 0,     hco3: 0     }, // NaCl
+  chalk:          { ca: 400.5, mg: 0,     na: 0,     cl: 0,     so4: 0,     hco3: 1200  }, // CaCO3 (approx alkalinity som HCO3)
+  bakingSoda:     { ca: 0,     mg: 0,     na: 273.4, cl: 0,     so4: 0,     hco3: 724.0 }, // NaHCO3
+};
+
+// ----------------------------------------------------------
+//  MÄSKSCHEMA-FÖRINSTÄLLNINGAR
+// ----------------------------------------------------------
+const MASH_PRESETS = {
+  single_infusion: {
+    name: 'Enkelt infusion',
+    steps: [
+      { name: 'Sackarifikation',  type: 'Infusion', temp: 67, time: 60 },
+      { name: 'Avmäskning',       type: 'Infusion', temp: 78, time: 10 },
+    ]
+  },
+  step_mash: {
+    name: 'Stegmäskning',
+    steps: [
+      { name: 'Beta-amylasrast',   type: 'Steg',     temp: 63, time: 30 },
+      { name: 'Sackarifikation',   type: 'Steg',     temp: 72, time: 30 },
+      { name: 'Avmäskning',        type: 'Steg',     temp: 78, time: 10 },
+    ]
+  },
+  full_step: {
+    name: 'Full stegmäskning (med proteinrast)',
+    steps: [
+      { name: 'Inläggning',        type: 'Infusion', temp: 52, time: 15 },
+      { name: 'Beta-amylasrast',   type: 'Steg',     temp: 63, time: 30 },
+      { name: 'Alfa-amylasrast',   type: 'Steg',     temp: 72, time: 20 },
+      { name: 'Avmäskning',        type: 'Steg',     temp: 78, time: 10 },
+    ]
+  },
+  decoction: {
+    name: 'Dekoktion (enkel)',
+    steps: [
+      { name: 'Inläggning',        type: 'Infusion',  temp: 55, time: 20 },
+      { name: 'Sackarifikation',   type: 'Dekoktion', temp: 68, time: 40 },
+      { name: 'Avmäskning',        type: 'Steg',      temp: 78, time: 10 },
+    ]
+  },
+};
+
+// Exportera (stöder både module och globalt scope)
+if (typeof module !== 'undefined') {
+  module.exports = { MALTS, HOPS, YEASTS, STYLES, WATER_PROFILES, SALT_IONS, MASH_PRESETS };
+}
