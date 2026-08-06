@@ -45,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupYeastTab(recalculate);
   setupMashTab(recalculate);
   setupWaterTab(recalculate);
-  setupSidebarActions();
   setupModalClose();
 
   loadDefaultRecipe(recalculate);
@@ -75,27 +74,26 @@ function setupHeaderControls() {
     State.recipe.name = e.target.value;
   });
   document.getElementById('btn-new')?.addEventListener('click', () => newRecipe(recalculate));
-  document
-    .getElementById('btn-open')
-    ?.addEventListener('click', () => openRecipeModal(recalculate));
+  document.getElementById('btn-open')?.addEventListener('click', () => openRecipeModal(recalculate));
   document.getElementById('btn-save')?.addEventListener('click', saveRecipe);
   document.getElementById('btn-swe-info')?.addEventListener('click', () => openModal('modal-swe-info'));
 
-  // Preset recipes modal triggers
-  document
-    .getElementById('btn-preset-recipes')
-    ?.addEventListener('click', () => openPresetRecipesModal(recalculate));
+  // Export & Import in Header
+  document.getElementById('btn-export')?.addEventListener('click', exportJSON);
+  document.getElementById('btn-import')?.addEventListener('click', () => {
+    document.getElementById('import-file-input')?.click();
+  });
+  document.getElementById('import-file-input')?.addEventListener('change', (e) => {
+    importJSON(e, recalculate);
+  });
+
+  // Recipe action triggers inside Receptinfo card
   document
     .getElementById('tab-btn-preset-recipes')
     ?.addEventListener('click', () => openPresetRecipesModal(recalculate));
-
-  // Scale recipe modal triggers
-  document.getElementById('btn-scale-recipe')?.addEventListener('click', () => {
-    openScaleModal();
-  });
-  document.getElementById('tab-btn-scale-recipe')?.addEventListener('click', () => {
-    openScaleModal();
-  });
+  document
+    .getElementById('tab-btn-scale-recipe')
+    ?.addEventListener('click', () => openScaleModal());
 
   document.getElementById('btn-confirm-scale')?.addEventListener('click', () => {
     const targetVol = document.getElementById('scale-target-volume')?.value;
@@ -158,17 +156,6 @@ function setupHopEvents() {
   });
   document.getElementById('hop-search')?.addEventListener('input', (e) => {
     filterModalList('hop-list', e.target.value);
-  });
-}
-
-function setupSidebarActions() {
-  document.getElementById('sb-btn-save')?.addEventListener('click', saveRecipe);
-  document.getElementById('sb-btn-export')?.addEventListener('click', exportJSON);
-  document.getElementById('sb-btn-import')?.addEventListener('click', () => {
-    document.getElementById('import-file-input')?.click();
-  });
-  document.getElementById('import-file-input')?.addEventListener('change', (e) => {
-    importJSON(e, recalculate);
   });
 }
 
