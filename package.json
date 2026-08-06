@@ -1,0 +1,27 @@
+{
+  "name": "brew",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/ tests/",
+    "lint:fix": "eslint src/ tests/ --fix",
+    "format": "prettier --write \"src/**/*.{js,css,html}\" \"tests/**/*.js\" \"*.md\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "happy-dom": "^20.11.1",
+    "prettier": "^3.0.0",
+    "vite": "^5.0.0",
+    "vitest": "^2.0.0"
+  }
+}

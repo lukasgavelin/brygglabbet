@@ -17,13 +17,13 @@ En förenklad webbapplikation för att skapa ölrecept och göra bryggkalkyler, 
 
 ## Europeisk/svensk standard
 
-| Enhet | Beskrivning |
-|-------|-------------|
-| **°Plato** | Stammvört och slutgravitet |
-| **EBC** | Ölens färg (European Brewery Convention) |
-| **IBU** | Bitterhet (Tinseth-formeln, metrisk) |
-| **ABV** | Alkohol – `(OG − FG) × 131.25` |
-| **L / kg / g** | Alla volymer och vikter |
+| Enhet          | Beskrivning                              |
+| -------------- | ---------------------------------------- |
+| **°Plato**     | Stammvört och slutgravitet               |
+| **EBC**        | Ölens färg (European Brewery Convention) |
+| **IBU**        | Bitterhet (Tinseth-formeln, metrisk)     |
+| **ABV**        | Alkohol – `(OG − FG) × 131.25`           |
+| **L / kg / g** | Alla volymer och vikter                  |
 
 ## Användning
 

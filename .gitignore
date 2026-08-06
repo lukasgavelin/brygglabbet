@@ -1,6 +1,10 @@
 # Dependencies
 node_modules/
 
+# Build & Test outputs
+dist/
+coverage/
+
 # OS files
 .DS_Store
 Thumbs.db
