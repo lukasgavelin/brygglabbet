@@ -79,6 +79,7 @@ function setupHeaderControls() {
     .getElementById('btn-open')
     ?.addEventListener('click', () => openRecipeModal(recalculate));
   document.getElementById('btn-save')?.addEventListener('click', saveRecipe);
+  document.getElementById('btn-swe-info')?.addEventListener('click', () => openModal('modal-swe-info'));
 
   // Preset recipes modal triggers
   document

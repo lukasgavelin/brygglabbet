@@ -17,6 +17,7 @@
   </div>
   <input type="text" id="recipe-name-input" placeholder="Receptnamn..." value="Mitt nya öl" autocomplete="off">
   <div class="header-actions">
+    <button class="btn btn-ghost btn-sm" id="btn-swe-info" title="Guide till utrustning, råvaror & butiker">💡 Brygguide & Utrustning</button>
     <button class="btn btn-ghost btn-sm" id="btn-preset-recipes" title="Skapa utifrån exempelrecept">✨ Exempelrecept</button>
     <button class="btn btn-ghost btn-sm" id="btn-scale-recipe" title="Skala om ingredienser till ny batchstorlek">⚖️ Skala recept</button>
     <button class="btn btn-ghost btn-sm" id="btn-new" title="Nytt recept">🆕 Nytt</button>
@@ -786,6 +787,56 @@
         <button class="btn btn-ghost" data-close="modal-scale-recipe">Avbryt</button>
         <button class="btn btn-primary" id="btn-confirm-scale">Skala alla ingredienser</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Brygguide, Utrustning & Råvaror -->
+<div class="modal-overlay hidden" id="modal-swe-info">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <h3 class="modal-title">💡 Brygguide – Utrustning, Råvaror & Butiker</h3>
+      <button class="modal-close" data-close="modal-swe-info">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 0; font-size:0.88rem; line-height:1.6; color:var(--text-secondary)">
+
+      <div style="background:var(--bg-card-hover); border-radius:8px; padding:14px; margin-bottom:16px; border-left:4px solid var(--accent)">
+        <h4 style="color:var(--text-primary); margin-bottom:6px; font-family:var(--font-heading)">🛠️ Vanlig Utrustning & Bryggverk</h4>
+        <ul style="margin:0; padding-left:18px">
+          <li><strong>Elbryggverk / All-In-One:</strong> Grainfather (G30, G40), Brewtools (B40pro, B80pro), BrewZilla Gen 4, Brew Monk & Coobra. Inbyggt element, mäskkorg och cirkulationspump.</li>
+          <li><strong>BIAB (Brew In A Bag):</strong> Enkel mäskning direkt i spisgryta med mäskpåse. Mycket populärt och kräver lite utrustning.</li>
+          <li><strong>Tre-kärl & Kylväskor:</strong> Igloo-kylväska med falskbotten eller nätingslang som mäskkärl + lakvattenvärmare. Klassisk hembryggarmetod.</li>
+          <li><strong>Fermentering:</strong> Plastjäshink 30L, FermZilla / FermTank (tryckjäsning & kegging) eller stålfermentor.</li>
+        </ul>
+      </div>
+
+      <div style="background:var(--bg-card-hover); border-radius:8px; padding:14px; margin-bottom:16px; border-left:4px solid #3b82f6">
+        <h4 style="color:var(--text-primary); margin-bottom:6px; font-family:var(--font-heading)">🌾 Maltsorter & Mälterier i Butik</h4>
+        <p style="margin-bottom:8px">
+          <strong>Populära Mälterier:</strong> Weyermann (Tyskland), Castle Malting (Belgien), Crisp & Simpson (UK) samt Viking Malt (Sverige/Finland).
+        </p>
+        <p style="margin:0">
+          <strong>Bas vs Specialmalt:</strong> Basmalt (Pilsner, Pale Ale, Maris Otter, Vienna, Munich) ger förjäsbara sockerarter. Karamellmalt (CaraPils, Crystal 60, Caramunchen, Special B) ger fyllighet och sötma. Rostad malt (Chokladmalt, Carafa I/III, Roasted Barley) ger färg och kaffetoner.
+        </p>
+      </div>
+
+      <div style="background:var(--bg-card-hover); border-radius:8px; padding:14px; margin-bottom:16px; border-left:4px solid #10b981">
+        <h4 style="color:var(--text-primary); margin-bottom:6px; font-family:var(--font-heading)">🌿 Humle & Jäst – Från Klassiskt till Modern Kveik</h4>
+        <p style="margin-bottom:8px">
+          <strong>Populära Humlesorter:</strong> Citra, Mosaic, Simcoe & Cascade för fruktdrivna IPAs; Saaz, Hallertau & Perle för lager; East Kent Goldings & Fuggles för engelsk ale.
+        </p>
+        <p style="margin:0">
+          <strong>Jäst & Kveik:</strong> SafAle US-05, S-04 och Verdant IPA är standard för ales. W-34/70 & Novalager för lager. Kveik-jäst (Voss, Lutra, Hornindal) möjliggör snabb jäsning vid 25–40°C utan diacetyl – perfekt vid jäsning i rumstemperatur!
+        </p>
+      </div>
+
+      <div style="background:var(--bg-card-hover); border-radius:8px; padding:14px; border-left:4px solid #f59e0b">
+        <h4 style="color:var(--text-primary); margin-bottom:6px; font-family:var(--font-heading)">🛒 Butiker & SHBF</h4>
+        <p style="margin:0">
+          Handla råvaror och utrustning hos <strong>Maltmagnus</strong> (maltmagnus.se), <strong>Humlegårdens Ekolager / Mr. Malt</strong> (humle.se), <strong>PGW</strong> (pgw.se), <strong>Ölkompaniet</strong> och <strong>Lilla Köksbryggeriet</strong>. Se även <strong>shbf.se</strong> för Öltypsdefinitioner och hembryggarforum.
+        </p>
+      </div>
+
     </div>
   </div>
 </div>

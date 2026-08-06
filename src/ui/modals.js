@@ -54,7 +54,7 @@ export function openFermentableModal(recalculateCallback) {
     MALTS.filter((m) => m.type === type).forEach((malt) => {
       const item = document.createElement('div');
       item.className = 'modal-item';
-      item.dataset.searchText = malt.name.toLowerCase();
+      item.dataset.searchText = `${malt.name} ${malt.desc || ''}`.toLowerCase();
       item.innerHTML = `
         <span class="ebc-dot" style="background:${ebcToColor(malt.ebc)};flex-shrink:0"></span>
         <div>
@@ -93,7 +93,7 @@ export function openHopModal(recalculateCallback) {
     HOPS.filter((h) => h.origin === origin).forEach((hop) => {
       const item = document.createElement('div');
       item.className = 'modal-item';
-      item.dataset.searchText = hop.name.toLowerCase();
+      item.dataset.searchText = `${hop.name} ${hop.desc || ''}`.toLowerCase();
       item.innerHTML = `
         <div>
           <div class="item-name">${escHtml(hop.name)}</div>
