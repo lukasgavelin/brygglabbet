@@ -9,9 +9,12 @@ import { setupTabNavigation } from './ui/tabs.js';
 import { setupYeastTab, populateYeastSelector } from './ui/yeast.js';
 import { setupMashTab } from './ui/mash.js';
 import { setupWaterTab, populateWaterProfileSelector } from './ui/water.js';
+import { setupEquipmentListeners, syncEquipmentFromUI } from './ui/equipment.js';
 import {
   openFermentableModal,
   openHopModal,
+  openModal,
+  closeModal,
   setupModalClose,
   filterModalList,
 } from './ui/modals.js';
@@ -19,6 +22,8 @@ import {
   saveRecipe,
   newRecipe,
   openRecipeModal,
+  openPresetRecipesModal,
+  scaleCurrentRecipe,
   exportJSON,
   importJSON,
   loadDefaultRecipe,
@@ -33,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabNavigation();
   setupHeaderControls();
   setupRecipeInputs();
+  setupEquipmentListeners(recalculate);
 
   setupFermentableEvents();
   setupHopEvents();
@@ -73,6 +79,37 @@ function setupHeaderControls() {
     .getElementById('btn-open')
     ?.addEventListener('click', () => openRecipeModal(recalculate));
   document.getElementById('btn-save')?.addEventListener('click', saveRecipe);
+
+  // Preset recipes modal triggers
+  document
+    .getElementById('btn-preset-recipes')
+    ?.addEventListener('click', () => openPresetRecipesModal(recalculate));
+  document
+    .getElementById('tab-btn-preset-recipes')
+    ?.addEventListener('click', () => openPresetRecipesModal(recalculate));
+
+  // Scale recipe modal triggers
+  document.getElementById('btn-scale-recipe')?.addEventListener('click', () => {
+    openScaleModal();
+  });
+  document.getElementById('tab-btn-scale-recipe')?.addEventListener('click', () => {
+    openScaleModal();
+  });
+
+  document.getElementById('btn-confirm-scale')?.addEventListener('click', () => {
+    const targetVol = document.getElementById('scale-target-volume')?.value;
+    const targetEff = document.getElementById('scale-target-efficiency')?.value;
+    scaleCurrentRecipe(targetVol, targetEff, recalculate);
+    closeModal('modal-scale-recipe');
+  });
+}
+
+function openScaleModal() {
+  const volInput = document.getElementById('scale-target-volume');
+  const effInput = document.getElementById('scale-target-efficiency');
+  if (volInput) volInput.value = State.recipe.batchVolume || 20;
+  if (effInput) effInput.value = State.recipe.efficiency || 75;
+  openModal('modal-scale-recipe');
 }
 
 function setupRecipeInputs() {
@@ -100,6 +137,9 @@ function syncRecipeFromUI() {
   State.recipe.efficiency = parseFloat(document.getElementById('efficiency')?.value) || 75;
   State.yeast.attMin = parseFloat(document.getElementById('att-min')?.value) || 72;
   State.yeast.attMax = parseFloat(document.getElementById('att-max')?.value) || 78;
+
+  // Sync back to State.equipment as well
+  syncEquipmentFromUI();
 }
 
 function setupFermentableEvents() {
@@ -130,3 +170,4 @@ function setupSidebarActions() {
     importJSON(e, recalculate);
   });
 }
+

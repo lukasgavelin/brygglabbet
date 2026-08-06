@@ -376,3 +376,105 @@ export function checkStyleMatch(values, style) {
   });
   return { match: allMatch, details };
 }
+
+/**
+ * Calculates required brewing water volumes based on equipment profile and grain bill.
+ * @param {object} equipment - Equipment profile parameters
+ * @param {Array<{amount: number, type?: string}>} fermentables - Grain bill
+ * @param {number} boilTime - Boil time in minutes
+ * @returns {{
+ *   boilVolume: number,
+ *   grainAbsorptionLoss: number,
+ *   totalWater: number,
+ *   mashWater: number,
+ *   spargeWater: number,
+ *   totalGrainKg: number
+ * }}
+ */
+export function calculateWaterVolumes(equipment, fermentables = [], boilTime = 60) {
+  const batchVol = Number(equipment?.batchVolume) || 20;
+  const boilOffRate = Number(equipment?.boilOffRate) || 3.0;
+  const kettleLoss = Number(equipment?.kettleLoss) || 2.0;
+  const fermenterLoss = Number(equipment?.fermenterLoss) || 1.0;
+  const grainAbs = Number(equipment?.grainAbsorption) || 0.96;
+  const mashRatio = Number(equipment?.mashRatio) || 3.0;
+
+  const totalGrainKg = fermentables.reduce((sum, f) => {
+    if (f.type === 'sugar') return sum;
+    return sum + (Number(f.amount) || 0);
+  }, 0);
+
+  const boilHours = boilTime / 60;
+  const boilOffTotal = boilOffRate * boilHours;
+  const boilVolume = Math.round((batchVol + boilOffTotal + kettleLoss + fermenterLoss) * 10) / 10;
+
+  const grainAbsorptionLoss = Math.round(totalGrainKg * grainAbs * 10) / 10;
+  const totalWater = Math.round((boilVolume + grainAbsorptionLoss) * 10) / 10;
+  const mashWater = Math.round(totalGrainKg * mashRatio * 10) / 10;
+  const spargeWater = Math.round(Math.max(0, totalWater - mashWater) * 10) / 10;
+
+  return {
+    boilVolume,
+    grainAbsorptionLoss,
+    totalWater,
+    mashWater,
+    spargeWater,
+    totalGrainKg: Math.round(totalGrainKg * 100) / 100,
+  };
+}
+
+/**
+ * Scales fermentables and hops in state to target batch volume and efficiency.
+ * @param {object} state - Current application state
+ * @param {number} targetBatchVolume - New target batch volume in liters
+ * @param {number} targetEfficiency - New target efficiency in percent (optional)
+ * @returns {object} New state object with scaled fermentables and hops
+ */
+export function scaleRecipe(state, targetBatchVolume, targetEfficiency = null) {
+  const oldBatchVol = Number(state.recipe.batchVolume) || 20;
+  const newBatchVol = Number(targetBatchVolume) || 20;
+
+  if (oldBatchVol <= 0 || newBatchVol <= 0) return state;
+
+  const volRatio = newBatchVol / oldBatchVol;
+
+  let effRatio = 1.0;
+  if (targetEfficiency !== null && targetEfficiency > 0) {
+    const oldEff = Number(state.recipe.efficiency) || 75;
+    const newEff = Number(targetEfficiency) || 75;
+    effRatio = oldEff / newEff;
+  }
+
+  const scaledFermentables = (state.fermentables || []).map((f) => {
+    const isSugar = f.type === 'sugar';
+    const mult = isSugar ? volRatio : volRatio * effRatio;
+    return {
+      ...f,
+      amount: Math.round(f.amount * mult * 100) / 100,
+    };
+  });
+
+  const scaledHops = (state.hops || []).map((h) => {
+    return {
+      ...h,
+      amount: Math.round(h.amount * volRatio * 10) / 10,
+    };
+  });
+
+  return {
+    ...state,
+    recipe: {
+      ...state.recipe,
+      batchVolume: newBatchVol,
+      efficiency: targetEfficiency !== null ? targetEfficiency : state.recipe.efficiency,
+    },
+    equipment: {
+      ...state.equipment,
+      batchVolume: newBatchVol,
+      efficiency: targetEfficiency !== null ? targetEfficiency : state.equipment?.efficiency || 75,
+    },
+    fermentables: scaledFermentables,
+    hops: scaledHops,
+  };
+}
+

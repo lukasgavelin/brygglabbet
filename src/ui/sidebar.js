@@ -22,6 +22,7 @@ import { renderFermentablesTable } from './fermentables.js';
 import { renderHopsTable } from './hops.js';
 import { renderWaterPanel } from './water.js';
 import { updateStyleMatch } from './styleMatch.js';
+import { renderWaterRequirementCard } from './equipment.js';
 
 export function recalculate() {
   const ogResult = calculateOG(
@@ -75,6 +76,7 @@ export function recalculate() {
   renderFermentablesTable(recalculate);
   renderHopsTable(recalculate);
   renderWaterPanel(waterResult);
+  renderWaterRequirementCard();
 }
 
 function updateSidebarStats({ sg, plato, fg_sg, fg_plato, abv, ibu, ebc, bugu, apparentAtt }) {

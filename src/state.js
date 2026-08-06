@@ -35,6 +35,17 @@ export function createInitialState() {
       efficiency: 75,
       notes: '',
     },
+    equipment: {
+      id: 'custom_30l',
+      name: 'Standard Gryta 30L',
+      batchVolume: 20,
+      efficiency: 75,
+      boilOffRate: 3.0,
+      kettleLoss: 2.0,
+      fermenterLoss: 1.0,
+      grainAbsorption: 0.96,
+      mashRatio: 3.0,
+    },
     fermentables: [],
     hops: [],
     yeast: {

@@ -20,6 +20,8 @@ import {
   estimateMashPH,
   chlorideSulfateBalance,
   checkStyleMatch,
+  calculateWaterVolumes,
+  scaleRecipe,
 } from '../src/core/calculations.js';
 
 describe('Brewing Calculations Module', () => {
@@ -214,4 +216,52 @@ describe('Brewing Calculations Module', () => {
       expect(checkStyleMatch(nonMatchingValues, mockStyle).match).toBe(false);
     });
   });
+
+  describe('calculateWaterVolumes & scaleRecipe', () => {
+    it('calculates expected mash water, sparge water and pre-boil volume', () => {
+      const equipment = {
+        batchVolume: 20,
+        boilOffRate: 3.0,
+        kettleLoss: 2.0,
+        fermenterLoss: 1.0,
+        grainAbsorption: 0.96,
+        mashRatio: 3.0,
+      };
+      const fermentables = [
+        { amount: 4, type: 'base' },
+        { amount: 1, type: 'sugar' },
+      ];
+      // total grain (excl. sugar) = 4kg
+      // boilVolume = 20 + 3.0*(60/60) + 2.0 + 1.0 = 26L
+      // grainAbsorptionLoss = 4 * 0.96 = 3.84L -> 3.8L
+      // totalWater = 26 + 3.8 = 29.8L
+      // mashWater = 4 * 3.0 = 12.0L
+      // spargeWater = 29.8 - 12 = 17.8L
+      const res = calculateWaterVolumes(equipment, fermentables, 60);
+      expect(res.boilVolume).toBe(26);
+      expect(res.totalGrainKg).toBe(4);
+      expect(res.mashWater).toBe(12.0);
+      expect(res.spargeWater).toBe(17.8);
+      expect(res.totalWater).toBe(29.8);
+    });
+
+    it('scales fermentables and hops proportionally when batch volume changes', () => {
+      const state = {
+        recipe: { batchVolume: 20, efficiency: 75 },
+        equipment: { batchVolume: 20, efficiency: 75 },
+        fermentables: [
+          { name: 'Pale Malt', amount: 4.0, type: 'base' },
+          { name: 'Sugar', amount: 0.5, type: 'sugar' },
+        ],
+        hops: [{ name: 'Cascade', amount: 20 }],
+      };
+
+      const scaled = scaleRecipe(state, 40); // double volume
+      expect(scaled.recipe.batchVolume).toBe(40);
+      expect(scaled.fermentables[0].amount).toBe(8.0);
+      expect(scaled.fermentables[1].amount).toBe(1.0);
+      expect(scaled.hops[0].amount).toBe(40.0);
+    });
+  });
 });
+

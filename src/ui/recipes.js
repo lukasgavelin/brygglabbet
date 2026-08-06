@@ -3,18 +3,25 @@
  */
 
 import { State, createInitialState, setNextId, generateId } from '../state.js';
-import { calculateOG, formatSG } from '../core/calculations.js';
+import { calculateOG, formatSG, scaleRecipe } from '../core/calculations.js';
+import { PRESET_RECIPES } from '../core/data.js';
 import { openModal, closeModal } from './modals.js';
 import { showToast, escHtml } from './toast.js';
 import { syncYeastToUI } from './yeast.js';
 import { syncWaterToUI } from './water.js';
 import { renderMashTable } from './mash.js';
+import { syncEquipmentToUI } from './equipment.js';
 
-const LOCAL_STORAGE_KEY = 'brew_recipes';
+const LOCAL_STORAGE_KEY = 'brygglabbet_recipes';
+const FALLBACK_STORAGE_KEY = 'brew_recipes';
 
 export function getSavedRecipes() {
   try {
-    return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
+    const primary = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (primary) return JSON.parse(primary);
+    const fallback = localStorage.getItem(FALLBACK_STORAGE_KEY);
+    if (fallback) return JSON.parse(fallback);
+    return {};
   } catch {
     return {};
   }
@@ -93,6 +100,85 @@ export function openRecipeModal(recalculateCallback) {
   openModal('modal-recipes');
 }
 
+export function openPresetRecipesModal(recalculateCallback) {
+  const list = document.getElementById('preset-recipes-list');
+  if (!list) return;
+
+  list.innerHTML = '';
+  PRESET_RECIPES.forEach((preset) => {
+    const div = document.createElement('div');
+    div.className = 'preset-recipe-card';
+    div.innerHTML = `
+      <div class="preset-recipe-info">
+        <div class="preset-recipe-title">${escHtml(preset.name)} <span class="badge">${escHtml(preset.styleId)}</span></div>
+        <div class="preset-recipe-desc">${escHtml(preset.description)}</div>
+        <div class="preset-recipe-meta">${preset.recipe.batchVolume}L · ${preset.fermentables.length} malter · ${preset.hops.length} humlegivor</div>
+      </div>
+      <button class="btn btn-primary btn-sm" data-use-preset="${preset.id}">Använd som mall</button>
+    `;
+
+    div.querySelector('[data-use-preset]')?.addEventListener('click', () => {
+      loadPresetRecipe(preset.id, recalculateCallback);
+      closeModal('modal-preset-recipes');
+    });
+
+    list.appendChild(div);
+  });
+
+  openModal('modal-preset-recipes');
+}
+
+export function loadPresetRecipe(presetId, recalculateCallback) {
+  const preset = PRESET_RECIPES.find((p) => p.id === presetId);
+  if (!preset) return;
+
+  // Clone recipe state
+  const newState = createInitialState();
+  newState.recipe = JSON.parse(JSON.stringify(preset.recipe));
+
+  // Maintain existing equipment settings if set, or sync batch size
+  if (State.equipment) {
+    newState.equipment = {
+      ...State.equipment,
+      batchVolume: preset.recipe.batchVolume,
+      efficiency: preset.recipe.efficiency,
+    };
+  }
+
+  newState.fermentables = preset.fermentables.map((f) => ({ ...f, id: generateId() }));
+  newState.hops = preset.hops.map((h) => ({ ...h, id: generateId() }));
+  newState.yeast = JSON.parse(JSON.stringify(preset.yeast));
+  newState.mash = preset.mash.map((m) => ({ ...m, id: generateId() }));
+  newState.water = JSON.parse(JSON.stringify(preset.water));
+
+  Object.assign(State, newState);
+
+  let maxId = 0;
+  [...State.fermentables, ...State.hops, ...State.mash].forEach((x) => {
+    if (x.id && x.id > maxId) maxId = x.id;
+  });
+  setNextId(maxId);
+
+  syncUIFromState(recalculateCallback);
+  showToast(`✨ Receptmall laddad: ${preset.name}`, 'success');
+}
+
+export function scaleCurrentRecipe(targetBatchVol, targetEff, recalculateCallback) {
+  const newBatchVol = parseFloat(targetBatchVol);
+  const newEff = targetEff ? parseFloat(targetEff) : null;
+
+  if (isNaN(newBatchVol) || newBatchVol <= 0) {
+    showToast('⚠️ Ange en giltig batchvolym', 'error');
+    return;
+  }
+
+  const updatedState = scaleRecipe(State, newBatchVol, newEff);
+  Object.assign(State, updatedState);
+
+  syncUIFromState(recalculateCallback);
+  showToast(`⚖️ Receptet har skalats om till ${newBatchVol}L!`, 'success');
+}
+
 export function loadRecipe(name, recalculateCallback) {
   const all = getSavedRecipes();
   const saved = all[name];
@@ -131,6 +217,7 @@ export function syncUIFromState(recalculateCallback) {
   if (notesInput) notesInput.value = State.recipe.notes || '';
   if (styleSelect) styleSelect.value = State.recipe.styleId || '';
 
+  syncEquipmentToUI();
   syncYeastToUI();
   syncWaterToUI();
   renderMashTable(recalculateCallback);

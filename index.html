@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bryggkalkylator – Skapa ölrecept</title>
-  <meta name="description" content="Förenklad webbapplikation för att skapa ölrecept och göra bryggkalkyler. Anpassad för svenska och europeiska standarder (EBC, °Plato, IBU).">
+  <title>Brygglabbet – Skapa & kalkylera ölrecept</title>
+  <meta name="description" content="Brygglabbet – Webbapplikation för att skapa ölrecept och göra bryggkalkyler. Anpassad för svenska och europeiska standarder (EBC, °Plato, IBU).">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,10 +13,12 @@
 <header id="app-header">
   <div class="header-logo">
     <span class="logo-icon">🍺</span>
-    <h1>Bryggkalkylator</h1>
+    <h1>Brygglabbet</h1>
   </div>
   <input type="text" id="recipe-name-input" placeholder="Receptnamn..." value="Mitt nya öl" autocomplete="off">
   <div class="header-actions">
+    <button class="btn btn-ghost btn-sm" id="btn-preset-recipes" title="Skapa utifrån exempelrecept">✨ Exempelrecept</button>
+    <button class="btn btn-ghost btn-sm" id="btn-scale-recipe" title="Skala om ingredienser till ny batchstorlek">⚖️ Skala recept</button>
     <button class="btn btn-ghost btn-sm" id="btn-new" title="Nytt recept">🆕 Nytt</button>
     <button class="btn btn-secondary btn-sm" id="btn-open" title="Öppna sparat recept">📂 Öppna</button>
     <button class="btn btn-primary btn-sm" id="btn-save" title="Spara recept">💾 Spara</button>
@@ -58,6 +60,10 @@
       <section id="tab-recipe" class="tab-panel active" role="tabpanel">
         <div class="panel-header">
           <h2 class="panel-title"><span class="title-icon">📋</span> Receptinformation</h2>
+          <div style="display:flex; gap:8px">
+            <button class="btn btn-ghost btn-sm" id="tab-btn-preset-recipes">✨ Exempelrecept</button>
+            <button class="btn btn-secondary btn-sm" id="tab-btn-scale-recipe">⚖️ Skala recept</button>
+          </div>
         </div>
 
         <div class="card-grid-2">
@@ -83,7 +89,7 @@
           <div class="card">
             <p class="section-label">Volymer</p>
             <div class="form-group" style="margin-bottom:10px">
-              <label class="form-label" for="batch-volume">Bryggvolym</label>
+              <label class="form-label" for="batch-volume">Bryggvolym (Jäskärl)</label>
               <div class="input-group">
                 <input type="number" id="batch-volume" value="20" min="1" max="1000" step="0.5">
                 <span class="input-addon">L</span>
@@ -91,12 +97,12 @@
               <span class="form-hint">Volym öl i fermentorn</span>
             </div>
             <div class="form-group">
-              <label class="form-label" for="boil-volume">Kokvolym</label>
+              <label class="form-label" for="boil-volume">Kokvolym (Pre-boil)</label>
               <div class="input-group">
                 <input type="number" id="boil-volume" value="25" min="1" max="1000" step="0.5">
                 <span class="input-addon">L</span>
               </div>
-              <span class="form-hint">Volym i grytan innan kok</span>
+              <span class="form-hint">Beräknas från utrustning</span>
             </div>
           </div>
 
@@ -115,7 +121,7 @@
                 <input type="number" id="efficiency" value="75" min="10" max="100" step="1">
                 <span class="input-addon">%</span>
               </div>
-              <span class="form-hint">Typiskt 70–80% för all-grain</span>
+              <span class="form-hint">Mäskeffektivitet för receptet</span>
             </div>
           </div>
 
@@ -139,8 +145,61 @@
           </div>
         </div>
 
+        <!-- Utrustningsprofil & Vattenberäkningskort -->
+        <div class="card" style="margin-top:16px">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px">
+            <p class="section-label" style="margin:0">🛠️ Utrustningsprofil & Vattenkalkylator</p>
+            <div style="display:flex; align-items:center; gap:8px">
+              <label class="form-label" for="equipment-profile-select" style="margin:0">Förinställning:</label>
+              <select id="equipment-profile-select" style="width:auto; min-width:200px; font-size:0.82rem; padding:6px 28px 6px 10px">
+                <option value="">— Välj utrustning —</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px">
+            <div class="form-group"><label class="form-label">Profilnamn</label><input type="text" id="eq-name" value="Standard Gryta 30L"></div>
+            <div class="form-group"><label class="form-label">Batchvolym (L)</label><input type="number" id="eq-batch-vol" value="20" min="1" step="0.5"></div>
+            <div class="form-group"><label class="form-label">Effektivitet (%)</label><input type="number" id="eq-efficiency" value="75" min="10" max="100"></div>
+            <div class="form-group"><label class="form-label">Bortkok (L/h)</label><input type="number" id="eq-boil-off" value="3.0" min="0" step="0.1"></div>
+            <div class="form-group"><label class="form-label">Grytförlust (L)</label><input type="number" id="eq-kettle-loss" value="2.0" min="0" step="0.1"></div>
+            <div class="form-group"><label class="form-label">Jäskärlsförlust (L)</label><input type="number" id="eq-fermenter-loss" value="1.0" min="0" step="0.1"></div>
+            <div class="form-group"><label class="form-label">Maltabs. (L/kg)</label><input type="number" id="eq-grain-abs" value="0.96" min="0.1" step="0.05"></div>
+            <div class="form-group"><label class="form-label">Mäskkvot (L/kg)</label><input type="number" id="eq-mash-ratio" value="3.0" min="1" step="0.1"></div>
+          </div>
+
+          <!-- Vattenberäkningsresultat -->
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:16px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border-subtle)">
+            <div>
+              <div class="stat-label">Mäskvatten</div>
+              <div class="stat-value" id="vol-mash-water" style="color:var(--accent)">—</div>
+              <span class="form-hint">Volym vid inläggning</span>
+            </div>
+            <div>
+              <div class="stat-label">Lakvatten</div>
+              <div class="stat-value" id="vol-sparge-water" style="color:var(--accent)">—</div>
+              <span class="form-hint">Volym för sköljning</span>
+            </div>
+            <div>
+              <div class="stat-label">Totalt vattenbehov</div>
+              <div class="stat-value" id="vol-total-water" style="color:var(--accent-gold)">—</div>
+              <span class="form-hint">Mäsk + lakvatten</span>
+            </div>
+            <div>
+              <div class="stat-label">Beräknad pre-boil</div>
+              <div class="stat-value" id="vol-preboil">—</div>
+              <span class="form-hint">Volym innan kok</span>
+            </div>
+            <div>
+              <div class="stat-label">Maltförlust</div>
+              <div class="stat-value" id="vol-grain-loss">—</div>
+              <span class="form-hint">Bundet i mäsken</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Förkoksgravitet-kalkyl -->
-        <div class="card">
+        <div class="card" style="margin-top:16px">
           <p class="section-label">Beräknad förkoksgravitet</p>
           <div style="display:flex; gap:24px; flex-wrap:wrap; padding:4px 0">
             <div>
@@ -152,7 +211,7 @@
               <div class="stat-value" id="preboil-plato-display">—</div>
             </div>
             <div>
-              <div class="stat-label">Verdampningsgrad</div>
+              <div class="stat-label">Bortkok / Verdampning</div>
               <div class="stat-value" id="evap-rate-display">—</div>
             </div>
           </div>
@@ -588,6 +647,25 @@
         <span class="stat-label">Totalt malt</span>
         <div class="stat-value" id="sb-total-malt">— kg</div>
       </div>
+
+      <hr class="divider">
+
+      <div class="stat-row">
+        <span class="stat-label">Utrustning</span>
+        <div class="stat-value" id="sb-eq-name" style="font-size:0.75rem; font-weight:600">Standard 30L</div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Mäskvatten</span>
+        <div class="stat-value" id="sb-mash-water">— L</div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Lakvatten</span>
+        <div class="stat-value" id="sb-sparge-water">— L</div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Totalt vatten</span>
+        <div class="stat-value" id="sb-total-water" style="color:var(--accent-gold); font-weight:700">— L</div>
+      </div>
     </div>
 
     <!-- Stilmatchning -->
@@ -661,6 +739,57 @@
   </div>
 </div>
 
+<!-- Modal: Exempelrecept (Mallar) -->
+<div class="modal-overlay hidden" id="modal-preset-recipes">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <h3 class="modal-title">✨ Exempelrecept (Receptmallar)</h3>
+      <button class="modal-close" data-close="modal-preset-recipes">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 0">
+      <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px">
+        Välj ett beprövat exempelrecept som utgångspunkt. Du kan därefter fritt anpassa alla malter, humlegivor och mäsksteg efter din egen utrustning!
+      </p>
+      <div class="preset-recipes-grid" id="preset-recipes-list">
+        <!-- Fylls i av JavaScript -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Skala recept -->
+<div class="modal-overlay hidden" id="modal-scale-recipe">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h3 class="modal-title">⚖️ Skala recept</h3>
+      <button class="modal-close" data-close="modal-scale-recipe">✕</button>
+    </div>
+    <div style="padding:16px 0">
+      <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px">
+        Alla malter (kg) och humletillsatser (g) proportionaliseras automatiskt baserat på din nya batchvolym och effektivitet.
+      </p>
+      <div class="form-group" style="margin-bottom:12px">
+        <label class="form-label" for="scale-target-volume">Mål Batchvolym (L)</label>
+        <div class="input-group">
+          <input type="number" id="scale-target-volume" value="20" min="1" step="0.5">
+          <span class="input-addon">L</span>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:20px">
+        <label class="form-label" for="scale-target-efficiency">Mål Bryggverkseffektivitet (%)</label>
+        <div class="input-group">
+          <input type="number" id="scale-target-efficiency" value="75" min="10" max="100" step="1">
+          <span class="input-addon">%</span>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px">
+        <button class="btn btn-ghost" data-close="modal-scale-recipe">Avbryt</button>
+        <button class="btn btn-primary" id="btn-confirm-scale">Skala alla ingredienser</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Toast container -->
 <div id="toast-container" role="alert" aria-live="polite"></div>
 
@@ -668,3 +797,4 @@
 <script type="module" src="/src/main.js"></script>
 </body>
 </html>
+
