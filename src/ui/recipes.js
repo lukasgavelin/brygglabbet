@@ -71,7 +71,7 @@ export function openRecipeModal(recalculateCallback) {
       div.innerHTML = `
         <div style="flex:1; cursor:pointer">
           <div class="recipe-name">${escHtml(name)}</div>
-          <div class="recipe-meta">${r.recipe?.batchVolume || '?'}L · OG ${og} · ${r.fermentables?.length || 0} malter · ${r.hops?.length || 0} humle</div>
+          <div class="recipe-meta">${r.recipe?.batchVolume || '?'}L · OG ${og} · ${r.fermentables?.length || 0} maltsorter · ${r.hops?.length || 0} humlegivor</div>
         </div>
         <div class="recipe-list-actions">
           <button class="btn btn-secondary btn-sm" data-load="${escHtml(name)}">Ladda</button>
@@ -112,7 +112,7 @@ export function openPresetRecipesModal(recalculateCallback) {
       <div class="preset-recipe-info">
         <div class="preset-recipe-title">${escHtml(preset.name)} <span class="badge">${escHtml(preset.styleId)}</span></div>
         <div class="preset-recipe-desc">${escHtml(preset.description)}</div>
-        <div class="preset-recipe-meta">${preset.recipe.batchVolume}L · ${preset.fermentables.length} malter · ${preset.hops.length} humlegivor</div>
+        <div class="preset-recipe-meta">${preset.recipe.batchVolume}L · ${preset.fermentables.length} maltsorter · ${preset.hops.length} humlegivor</div>
       </div>
       <button class="btn btn-primary btn-sm" data-use-preset="${preset.id}">Använd som mall</button>
     `;

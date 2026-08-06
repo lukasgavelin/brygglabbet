@@ -38,7 +38,7 @@
         <span class="tab-icon">📋</span> Recept
       </button>
       <button class="tab-btn" data-tab="fermentables"    role="tab" aria-selected="false" aria-controls="tab-fermentables">
-        <span class="tab-icon">🌾</span> Malter
+        <span class="tab-icon">🌾</span> Malt & Råvaror
       </button>
       <button class="tab-btn" data-tab="hops"            role="tab" aria-selected="false" aria-controls="tab-hops">
         <span class="tab-icon">🌿</span> Humle
@@ -117,31 +117,31 @@
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label" for="efficiency">Bryggverkseffektivitet</label>
+              <label class="form-label" for="efficiency">Bryggeffektivitet</label>
               <div class="input-group">
                 <input type="number" id="efficiency" value="75" min="10" max="100" step="1">
                 <span class="input-addon">%</span>
               </div>
-              <span class="form-hint">Mäskeffektivitet för receptet</span>
+              <span class="form-hint">Mäskeffektivitet för bryggningen</span>
             </div>
           </div>
 
           <div class="card">
-            <p class="section-label">Förjäsning</p>
+            <p class="section-label">Förjäsningsgrad</p>
             <div class="form-group" style="margin-bottom:10px">
-              <label class="form-label">Attenuation (min)</label>
+              <label class="form-label">Förjäsning min</label>
               <div class="input-group">
                 <input type="number" id="att-min" value="72" min="40" max="100" step="1">
                 <span class="input-addon">%</span>
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">Attenuation (max)</label>
+              <label class="form-label">Förjäsning max</label>
               <div class="input-group">
                 <input type="number" id="att-max" value="78" min="40" max="100" step="1">
                 <span class="input-addon">%</span>
               </div>
-              <span class="form-hint">Synbar förjäsningsgrad</span>
+              <span class="form-hint">Förväntad förjäsningsgrad</span>
             </div>
           </div>
         </div>
@@ -162,10 +162,10 @@
             <div class="form-group"><label class="form-label">Profilnamn</label><input type="text" id="eq-name" value="Standard Gryta 30L"></div>
             <div class="form-group"><label class="form-label">Batchvolym (L)</label><input type="number" id="eq-batch-vol" value="20" min="1" step="0.5"></div>
             <div class="form-group"><label class="form-label">Effektivitet (%)</label><input type="number" id="eq-efficiency" value="75" min="10" max="100"></div>
-            <div class="form-group"><label class="form-label">Bortkok (L/h)</label><input type="number" id="eq-boil-off" value="3.0" min="0" step="0.1"></div>
+            <div class="form-group"><label class="form-label">Bortkokning (L/h)</label><input type="number" id="eq-boil-off" value="3.0" min="0" step="0.1"></div>
             <div class="form-group"><label class="form-label">Grytförlust (L)</label><input type="number" id="eq-kettle-loss" value="2.0" min="0" step="0.1"></div>
             <div class="form-group"><label class="form-label">Jäskärlsförlust (L)</label><input type="number" id="eq-fermenter-loss" value="1.0" min="0" step="0.1"></div>
-            <div class="form-group"><label class="form-label">Maltabs. (L/kg)</label><input type="number" id="eq-grain-abs" value="0.96" min="0.1" step="0.05"></div>
+            <div class="form-group"><label class="form-label">Maltabsorption (L/kg)</label><input type="number" id="eq-grain-abs" value="0.96" min="0.1" step="0.05"></div>
             <div class="form-group"><label class="form-label">Mäskkvot (L/kg)</label><input type="number" id="eq-mash-ratio" value="3.0" min="1" step="0.1"></div>
           </div>
 
@@ -187,12 +187,12 @@
               <span class="form-hint">Mäsk + lakvatten</span>
             </div>
             <div>
-              <div class="stat-label">Beräknad pre-boil</div>
+              <div class="stat-label">Förkoksvolym</div>
               <div class="stat-value" id="vol-preboil">—</div>
               <span class="form-hint">Volym innan kok</span>
             </div>
             <div>
-              <div class="stat-label">Maltförlust</div>
+              <div class="stat-label">Vattenförlust i malt</div>
               <div class="stat-value" id="vol-grain-loss">—</div>
               <span class="form-hint">Bundet i mäsken</span>
             </div>
@@ -204,15 +204,15 @@
           <p class="section-label">Beräknad förkoksgravitet</p>
           <div style="display:flex; gap:24px; flex-wrap:wrap; padding:4px 0">
             <div>
-              <div class="stat-label">Förkoks-OG</div>
+              <div class="stat-label">Förkoksgravitet (OG)</div>
               <div class="stat-value" id="preboil-og-display">—</div>
             </div>
             <div>
-              <div class="stat-label">Förkoks °Plato</div>
+              <div class="stat-label">Förkok °Plato</div>
               <div class="stat-value" id="preboil-plato-display">—</div>
             </div>
             <div>
-              <div class="stat-label">Bortkok / Verdampning</div>
+              <div class="stat-label">Bortkokning</div>
               <div class="stat-value" id="evap-rate-display">—</div>
             </div>
           </div>
@@ -222,7 +222,7 @@
       <!-- ===== MALTER TAB ============================= -->
       <section id="tab-fermentables" class="tab-panel" role="tabpanel">
         <div class="panel-header">
-          <h2 class="panel-title"><span class="title-icon">🌾</span> Malter & Jäsbara Ingredienser</h2>
+          <h2 class="panel-title"><span class="title-icon">🌾</span> Malt & Jäsbara Råvaror</h2>
           <button class="btn btn-primary btn-sm" id="btn-add-fermentable">＋ Lägg till</button>
         </div>
 
@@ -230,13 +230,13 @@
           <table class="ingredient-table" id="fermentables-table">
             <thead>
               <tr>
-                <th class="col-name">Malt / Ingrediens</th>
+                <th class="col-name">Malt / Råvara</th>
                 <th class="col-amount">Mängd (kg)</th>
                 <th class="col-value">EBC</th>
                 <th class="col-value">Utbyte %</th>
                 <th class="col-result">%</th>
-                <th class="col-result">GU bidr.</th>
-                <th class="col-result">EBC bidr.</th>
+                <th class="col-result">OG-bidrag</th>
+                <th class="col-result">Färg (EBC)</th>
                 <th class="col-action"></th>
               </tr>
             </thead>
@@ -314,7 +314,7 @@
           <div class="card">
             <p class="section-label">Välj jäststam</p>
             <div class="form-group" style="margin-bottom:12px">
-              <label class="form-label" for="yeast-select">Jästdatabas</label>
+              <label class="form-label" for="yeast-select">Välj jäststam</label>
               <select id="yeast-select">
                 <option value="">— Välj från lista —</option>
               </select>
@@ -338,16 +338,16 @@
                 <option value="lager">Lager</option>
                 <option value="wheat">Vete</option>
                 <option value="belgian">Belgisk</option>
-                <option value="wild">Vild / Brett</option>
+                <option value="wild">Vild / Säsongsjäst</option>
               </select>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px">
               <div class="form-group">
-                <label class="form-label">Att. min %</label>
+                <label class="form-label">Förjäsning min %</label>
                 <input type="number" id="yeast-att-min" value="72" min="40" max="100">
               </div>
               <div class="form-group">
-                <label class="form-label">Att. max %</label>
+                <label class="form-label">Förjäsning max %</label>
                 <input type="number" id="yeast-att-max" value="78" min="40" max="100">
               </div>
             </div>
@@ -368,13 +368,13 @@
           <p class="section-label">Anteckningar om jästen</p>
           <div class="form-group">
             <label class="form-label" for="yeast-notes">Jästnoteringar</label>
-            <textarea id="yeast-notes" placeholder="Jäststartvolym, näring, märkliga egenskaper..."></textarea>
+            <textarea id="yeast-notes" placeholder="Förkultur, jästnäring, särdrag..."></textarea>
           </div>
         </div>
 
         <!-- Jästbeskrivning från databasen -->
         <div class="card" id="yeast-desc-card" style="display:none">
-          <p class="section-label">Databeskrivning</p>
+          <p class="section-label">Stambeskrivning</p>
           <p id="yeast-desc-text" style="font-size:0.88rem; color:var(--text-secondary); line-height:1.6"></p>
         </div>
       </section>
@@ -393,9 +393,9 @@
         <div class="card" style="margin-bottom:16px">
           <p class="section-label">Förinställda mäskprogram</p>
           <div class="preset-grid">
-            <button class="preset-btn" data-preset="single_infusion">🔥 Enkelt infusion</button>
+            <button class="preset-btn" data-preset="single_infusion">🔥 Enkel infusion</button>
             <button class="preset-btn" data-preset="step_mash">📶 Stegmäskning</button>
-            <button class="preset-btn" data-preset="full_step">🔬 Full steg m. proteinrast</button>
+            <button class="preset-btn" data-preset="full_step">🔬 Stegmäskning m. proteinrast</button>
             <button class="preset-btn" data-preset="decoction">🫕 Dekoktion (enkel)</button>
           </div>
         </div>
@@ -421,7 +421,7 @@
         <div id="mash-empty" class="empty-state" style="display:none">
           <div class="empty-icon">🔥</div>
           <p>Inget mäskschema definierat.<br>Välj ett förinställt program eller lägg till steg manuellt.</p>
-          <button class="btn btn-primary btn-sm" data-preset="single_infusion">Enkelt infusion</button>
+          <button class="btn btn-primary btn-sm" data-preset="single_infusion">Enkel infusion</button>
         </div>
 
         <!-- Mäsksammanfattning -->
@@ -549,7 +549,7 @@
               </div>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--text-dim);margin-top:4px">
-              <span>−200 (Hoppy)</span><span>0</span><span>+200 (Malty)</span>
+              <span>−200 (Humlig)</span><span>0</span><span>+200 (Maltig)</span>
             </div>
           </div>
 
@@ -578,7 +578,7 @@
               </div>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--text-dim);margin-top:4px">
-              <span>0 (Hoppy)</span><span>1.0</span><span>2+ (Malty)</span>
+              <span>0 (Humlig/Besk)</span><span>1.0</span><span>2+ (Maltig/Fyllig)</span>
             </div>
           </div>
         </div>
@@ -595,7 +595,7 @@
       <div class="stat-card-title">📊 Beräkningar</div>
 
       <div class="stat-row">
-        <span class="stat-label">OG (Stammvört)</span>
+        <span class="stat-label">Stammvörtstyrka (OG)</span>
         <div style="text-align:right">
           <div class="stat-value" id="sb-og">—</div>
           <div class="stat-sub" id="sb-og-sg">—</div>
@@ -603,7 +603,7 @@
       </div>
 
       <div class="stat-row">
-        <span class="stat-label">FG (Slutgravitet)</span>
+        <span class="stat-label">Slutgravitet (FG)</span>
         <div style="text-align:right">
           <div class="stat-value" id="sb-fg">—</div>
           <div class="stat-sub" id="sb-fg-sg">—</div>
@@ -637,7 +637,7 @@
       <hr class="divider">
 
       <div class="stat-row">
-        <span class="stat-label">BU:GU-kvot</span>
+        <span class="stat-label">Bitterhet/Malt-kvot (BU:GU)</span>
         <div class="stat-value" id="sb-bugu">—</div>
       </div>
       <div class="stat-row">
@@ -645,7 +645,7 @@
         <div class="stat-value" id="sb-attenuation">— %</div>
       </div>
       <div class="stat-row">
-        <span class="stat-label">Totalt malt</span>
+        <span class="stat-label">Total maltmängd</span>
         <div class="stat-value" id="sb-total-malt">— kg</div>
       </div>
 
@@ -695,11 +695,11 @@
 <div class="modal-overlay hidden" id="modal-fermentable">
   <div class="modal">
     <div class="modal-header">
-      <h3 class="modal-title">Välj malt / ingrediens</h3>
+      <h3 class="modal-title">Välj malt eller råvara</h3>
       <button class="modal-close" data-close="modal-fermentable">✕</button>
     </div>
     <div class="modal-search">
-      <input type="text" id="fermentable-search" placeholder="Sök efter malt...">
+      <input type="text" id="fermentable-search" placeholder="Sök malt, mälteri eller egenskap...">
     </div>
     <div class="modal-list" id="fermentable-list">
       <!-- Fylls i av JavaScript -->
@@ -715,7 +715,7 @@
       <button class="modal-close" data-close="modal-hop">✕</button>
     </div>
     <div class="modal-search">
-      <input type="text" id="hop-search" placeholder="Sök humle...">
+      <input type="text" id="hop-search" placeholder="Sök humlesort, karaktär eller ursprung...">
     </div>
     <div class="modal-list" id="hop-list">
       <!-- Fylls i av JavaScript -->
@@ -767,7 +767,7 @@
     </div>
     <div style="padding:16px 0">
       <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px">
-        Alla malter (kg) och humletillsatser (g) proportionaliseras automatiskt baserat på din nya batchvolym och effektivitet.
+        Alla malter (kg) och humletillsatser (g) skalas proportionerligt baserat på din nya batchvolym och effektivitet.
       </p>
       <div class="form-group" style="margin-bottom:12px">
         <label class="form-label" for="scale-target-volume">Mål Batchvolym (L)</label>
@@ -777,7 +777,7 @@
         </div>
       </div>
       <div class="form-group" style="margin-bottom:20px">
-        <label class="form-label" for="scale-target-efficiency">Mål Bryggverkseffektivitet (%)</label>
+        <label class="form-label" for="scale-target-efficiency">Mål Bryggeffektivitet (%)</label>
         <div class="input-group">
           <input type="number" id="scale-target-efficiency" value="75" min="10" max="100" step="1">
           <span class="input-addon">%</span>
@@ -785,7 +785,7 @@
       </div>
       <div style="display:flex; justify-content:flex-end; gap:8px">
         <button class="btn btn-ghost" data-close="modal-scale-recipe">Avbryt</button>
-        <button class="btn btn-primary" id="btn-confirm-scale">Skala alla ingredienser</button>
+        <button class="btn btn-primary" id="btn-confirm-scale">Skala receptets råvaror</button>
       </div>
     </div>
   </div>

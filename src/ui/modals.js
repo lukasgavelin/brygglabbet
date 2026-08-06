@@ -37,11 +37,11 @@ export function openFermentableModal(recalculateCallback) {
 
   const groups = [...new Set(MALTS.map((m) => m.type))];
   const typeLabels = {
-    base: 'Basmalter',
-    cara: 'Karamelmalter',
-    roasted: 'Rostade malter',
-    adjunct: 'Adjunkter',
-    sugar: 'Socker & Extrakt',
+    base: 'Basmalt',
+    cara: 'Karamellmalt & Kristallmalt',
+    roasted: 'Rostad malt',
+    adjunct: 'Adjunkter & Flingor',
+    sugar: 'Socker, Maltextrakt & Tillsatser',
   };
 
   groups.forEach((type) => {

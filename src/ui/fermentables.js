@@ -42,7 +42,7 @@ export function renderFermentablesTable(recalculateCallback) {
       <td class="col-name">
         <div style="display:flex;align-items:center">
           <span class="ebc-dot" style="background:${dotColor}"></span>
-          <input type="text" value="${escHtml(f.name)}" placeholder="Maltnamn" data-id="${f.id}" data-field="name">
+          <input type="text" value="${escHtml(f.name)}" placeholder="Malt- eller råvarunamn" data-id="${f.id}" data-field="name">
         </div>
       </td>
       <td class="col-amount">
