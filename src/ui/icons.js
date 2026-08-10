@@ -3,6 +3,7 @@
  */
 
 export const ICONS = {
+  logo: `<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M10 6h4M12 6v4l-4.5 7.5A1.2 1.2 0 0 0 8.5 19.3h7a1.2 1.2 0 0 0 1-1.8L12 10V6"/><path d="M9.5 16c1.5-.7 3.5 1 5 0"/></svg>`,
   beer: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M17 11h1a3 3 0 0 1 0 6h-1"/><path d="M9 12v6"/><path d="M13 12v6"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="M5 8a2.5 2.5 0 0 1 2.5-2.5h9A2.5 2.5 0 0 1 19 8"/><path d="M5 8c0-1.1.9-2 2-2 1.1 0 2 .9 2 2s.9 2 2 2 2-.9 2-2 .9-2 2-2 2 .9 2 2"/></svg>`,
   recipe: `<svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>`,
   wheat: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg>`,
