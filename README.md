@@ -38,7 +38,7 @@ Appen innehåller ett **BeerSmith-inspirerat flöde** där du enkelt kan utgå f
 Applikationen är refaktorerad enligt rena moduler (ES Modules) med tydlig ansvarsuppdelning mellan beräkningslogik (`core`), UI-komponenter (`ui`) och enhetstester (`tests`).
 
 ```
-brew/
+brygglabbet/
 ├── index.html               # Applikationens HTML5-struktur och modaler
 ├── style.css                # CSS Design System med variabler, dark/light amber-tema
 ├── vite.config.js           # Vite- och Vitest-konfiguration
@@ -58,6 +58,10 @@ brew/
 │       ├── equipment.js     # Utrustningsprofiler & vattenvolymsvisning
 │       ├── fermentables.js  # Malttabell & interaktioner
 │       ├── hops.js           # Humletabell & interaktioner
+│       ├── mobile/          # Parallellt Mobil-UI (Mobile-First cards, steppers, app bar)
+│       │   ├── mobileApp.js
+│       │   ├── mobileNav.js
+│       │   └── mobileCards.js
 │       ├── yeast.js          # Jästval & parametrar
 │       ├── mash.js           # Mäskschema & tidslinje
 │       ├── water.js          # Vattenkemi & saltberäkning

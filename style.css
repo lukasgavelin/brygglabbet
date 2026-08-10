@@ -1368,3 +1368,422 @@ textarea {
   }
 }
 
+/* =========================================================
+   PARALLELLT MOBIL-UI (#mobile-app-view) STYLES
+   ========================================================= */
+
+.view-hidden {
+  display: none !important;
+}
+
+#mobile-app-view {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  z-index: 990;
+}
+
+/* Mobile Header */
+.mobile-header {
+  height: 52px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.mobile-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.mobile-recipe-name-wrap {
+  flex: 1;
+  max-width: 220px;
+}
+
+.mobile-recipe-name-wrap input {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mobile-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* Mobile Menu Dropdown */
+.mobile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1050;
+  display: none;
+}
+.mobile-menu-backdrop.active {
+  display: block;
+}
+
+.mobile-menu-dropdown {
+  position: fixed;
+  top: 56px;
+  right: 12px;
+  width: 240px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 1060;
+  display: none;
+  flex-direction: column;
+  padding: 8px 0;
+}
+.mobile-menu-dropdown.open {
+  display: flex;
+}
+
+.mobile-menu-header {
+  padding: 8px 16px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.mobile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+.mobile-menu-item:hover {
+  background: var(--bg-hover);
+}
+.mobile-menu-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 4px 0;
+}
+
+/* Permanent Sticky Metrics Bar */
+.mobile-metrics-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: linear-gradient(135deg, #fff8ef 0%, #fdf2e4 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 4px;
+  flex-shrink: 0;
+}
+
+.mobile-metric-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid rgba(0,0,0,0.06);
+}
+.mobile-metric-item:last-child {
+  border-right: none;
+}
+
+.metric-lbl {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-val {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.metric-val.highlight {
+  color: var(--accent-bright);
+}
+
+.ebc-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
+/* Mobile Screens Container */
+.mobile-screen-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  padding-bottom: 70px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-screen {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+.mobile-screen.active {
+  display: flex;
+}
+
+.mobile-screen-header {
+  margin-bottom: 4px;
+}
+.mobile-screen-header h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Mobile Form Cards */
+.mobile-card-form {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mobile-form-group label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.mobile-form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mobile-select-lg {
+  padding: 10px;
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+/* Mobile Ingredient Cards List */
+.mobile-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobile-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-sm);
+}
+
+.mobile-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mobile-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.mobile-input-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed var(--border);
+  padding: 2px 4px;
+  width: 100%;
+}
+
+.mobile-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mobile-card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* Touch Steppers */
+.mobile-stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.stepper-btn {
+  width: 36px;
+  height: 38px;
+  background: var(--bg-secondary);
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+.stepper-btn:active {
+  background: var(--bg-hover);
+}
+
+.stepper-input {
+  flex: 1;
+  width: 100%;
+  text-align: center;
+  border: none !important;
+  background: var(--bg-card);
+  font-weight: 600;
+  font-size: 0.9rem;
+  height: 38px;
+}
+
+.mobile-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.mobile-meta-tag {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+/* Mobile Empty State */
+.mobile-empty-state {
+  text-align: center;
+  padding: 30px 16px;
+  background: var(--bg-card);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-md);
+
+}
+.empty-icon {
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+}
+
+/* Bottom Nav App Bar */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+}
+
+.mobile-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 6px 10px;
+  cursor: pointer;
+  flex: 1;
+  transition: color var(--transition);
+}
+.mobile-nav-btn .nav-icon {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+}
+.mobile-nav-btn.active {
+  color: var(--accent-bright);
+  font-weight: 700;
+}
+
+

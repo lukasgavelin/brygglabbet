@@ -24,6 +24,7 @@ import { renderWaterPanel } from './water.js';
 import { updateStyleMatch } from './styleMatch.js';
 import { renderWaterRequirementCard } from './equipment.js';
 import { updateAccordionBadges } from './tabs.js';
+import { updateMobileUI } from './mobile/mobileApp.js';
 
 export function recalculate() {
   const ogResult = calculateOG(
@@ -79,6 +80,7 @@ export function recalculate() {
   renderWaterPanel(waterResult);
   renderWaterRequirementCard();
   updateAccordionBadges();
+  updateMobileUI(recalculate);
 }
 
 function updateSidebarStats({ sg, plato, fg_sg, fg_plato, abv, ibu, ebc, bugu, apparentAtt }) {

@@ -29,6 +29,7 @@ import {
   loadDefaultRecipe,
 } from './ui/recipes.js';
 import { recalculate, setupMobileSidebar } from './ui/sidebar.js';
+import { initMobileApp } from './ui/mobile/mobileApp.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   populateStyleSelector();
@@ -47,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupWaterTab(recalculate);
   setupModalClose();
   setupMobileSidebar();
+  initMobileApp(recalculate);
 
   loadDefaultRecipe(recalculate);
   recalculate();

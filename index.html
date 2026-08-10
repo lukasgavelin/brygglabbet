@@ -7,7 +7,8 @@
   <meta name="description" content="Brygglabbet – Webbapplikation för att skapa ölrecept och göra bryggkalkyler. Anpassad för svenska och europeiska standarder (EBC, °Plato, IBU).">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<!-- ===================== DESKTOP APP VIEW ========================= -->
+<div id="desktop-app-view">
 
 <!-- ===================== HEADER ========================= -->
 <header id="app-header">
@@ -25,6 +26,7 @@
     <button class="btn btn-secondary btn-sm" id="btn-import" title="Importera JSON-recept"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Importera</button>
     <input type="file" id="import-file-input" accept=".json" style="display:none">
     <button class="btn btn-primary btn-sm" id="btn-save" title="Spara recept"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Spara</button>
+    <button class="btn btn-outline btn-sm" id="btn-switch-to-mobile" title="Växla till mobilvy">📱 Mobilvy</button>
   </div>
 </header>
 
