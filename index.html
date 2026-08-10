@@ -10,7 +10,9 @@
 </head>
 <body>
 
-<!-- ===================== DESKTOP APP VIEW ========================= -->
+<!-- =========================================================
+     DESKTOP APP VIEW (#desktop-app-view)
+     ========================================================= -->
 <div id="desktop-app-view">
 
 <!-- ===================== HEADER ========================= -->
@@ -162,7 +164,7 @@
         </div>
       </section>
 
-      <!-- ===== 2. MALT & RÅVAROR (Standard: Utfälld) ============================= -->
+      <!-- ===== 2. MALT & RÅVAROR ============================= -->
       <section id="sec-fermentables" class="accordion-card">
         <div class="accordion-header" data-toggle="accordion">
           <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></span> Malt & Jäsbara Råvaror</h2>
@@ -188,9 +190,7 @@
                   <th class="col-action"></th>
                 </tr>
               </thead>
-              <tbody id="fermentables-body">
-                <!-- Rader fylls i av JavaScript -->
-              </tbody>
+              <tbody id="fermentables-body"></tbody>
               <tfoot>
                 <tr>
                   <td>Totalt</td>
@@ -203,18 +203,16 @@
               </tfoot>
             </table>
           </div>
-
-          <div id="fermentables-empty" class="empty-state" style="display:none">
-            <div class="empty-icon"><svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></div>
-            <p>Inga malter tillagda ännu.<br>Klicka på "Lägg till" för att välja malt.</p>
+          <div id="fermentables-empty" class="empty-state">
+            Inga råvaror tillagda ännu. Klicka på "Lägg till" för att välja ur maltbiblioteket.
           </div>
         </div>
       </section>
 
-      <!-- ===== 3. HUMLE (Standard: Utfälld) ============================== -->
+      <!-- ===== 3. HUMLE ============================= -->
       <section id="sec-hops" class="accordion-card">
         <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></span> Humle</h2>
+          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></span> Humleschema</h2>
           <div class="accordion-header-actions">
             <span class="accordion-badge" id="badge-hops">0 g | 0 IBU</span>
             <button class="btn btn-primary btn-sm" id="btn-add-hop">＋ Lägg till</button>
@@ -227,44 +225,40 @@
             <table class="ingredient-table" id="hops-table">
               <thead>
                 <tr>
-                  <th class="col-name">Humle</th>
+                  <th class="col-name">Humlesort</th>
                   <th class="col-amount">Mängd (g)</th>
-                  <th class="col-value">Alpha %</th>
+                  <th class="col-value">Alfa (%)</th>
                   <th class="col-value">Tid (min)</th>
                   <th class="col-unit">Form</th>
-                  <th class="col-unit">Tillsats</th>
-                  <th class="col-result">IBU bidr.</th>
+                  <th class="col-unit">Användning</th>
+                  <th class="col-result">IBU-bidrag</th>
                   <th class="col-action"></th>
                 </tr>
               </thead>
-              <tbody id="hops-body">
-                <!-- Rader fylls i av JavaScript -->
-              </tbody>
+              <tbody id="hops-body"></tbody>
               <tfoot>
                 <tr>
                   <td>Totalt</td>
                   <td id="hops-total-g">0 g</td>
                   <td colspan="4"></td>
-                  <td id="hops-total-ibu">0 IBU</td>
+                  <td id="hops-total-ibu">0.0 IBU</td>
                   <td></td>
                 </tr>
               </tfoot>
             </table>
           </div>
-
-          <div id="hops-empty" class="empty-state" style="display:none">
-            <div class="empty-icon"><svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></div>
-            <p>Inga humletillsatser tillagda.<br>Klicka på "Lägg till" för att välja humle.</p>
+          <div id="hops-empty" class="empty-state">
+            Ingen humle tillagd ännu. Klicka på "Lägg till" för att välja ur humlebiblioteket.
           </div>
         </div>
       </section>
 
-      <!-- ===== 4. JÄST (Standard: Utfälld) =============================== -->
+      <!-- ===== 4. JÄST & FERMENTERING ============================= -->
       <section id="sec-yeast" class="accordion-card">
         <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon">🧫</span> Jäst & Fermentering</h2>
+          <h2 class="accordion-title"><span class="title-icon">🧫</span> Jäst & Jäsning</h2>
           <div class="accordion-header-actions">
-            <span class="accordion-badge" id="badge-yeast">Ej vald</span>
+            <span class="accordion-badge" id="badge-yeast">Ingen jäst vald</span>
             <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </div>
@@ -272,181 +266,123 @@
         <div class="accordion-content">
           <div class="card-grid-2">
             <div class="card">
-              <p class="section-label">Välj jäststam</p>
-              <div class="form-group" style="margin-bottom:12px">
-                <label class="form-label" for="yeast-select">Välj jäststam</label>
+              <p class="section-label">Jäststam</p>
+              <div class="form-group" style="margin-bottom:10px">
+                <label class="form-label" for="yeast-select">Välj ur jästdatabas</label>
                 <select id="yeast-select">
-                  <option value="">— Välj från lista —</option>
+                  <option value="">— Välj jäststram —</option>
                 </select>
               </div>
-              <div class="form-group" style="margin-bottom:10px">
-                <label class="form-label" for="yeast-name">Namn (fritext)</label>
-                <input type="text" id="yeast-name" placeholder="Namn på jäststammen">
-              </div>
               <div class="form-group">
-                <label class="form-label" for="yeast-lab">Tillverkare / Lab</label>
-                <input type="text" id="yeast-lab" placeholder="t.ex. Fermentis, White Labs">
+                <label class="form-label" for="yeast-name">Jästnamn (Anpassad)</label>
+                <input type="text" id="yeast-name" placeholder="t.ex. SafAle US-05">
               </div>
             </div>
 
             <div class="card">
-              <p class="section-label">Jästparametrar</p>
+              <p class="section-label">Parametrar</p>
               <div class="form-group" style="margin-bottom:10px">
-                <label class="form-label" for="yeast-type">Typ</label>
+                <label class="form-label" for="yeast-lab">Tillverkare / Lab</label>
+                <input type="text" id="yeast-lab" placeholder="t.ex. Fermentis, Lallemand, Wyeast">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="yeast-type">Jästtyp</label>
                 <select id="yeast-type">
-                  <option value="ale">Ale</option>
-                  <option value="lager">Lager</option>
-                  <option value="wheat">Vete</option>
-                  <option value="belgian">Belgisk</option>
-                  <option value="wild">Vild / Säsongsjäst</option>
+                  <option value="ale">Ale (Överjäst)</option>
+                  <option value="lager">Lager (Underjäst)</option>
+                  <option value="wheat">Veteöl</option>
+                  <option value="kviek">Kveik</option>
+                  <option value="wild">Vild / Brett</option>
                 </select>
               </div>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px">
-                <div class="form-group">
-                  <label class="form-label">Förjäsning min %</label>
-                  <input type="number" id="yeast-att-min" value="72" min="40" max="100">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Förjäsning max %</label>
-                  <input type="number" id="yeast-att-max" value="78" min="40" max="100">
-                </div>
-              </div>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-                <div class="form-group">
-                  <label class="form-label">Temp min °C</label>
-                  <input type="number" id="yeast-temp-min" value="18" min="0" max="40">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Temp max °C</label>
-                  <input type="number" id="yeast-temp-max" value="22" min="0" max="40">
-                </div>
-              </div>
             </div>
-          </div>
-
-          <div class="card" style="margin-top:16px">
-            <p class="section-label">Anteckningar om jästen</p>
-            <div class="form-group">
-              <label class="form-label" for="yeast-notes">Jästnoteringar</label>
-              <textarea id="yeast-notes" placeholder="Förkultur, jästnäring, särdrag..."></textarea>
-            </div>
-          </div>
-
-          <!-- Jästbeskrivning från databasen -->
-          <div class="card" id="yeast-desc-card" style="display:none; margin-top:16px">
-            <p class="section-label">Stambeskrivning</p>
-            <p id="yeast-desc-text" style="font-size:0.88rem; color:var(--text-secondary); line-height:1.6"></p>
           </div>
         </div>
       </section>
 
-      <!-- ===== 5. UTRUSTNINGSPROFIL & VATTENBEHOV (Standard: Hopfälld / Avancerad) ============================= -->
+      <!-- ===== 5. UTRUSTNING ============================= -->
       <section id="sec-equipment" class="accordion-card collapsed">
         <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span> Utrustningsprofil & Vattenkalkylator</h2>
+          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span> Utrustningsprofil & Volymberäkning</h2>
           <div class="accordion-header-actions">
-            <span class="accordion-badge" id="badge-equipment">Standard 20L</span>
+            <span class="accordion-badge" id="badge-equipment">Preset: Standard 30L</span>
             <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </div>
 
         <div class="accordion-content">
-          <div class="card">
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px">
-              <p class="section-label" style="margin:0">Utrustningsinställningar</p>
-              <div style="display:flex; align-items:center; gap:8px">
-                <label class="form-label" for="equipment-profile-select" style="margin:0">Förinställning:</label>
-                <select id="equipment-profile-select" style="width:auto; min-width:200px; font-size:0.82rem; padding:6px 28px 6px 10px">
-                  <option value="">— Välj utrustning —</option>
-                </select>
+          <div class="card-grid-2" style="margin-bottom:14px">
+            <div class="card">
+              <p class="section-label">Utrustningspreset</p>
+              <div class="form-group">
+                <label class="form-label" for="equipment-preset">Välj bryggverk / utrustning</label>
+                <select id="equipment-preset"></select>
               </div>
             </div>
-
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px">
-              <div class="form-group"><label class="form-label">Profilnamn</label><input type="text" id="eq-name" value="Standard Gryta 30L"></div>
-              <div class="form-group"><label class="form-label">Batchvolym (L)</label><input type="number" id="eq-batch-vol" value="20" min="1" step="0.5"></div>
-              <div class="form-group"><label class="form-label">Effektivitet (%)</label><input type="number" id="eq-efficiency" value="75" min="10" max="100"></div>
-              <div class="form-group"><label class="form-label">Bortkokning (L/h)</label><input type="number" id="eq-boil-off" value="3.0" min="0" step="0.1"></div>
-              <div class="form-group"><label class="form-label">Grytförlust (L)</label><input type="number" id="eq-kettle-loss" value="2.0" min="0" step="0.1"></div>
-              <div class="form-group"><label class="form-label">Jäskärlsförlust (L)</label><input type="number" id="eq-fermenter-loss" value="1.0" min="0" step="0.1"></div>
-              <div class="form-group"><label class="form-label">Maltabsorption (L/kg)</label><input type="number" id="eq-grain-abs" value="0.96" min="0.1" step="0.05"></div>
-              <div class="form-group"><label class="form-label">Mäskkvot (L/kg)</label><input type="number" id="eq-mash-ratio" value="3.0" min="1" step="0.1"></div>
-            </div>
-
-            <!-- Vattenberäkningsresultat -->
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:16px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border-subtle)">
-              <div>
-                <div class="stat-label">Mäskvatten</div>
-                <div class="stat-value" id="vol-mash-water" style="color:var(--accent)">—</div>
-                <span class="form-hint">Volym vid inläggning</span>
-              </div>
-              <div>
-                <div class="stat-label">Lakvatten</div>
-                <div class="stat-value" id="vol-sparge-water" style="color:var(--accent)">—</div>
-                <span class="form-hint">Volym för sköljning</span>
-              </div>
-              <div>
-                <div class="stat-label">Totalt vattenbehov</div>
-                <div class="stat-value" id="vol-total-water" style="color:var(--accent-gold)">—</div>
-                <span class="form-hint">Mäsk + lakvatten</span>
-              </div>
-              <div>
-                <div class="stat-label">Förkoksvolym</div>
-                <div class="stat-value" id="vol-preboil">—</div>
-                <span class="form-hint">Volym innan kok</span>
-              </div>
-              <div>
-                <div class="stat-label">Vattenförlust i malt</div>
-                <div class="stat-value" id="vol-grain-loss">—</div>
-                <span class="form-hint">Bundet i mäsken</span>
+            <div class="card">
+              <p class="section-label">Inställningar</p>
+              <div class="form-group" style="margin-bottom:8px">
+                <label class="form-label" for="eq-boiloff">Avdunstning (L/h)</label>
+                <div class="input-group">
+                  <input type="number" inputmode="decimal" id="eq-boiloff" value="3.0" step="0.1" min="0">
+                  <span class="input-addon">L/h</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Förkoksgravitet-kalkyl -->
-          <div class="card" style="margin-top:16px">
-            <p class="section-label">Beräknad förkoksgravitet</p>
-            <div style="display:flex; gap:24px; flex-wrap:wrap; padding:4px 0">
-              <div>
-                <div class="stat-label">Förkoksgravitet (OG)</div>
-                <div class="stat-value" id="preboil-og-display">—</div>
+          <div class="card-grid-3">
+            <div class="card">
+              <div class="form-group" style="margin-bottom:8px">
+                <label class="form-label" for="eq-kettle-loss">Grytförlust (Trub/humle)</label>
+                <div class="input-group">
+                  <input type="number" inputmode="decimal" id="eq-kettle-loss" value="2.0" step="0.5" min="0">
+                  <span class="input-addon">L</span>
+                </div>
               </div>
-              <div>
-                <div class="stat-label">Förkok °Plato</div>
-                <div class="stat-value" id="preboil-plato-display">—</div>
+            </div>
+            <div class="card">
+              <div class="form-group" style="margin-bottom:8px">
+                <label class="form-label" for="eq-fermenter-loss">Jäskärlsförlust (Bottensats)</label>
+                <div class="input-group">
+                  <input type="number" inputmode="decimal" id="eq-fermenter-loss" value="1.0" step="0.5" min="0">
+                  <span class="input-addon">L</span>
+                </div>
               </div>
-              <div>
-                <div class="stat-label">Bortkokning</div>
-                <div class="stat-value" id="evap-rate-display">—</div>
+            </div>
+            <div class="card">
+              <div class="form-group" style="margin-bottom:8px">
+                <label class="form-label" for="eq-grain-abs">Maltabsorption</label>
+                <div class="input-group">
+                  <input type="number" inputmode="decimal" id="eq-grain-abs" value="0.96" step="0.05" min="0.5">
+                  <span class="input-addon">L/kg</span>
+                </div>
               </div>
             </div>
           </div>
+
+          <div id="water-requirement-card" style="margin-top:14px"></div>
         </div>
       </section>
 
-      <!-- ===== 6. MÄSKSCHEMA (Standard: Hopfälld / Avancerad) =============================== -->
+      <!-- ===== 6. MÄSKNING ============================= -->
       <section id="sec-mash" class="accordion-card collapsed">
         <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></span> Mäskschema</h2>
+          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></span> Mäskningsprofil & Steg</h2>
           <div class="accordion-header-actions">
-            <span class="accordion-badge" id="badge-mash">0 min | 0 steg</span>
-            <button class="btn btn-primary btn-sm" id="btn-add-mash-step">＋ Lägg till steg</button>
+            <span class="accordion-badge" id="badge-mash">Enkelsteg 67°C</span>
             <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </div>
 
         <div class="accordion-content">
-          <!-- Tidsvisualisering -->
-          <div id="mash-timeline" class="mash-timeline" style="margin-bottom:16px"></div>
-
-          <!-- Förinställda program -->
-          <div class="card" style="margin-bottom:16px">
-            <p class="section-label">Förinställda mäskprogram</p>
+          <div style="margin-bottom:14px">
+            <p class="section-label" style="margin-bottom:6px">Välj mäskprofil-preset</p>
             <div class="preset-grid">
-              <button class="preset-btn" data-preset="single_infusion"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg> Enkel infusion</button>
-              <button class="preset-btn" data-preset="step_mash"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> Stegmäskning</button>
-              <button class="preset-btn" data-preset="full_step"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 2v7.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V2"/></svg> Stegmäskning m. proteinrast</button>
-              <button class="preset-btn" data-preset="decoction"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Dekoktion (enkel)</button>
+              <button class="preset-btn" data-mash-preset="single_light">Enkelsteg Torrt (65°C)</button>
+              <button class="preset-btn" data-mash-preset="single_medium">Enkelsteg Medium (67°C)</button>
+              <button class="preset-btn" data-mash-preset="single_full">Enkelsteg Fylligt (69°C)</button>
+              <button class="preset-btn" data-mash-preset="step_dekoktion">Flersteg / Dekoktion</button>
             </div>
           </div>
 
@@ -454,187 +390,140 @@
             <table class="ingredient-table" id="mash-table">
               <thead>
                 <tr>
-                  <th style="width:40px">#</th>
                   <th class="col-name">Stegnamn</th>
-                  <th class="col-unit">Typ</th>
                   <th class="col-value">Temp (°C)</th>
                   <th class="col-value">Tid (min)</th>
+                  <th class="col-name">Typ / Beskrivning</th>
                   <th class="col-action"></th>
                 </tr>
               </thead>
-              <tbody id="mash-body">
-                <!-- Rader fylls i av JavaScript -->
-              </tbody>
+              <tbody id="mash-body"></tbody>
             </table>
           </div>
 
-          <div id="mash-empty" class="empty-state" style="display:none">
-            <div class="empty-icon"><svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></div>
-            <p>Inget mäskschema definierat.<br>Välj ett förinställt program eller lägg till steg manuellt.</p>
-            <button class="btn btn-primary btn-sm" data-preset="single_infusion">Enkel infusion</button>
-          </div>
-
-          <!-- Mäsksammanfattning -->
-          <div class="card" style="margin-top:16px" id="mash-summary-card">
-            <p class="section-label">Mäsksammanfattning</p>
-            <div style="display:flex; gap:24px; flex-wrap:wrap">
-              <div>
-                <div class="stat-label">Totaltid</div>
-                <div class="stat-value" id="mash-total-time">0 min</div>
-              </div>
-              <div>
-                <div class="stat-label">Antal steg</div>
-                <div class="stat-value" id="mash-step-count">0</div>
-              </div>
-            </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px">
+            <button class="btn btn-secondary btn-sm" id="btn-add-mash-step">＋ Lägg till mäsksteg</button>
+            <div id="mash-summary-text" style="font-size:0.83rem; color:var(--text-secondary)"></div>
           </div>
         </div>
       </section>
 
-      <!-- ===== 7. VATTENKEMI (Standard: Hopfälld / Avancerad) ============================= -->
+      <!-- ===== 7. VATTENBEHANDLING ============================= -->
       <section id="sec-water" class="accordion-card collapsed">
         <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon">💧</span> Vattenkemi & Salter</h2>
+          <h2 class="accordion-title"><span class="title-icon">💧</span> Vattenprofil & Salttillsatser</h2>
           <div class="accordion-header-actions">
-            <span class="accordion-badge" id="badge-water">Ej beräknad</span>
+            <span class="accordion-badge" id="badge-water">Kranvatten</span>
             <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </div>
 
         <div class="accordion-content">
-          <div class="card-grid-2">
-            <!-- Basvatten -->
+          <div class="card-grid-2" style="margin-bottom:14px">
             <div class="card">
-              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
-                <p class="section-label" style="margin:0">Basvatten (ppm / mg·L⁻¹)</p>
-                <select id="water-profile-select" style="width:auto; min-width:160px; font-size:0.78rem; padding:5px 28px 5px 8px">
-                  <option value="">Välj profil...</option>
+              <p class="section-label">Basvattenprofil</p>
+              <div class="form-group">
+                <label class="form-label" for="water-profile-preset">Ladda profil-preset (Svenska städer / RO)</label>
+                <select id="water-profile-preset">
+                  <option value="">— Anpassad profil —</option>
                 </select>
               </div>
-              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px">
-                <div class="form-group"><label class="form-label">Ca²⁺</label><input type="number" id="w-ca"  value="50" min="0" step="1"><span class="form-hint">Kalcium</span></div>
-                <div class="form-group"><label class="form-label">Mg²⁺</label><input type="number" id="w-mg"  value="10" min="0" step="1"><span class="form-hint">Magnesium</span></div>
-                <div class="form-group"><label class="form-label">Na⁺</label> <input type="number" id="w-na"  value="20" min="0" step="1"><span class="form-hint">Natrium</span></div>
-                <div class="form-group"><label class="form-label">Cl⁻</label> <input type="number" id="w-cl"  value="50" min="0" step="1"><span class="form-hint">Klorid</span></div>
-                <div class="form-group"><label class="form-label">SO₄²⁻</label><input type="number" id="w-so4" value="50" min="0" step="1"><span class="form-hint">Sulfat</span></div>
-                <div class="form-group"><label class="form-label">HCO₃⁻</label><input type="number" id="w-hco3" value="100" min="0" step="1"><span class="form-hint">Bikarbonat</span></div>
-              </div>
             </div>
-
-            <!-- Saltillsatser -->
             <div class="card">
-              <p class="section-label" style="margin-bottom:12px">Saltillsatser (gram per bryggning)</p>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
-                <div class="form-group"><label class="form-label">Gips (CaSO₄)</label><input type="number" id="s-gypsum" value="0" min="0" step="0.1"><span class="form-hint">Ca + SO₄</span></div>
-                <div class="form-group"><label class="form-label">CaCl₂</label><input type="number" id="s-cacl2" value="0" min="0" step="0.1"><span class="form-hint">Ca + Cl</span></div>
-                <div class="form-group"><label class="form-label">Bittersalt (MgSO₄)</label><input type="number" id="s-epsom" value="0" min="0" step="0.1"><span class="form-hint">Mg + SO₄</span></div>
-                <div class="form-group"><label class="form-label">Koksalt (NaCl)</label><input type="number" id="s-salt" value="0" min="0" step="0.1"><span class="form-hint">Na + Cl</span></div>
-                <div class="form-group"><label class="form-label">Krita (CaCO₃)</label><input type="number" id="s-chalk" value="0" min="0" step="0.1"><span class="form-hint">Ca + HCO₃</span></div>
-                <div class="form-group"><label class="form-label">Bikarbonat (NaHCO₃)</label><input type="number" id="s-baking-soda" value="0" min="0" step="0.1"><span class="form-hint">Na + HCO₃</span></div>
-              </div>
-              <div class="form-group" style="margin-top:10px">
-                <label class="form-label">Vattenvolym för beräkning</label>
+              <p class="section-label">Behandlad Vattenvolym</p>
+              <div class="form-group">
+                <label class="form-label" for="water-total-volume">Total vattenvolym att behandla</label>
                 <div class="input-group">
-                  <input type="number" id="w-volume" value="25" min="1" step="0.5">
+                  <input type="number" inputmode="decimal" id="water-total-volume" value="25" min="1" step="0.5">
                   <span class="input-addon">L</span>
                 </div>
-                <span class="form-hint">Typiskt: kokvolym</span>
               </div>
             </div>
           </div>
 
-          <!-- Resulterande profil -->
-          <div class="card" style="margin-bottom:16px; margin-top:16px">
-            <p class="section-label">Resulterande vattenprofil</p>
-            <div class="ingredient-table-wrap" style="margin-bottom:0">
-              <table class="water-table" id="water-result-table">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Ca²⁺</th>
-                    <th>Mg²⁺</th>
-                    <th>Na⁺</th>
-                  <th>Cl⁻</th>
-                  <th>SO₄²⁻</th>
-                  <th>HCO₃⁻</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Basvatten</td>
-                  <td id="wt-base-ca">—</td>
-                  <td id="wt-base-mg">—</td>
-                  <td id="wt-base-na">—</td>
-                  <td id="wt-base-cl">—</td>
-                  <td id="wt-base-so4">—</td>
-                  <td id="wt-base-hco3">—</td>
-                </tr>
-                <tr>
-                  <td>Saltbidrag</td>
-                  <td id="wt-salt-ca">—</td>
-                  <td id="wt-salt-mg">—</td>
-                  <td id="wt-salt-na">—</td>
-                  <td id="wt-salt-cl">—</td>
-                  <td id="wt-salt-so4">—</td>
-                  <td id="wt-salt-hco3">—</td>
-                </tr>
-                <tr class="result-row">
-                  <td>Totalt</td>
-                  <td id="wt-res-ca">—</td>
-                  <td id="wt-res-mg">—</td>
-                  <td id="wt-res-na">—</td>
-                  <td id="wt-res-cl">—</td>
-                  <td id="wt-res-so4">—</td>
-                  <td id="wt-res-hco3">—</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Indikatorer -->
-        <div class="card-grid-3">
-          <div class="card">
-            <p class="section-label">Residualalkalinitet (RA)</p>
-            <div class="stat-value" id="w-ra-value">—</div>
-            <div class="form-hint" style="margin-top:4px" id="w-ra-label">—</div>
-            <div class="indicator-bar" style="margin-top:12px">
-              <div class="indicator-track">
-                <div class="indicator-fill" id="w-ra-fill" style="width:50%;background:var(--accent)"></div>
-                <div class="indicator-needle" id="w-ra-needle" style="left:50%"></div>
-              </div>
+          <p class="section-label">Ingående jonhalter i basvatten (ppm / mg/L)</p>
+          <div class="card-grid-3" style="margin-bottom:16px">
+            <div class="form-group">
+              <label class="form-label" for="w-base-ca">Kalcium (Ca²⁺)</label>
+              <input type="number" inputmode="decimal" id="w-base-ca" value="50" min="0">
             </div>
-            <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--text-dim);margin-top:4px">
-              <span>−200 (Humlig)</span><span>0</span><span>+200 (Maltig)</span>
+            <div class="form-group">
+              <label class="form-label" for="w-base-mg">Magnesium (Mg²⁺)</label>
+              <input type="number" inputmode="decimal" id="w-base-mg" value="10" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="w-base-na">Natrium (Na⁺)</label>
+              <input type="number" inputmode="decimal" id="w-base-na" value="20" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="w-base-cl">Klorid (Cl⁻)</label>
+              <input type="number" inputmode="decimal" id="w-base-cl" value="50" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="w-base-so4">Sulfat (SO₄²⁻)</label>
+              <input type="number" inputmode="decimal" id="w-base-so4" value="50" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="w-base-hco3">Bikarbonat (HCO₃⁻)</label>
+              <input type="number" inputmode="decimal" id="w-base-hco3" value="100" min="0">
             </div>
           </div>
 
-          <div class="card">
-            <p class="section-label">Beräknat mäsk-pH</p>
-            <div class="stat-value" id="w-ph-value">—</div>
-            <div class="form-hint" style="margin-top:4px" id="w-ph-label">Uppskattning (±0.2)</div>
-            <div class="indicator-bar" style="margin-top:12px">
-              <div class="indicator-track">
-                <div class="indicator-fill" id="w-ph-fill" style="width:50%;background:var(--accent)"></div>
-                <div class="indicator-needle" id="w-ph-needle" style="left:50%"></div>
+          <p class="section-label">Bryggsalter att tillsätta (gram totalt)</p>
+          <div class="card-grid-3" style="margin-bottom:16px">
+            <div class="form-group">
+              <label class="form-label" for="salt-gypsum">Gips (CaSO₄)</label>
+              <div class="input-group">
+                <input type="number" inputmode="decimal" id="salt-gypsum" value="0" min="0" step="0.5">
+                <span class="input-addon">g</span>
               </div>
             </div>
-            <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--text-dim);margin-top:4px">
-              <span>4.5 (Surt)</span><span>5.4 Optimal</span><span>6.5 (Basiskt)</span>
+            <div class="form-group">
+              <label class="form-label" for="salt-cacl2">Kalciumklorid (CaCl₂)</label>
+              <div class="input-group">
+                <input type="number" inputmode="decimal" id="salt-cacl2" value="0" min="0" step="0.5">
+                <span class="input-addon">g</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="salt-epsom">Epsomsalt (MgSO₄)</label>
+              <div class="input-group">
+                <input type="number" inputmode="decimal" id="salt-epsom" value="0" min="0" step="0.5">
+                <span class="input-addon">g</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="salt-nacl">Bordssalt (NaCl)</label>
+              <div class="input-group">
+                <input type="number" inputmode="decimal" id="salt-nacl" value="0" min="0" step="0.5">
+                <span class="input-addon">g</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="salt-caco3">Krita (CaCO₃)</label>
+              <div class="input-group">
+                <input type="number" inputmode="decimal" id="salt-caco3" value="0" min="0" step="0.5">
+                <span class="input-addon">g</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="salt-nahco3">Bikarbonat (NaHCO₃)</label>
+              <div class="input-group">
+                <input type="number" inputmode="decimal" id="salt-nahco3" value="0" min="0" step="0.5">
+                <span class="input-addon">g</span>
+              </div>
             </div>
           </div>
 
-          <div class="card">
-            <p class="section-label">Cl⁻ : SO₄²⁻-kvot</p>
-            <div class="stat-value" id="w-ratio-value">—</div>
-            <div class="form-hint" style="margin-top:4px" id="w-ratio-label" style="color:var(--accent)">—</div>
-            <div class="indicator-bar" style="margin-top:12px">
-              <div class="indicator-track">
-                <div class="indicator-fill" id="w-ratio-fill" style="width:50%;background:var(--accent)"></div>
-              </div>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--text-dim);margin-top:4px">
-              <span>0 (Humlig/Besk)</span><span>1.0</span><span>2+ (Maltig/Fyllig)</span>
+          <div class="card" style="background:var(--bg-secondary); border-color:var(--border)">
+            <p class="section-label" style="margin-bottom:8px">Slutgiltig vattenprofil</p>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap:10px; text-align:center">
+              <div><span style="font-size:0.75rem; color:var(--text-muted)">Ca²⁺</span><div id="w-res-ca" style="font-weight:700">0 ppm</div></div>
+              <div><span style="font-size:0.75rem; color:var(--text-muted)">Mg²⁺</span><div id="w-res-mg" style="font-weight:700">0 ppm</div></div>
+              <div><span style="font-size:0.75rem; color:var(--text-muted)">Na⁺</span><div id="w-res-na" style="font-weight:700">0 ppm</div></div>
+              <div><span style="font-size:0.75rem; color:var(--text-muted)">Cl⁻</span><div id="w-res-cl" style="font-weight:700">0 ppm</div></div>
+              <div><span style="font-size:0.75rem; color:var(--text-muted)">SO₄²⁻</span><div id="w-res-so4" style="font-weight:700">0 ppm</div></div>
+              <div><span style="font-size:0.75rem; color:var(--text-muted)">Cl / SO₄</span><div id="w-res-ratio" style="font-weight:700; color:var(--accent-bright)">1.0 (Balanserad)</div></div>
             </div>
           </div>
         </div>
@@ -645,17 +534,13 @@
 
   <!-- ===================== SIDEBAR ======================= -->
   <aside id="sidebar">
-
-    <!-- Mobil-head i sidebar (visas endast på mobila skärmar) -->
     <div class="sidebar-mobile-header">
       <h3 class="sidebar-mobile-title"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg> Nyckeltal & Stil</h3>
       <button id="btn-close-sidebar" class="sidebar-close-btn" aria-label="Stäng nyckeltal">✕</button>
     </div>
 
-    <!-- Beräkningssammanfattning -->
     <div class="stat-card">
       <div class="stat-card-title"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> Beräkningar</div>
-
       <div class="stat-row">
         <span class="stat-label">Stammvörtstyrka (OG)</span>
         <div style="text-align:right">
@@ -663,7 +548,6 @@
           <div class="stat-sub" id="sb-og-sg">—</div>
         </div>
       </div>
-
       <div class="stat-row">
         <span class="stat-label">Slutgravitet (FG)</span>
         <div style="text-align:right">
@@ -671,12 +555,10 @@
           <div class="stat-sub" id="sb-fg-sg">—</div>
         </div>
       </div>
-
       <div class="stat-row">
         <span class="stat-label">Alkohol (ABV)</span>
         <div class="stat-value" id="sb-abv">— %</div>
       </div>
-
       <div class="stat-row">
         <span class="stat-label">Bitterhet (IBU)</span>
         <div class="stat-value" id="sb-ibu">—</div>
@@ -684,7 +566,6 @@
 
       <hr class="divider">
 
-      <!-- EBC färgvisning -->
       <div class="stat-row" style="align-items:center">
         <span class="stat-label">Färg (EBC)</span>
         <div class="ebc-display">
@@ -731,18 +612,200 @@
       </div>
     </div>
 
-    <!-- Stilmatchning -->
     <div class="style-match-card" id="style-match-section">
       <div class="style-match-title"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Stilmatchning</div>
       <div class="style-name-display" id="style-match-name">Välj en stil i Recept-fliken</div>
-      <div id="style-bars-container">
-        <!-- Genereras dynamiskt -->
-      </div>
+      <div id="style-bars-container"></div>
     </div>
-
   </aside>
 
 </div><!-- end #app-body -->
+</div><!-- end #desktop-app-view -->
+
+<!-- =========================================================
+     PARALLELLT MOBIL-UI (#mobile-app-view)
+     ========================================================= -->
+<div id="mobile-app-view" class="view-hidden">
+
+  <!-- Mobil Top Header -->
+  <header class="mobile-header">
+    <div class="mobile-header-brand">
+      <span class="logo-icon"><svg class="svg-icon svg-icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M10 6h4M12 6v4l-4.5 7.5A1.2 1.2 0 0 0 8.5 19.3h7a1.2 1.2 0 0 0 1-1.8L12 10V6"/><path d="M9.5 16c1.5-.7 3.5 1 5 0"/></svg></span>
+      <span class="mobile-brand-title">Brygglabbet</span>
+    </div>
+    <div class="mobile-recipe-name-wrap">
+      <input type="text" id="mobile-recipe-name" value="Mitt nya öl" placeholder="Receptnamn...">
+    </div>
+    <button class="mobile-icon-btn" id="mobile-menu-btn" title="Meny">
+      <svg class="svg-icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </header>
+
+  <!-- Mobil Meny-Dropdown -->
+  <div class="mobile-menu-backdrop" id="mobile-menu-backdrop"></div>
+  <div class="mobile-menu-dropdown" id="mobile-menu-dropdown">
+    <div class="mobile-menu-header">Receptåtgärder</div>
+    <button class="mobile-menu-item" id="mobile-menu-new"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Nytt recept</button>
+    <button class="mobile-menu-item" id="mobile-menu-open"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Öppna sparat</button>
+    <button class="mobile-menu-item" id="mobile-menu-save"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Spara recept</button>
+    <hr class="mobile-menu-divider">
+    <button class="mobile-menu-item" id="mobile-menu-export"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Exportera JSON</button>
+    <button class="mobile-menu-item" id="mobile-menu-import"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Importera JSON</button>
+    <button class="mobile-menu-item" id="mobile-menu-guide"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> Brygguide</button>
+    <hr class="mobile-menu-divider">
+    <button class="mobile-menu-item text-secondary" id="btn-switch-to-desktop">💻 Växla till skrivbordsvy</button>
+  </div>
+
+  <!-- Permanent Sticky Metrics Bar -->
+  <div class="mobile-metrics-bar">
+    <div class="mobile-metric-item">
+      <span class="metric-lbl">OG</span>
+      <span class="metric-val" id="mobile-metric-og">1.050</span>
+    </div>
+    <div class="mobile-metric-item">
+      <span class="metric-lbl">ABV</span>
+      <span class="metric-val highlight" id="mobile-metric-abv">5.2%</span>
+    </div>
+    <div class="mobile-metric-item">
+      <span class="metric-lbl">IBU</span>
+      <span class="metric-val" id="mobile-metric-ibu">35</span>
+    </div>
+    <div class="mobile-metric-item">
+      <span class="metric-lbl">EBC</span>
+      <span class="metric-val" id="mobile-metric-ebc">
+        <span class="ebc-color-dot" id="mobile-metric-color-dot"></span>
+        <span id="mobile-metric-ebc-text">12</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Mobile Screens Container -->
+  <main class="mobile-screen-container" id="mobile-screen-container">
+
+    <!-- Screen 1: Recept info & Volymer -->
+    <section class="mobile-screen active" id="mobile-screen-recipe">
+      <div class="mobile-screen-header">
+        <h2>Recept & Volymer</h2>
+      </div>
+
+      <div class="mobile-card-form">
+        <div class="mobile-form-group">
+          <label for="mobile-recipe-style">BJCP Ölstil</label>
+          <select id="mobile-recipe-style" class="mobile-select-lg">
+            <option value="">— Välj stil —</option>
+          </select>
+        </div>
+
+        <div class="mobile-form-row-2">
+          <div class="mobile-form-group">
+            <label for="mobile-batch-volume">Bryggvolym (L)</label>
+            <input type="number" inputmode="decimal" id="mobile-batch-volume" value="20" step="0.5">
+          </div>
+          <div class="mobile-form-group">
+            <label for="mobile-boil-volume">Kokvolym (L)</label>
+            <input type="number" inputmode="decimal" id="mobile-boil-volume" value="25" step="0.5">
+          </div>
+        </div>
+
+        <div class="mobile-form-row-2">
+          <div class="mobile-form-group">
+            <label for="mobile-boil-time">Koktid (min)</label>
+            <input type="number" inputmode="decimal" id="mobile-boil-time" value="60" step="5">
+          </div>
+          <div class="mobile-form-group">
+            <label for="mobile-efficiency">Effektivitet (%)</label>
+            <input type="number" inputmode="decimal" id="mobile-efficiency" value="75" step="1">
+          </div>
+        </div>
+
+        <div class="mobile-form-group">
+          <label for="mobile-recipe-notes">Anteckningar</label>
+          <textarea id="mobile-recipe-notes" rows="3" placeholder="Receptnoteringar, inspiration..."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: Malt & Råvaror -->
+    <section class="mobile-screen" id="mobile-screen-malt">
+      <div class="mobile-screen-header flex-between">
+        <h2>Malt & Råvaror</h2>
+        <button class="btn btn-primary btn-sm" id="mobile-btn-add-fermentable">＋ Lägg till malt</button>
+      </div>
+
+      <div id="mobile-fermentables-empty" class="mobile-empty-state">
+        <div class="empty-icon">🌾</div>
+        <p>Ingen malt tillagd ännu.</p>
+        <button class="btn btn-primary" onclick="document.getElementById('mobile-btn-add-fermentable').click()">＋ Välj malt ur databasen</button>
+      </div>
+
+      <div id="mobile-fermentables-list" class="mobile-cards-list"></div>
+    </section>
+
+    <!-- Screen 3: Humle -->
+    <section class="mobile-screen" id="mobile-screen-hops">
+      <div class="mobile-screen-header flex-between">
+        <h2>Humlegivor</h2>
+        <button class="btn btn-primary btn-sm" id="mobile-btn-add-hop">＋ Lägg till humle</button>
+      </div>
+
+      <div id="mobile-hops-empty" class="mobile-empty-state">
+        <div class="empty-icon">🌿</div>
+        <p>Ingen humle tillagd ännu.</p>
+        <button class="btn btn-primary" onclick="document.getElementById('mobile-btn-add-hop').click()">＋ Välj humle ur databasen</button>
+      </div>
+
+      <div id="mobile-hops-list" class="mobile-cards-list"></div>
+    </section>
+
+    <!-- Screen 4: Jäst & Mäsksteg -->
+    <section class="mobile-screen" id="mobile-screen-yeast">
+      <div class="mobile-screen-header">
+        <h2>Jäst & Jäsning</h2>
+      </div>
+      <div class="mobile-card-form">
+        <p class="section-label">Jästhantering</p>
+        <p class="text-muted" style="font-size:0.9rem">För avancerade jäst- och mäskinställningar, använd Skrivbordsvy.</p>
+      </div>
+    </section>
+
+    <!-- Screen 5: Vatten & Mer -->
+    <section class="mobile-screen" id="mobile-screen-water">
+      <div class="mobile-screen-header">
+        <h2>Vatten & Utrustning</h2>
+      </div>
+      <div class="mobile-card-form">
+        <p class="section-label">Inställningar</p>
+        <p class="text-muted" style="font-size:0.9rem">För detaljerade vattenjusteringar och salter, använd Skrivbordsvy.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Mobile Bottom Navigation (App Bar) -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-nav-btn active" data-screen="mobile-screen-recipe">
+      <span class="nav-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span>
+      <span class="nav-label">Recept</span>
+    </button>
+    <button class="mobile-nav-btn" data-screen="mobile-screen-malt">
+      <span class="nav-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></span>
+      <span class="nav-label">Malt</span>
+    </button>
+    <button class="mobile-nav-btn" data-screen="mobile-screen-hops">
+      <span class="nav-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></span>
+      <span class="nav-label">Humle</span>
+    </button>
+    <button class="mobile-nav-btn" data-screen="mobile-screen-yeast">
+      <span class="nav-icon">🧫</span>
+      <span class="nav-label">Jäst</span>
+    </button>
+    <button class="mobile-nav-btn" data-screen="mobile-screen-water">
+      <span class="nav-icon">💧</span>
+      <span class="nav-label">Vatten</span>
+    </button>
+  </nav>
+
+</div><!-- end #mobile-app-view -->
 
 <!-- ===================== MODALER ========================= -->
 
@@ -756,9 +819,7 @@
     <div class="modal-search">
       <input type="text" id="fermentable-search" placeholder="Sök malt, mälteri eller egenskap...">
     </div>
-    <div class="modal-list" id="fermentable-list">
-      <!-- Fylls i av JavaScript -->
-    </div>
+    <div class="modal-list" id="fermentable-list"></div>
   </div>
 </div>
 
@@ -772,9 +833,7 @@
     <div class="modal-search">
       <input type="text" id="hop-search" placeholder="Sök humlesort, karaktär eller ursprung...">
     </div>
-    <div class="modal-list" id="hop-list">
-      <!-- Fylls i av JavaScript -->
-    </div>
+    <div class="modal-list" id="hop-list"></div>
   </div>
 </div>
 
@@ -785,9 +844,7 @@
       <h3 class="modal-title"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Sparade recept</h3>
       <button class="modal-close" data-close="modal-recipes">✕</button>
     </div>
-    <div class="modal-list" id="recipes-list">
-      <!-- Fylls i av JavaScript -->
-    </div>
+    <div class="modal-list" id="recipes-list"></div>
     <div id="no-recipes-msg" class="empty-state" style="display:none">
       <div class="empty-icon"><svg class="svg-icon svg-icon-xl" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
       <p>Inga sparade recept hittades.<br>Spara ett recept för att se det här.</p>
@@ -806,9 +863,7 @@
       <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px">
         Välj ett beprövat exempelrecept som utgångspunkt. Du kan därefter fritt anpassa alla malter, humlegivor och mäsksteg efter din egen utrustning!
       </p>
-      <div class="preset-recipes-grid" id="preset-recipes-list">
-        <!-- Fylls i av JavaScript -->
-      </div>
+      <div class="preset-recipes-grid" id="preset-recipes-list"></div>
     </div>
   </div>
 </div>
@@ -846,7 +901,7 @@
   </div>
 </div>
 
-<!-- Modal: Brygguide, Utrustning & Råvaror -->
+<!-- Modal: Brygguide -->
 <div class="modal-overlay hidden" id="modal-swe-info">
   <div class="modal" style="max-width:680px">
     <div class="modal-header">
@@ -854,7 +909,6 @@
       <button class="modal-close" data-close="modal-swe-info">✕</button>
     </div>
     <div class="modal-body" style="padding:16px 0; font-size:0.88rem; line-height:1.6; color:var(--text-secondary)">
-
       <div style="background:var(--bg-card-hover); border-radius:8px; padding:14px; margin-bottom:16px; border-left:4px solid var(--accent)">
         <h4 style="color:var(--text-primary); margin-bottom:6px; font-family:var(--font-heading)">🛠️ Vanlig Utrustning & Bryggverk</h4>
         <ul style="margin:0; padding-left:18px">
@@ -864,7 +918,6 @@
           <li><strong>Fermentering:</strong> Plastjäshink 30L, FermZilla / FermTank (tryckjäsning & kegging) eller stålfermentor.</li>
         </ul>
       </div>
-
       <div style="background:var(--bg-card-hover); border-radius:8px; padding:14px; margin-bottom:16px; border-left:4px solid #3b82f6">
         <h4 style="color:var(--text-primary); margin-bottom:6px; font-family:var(--font-heading)">🌾 Maltsorter & Mälterier i Butik</h4>
         <p style="margin-bottom:8px">
@@ -874,7 +927,6 @@
           <strong>Bas vs Specialmalt:</strong> Basmalt (Pilsner, Pale Ale, Maris Otter, Vienna, Munich) ger förjäsbara sockerarter. Karamellmalt (CaraPils, Crystal 60, Caramunchen, Special B) ger fyllighet och sötma. Rostad malt (Chokladmalt, Carafa I/III, Roasted Barley) ger färg och kaffetoner.
         </p>
       </div>
-
       <div style="background:var(--bg-card-hover); border-radius:8px; padding:14px; margin-bottom:16px; border-left:4px solid #10b981">
         <h4 style="color:var(--text-primary); margin-bottom:6px; font-family:var(--font-heading)">🌿 Humle & Jäst – Från Klassiskt till Modern Kveik</h4>
         <p style="margin-bottom:8px">
@@ -884,14 +936,12 @@
           <strong>Jäst & Kveik:</strong> SafAle US-05, S-04 och Verdant IPA är standard för ales. W-34/70 & Novalager för lager. Kveik-jäst (Voss, Lutra, Hornindal) möjliggör snabb jäsning vid 25–40°C utan diacetyl – perfekt vid jäsning i rumstemperatur!
         </p>
       </div>
-
       <div style="background:var(--bg-card-hover); border-radius:8px; padding:14px; border-left:4px solid #f59e0b">
         <h4 style="color:var(--text-primary); margin-bottom:6px; font-family:var(--font-heading)">🛒 Butiker & SHBF</h4>
         <p style="margin:0">
           Handla råvaror och utrustning hos <strong>Maltmagnus</strong> (maltmagnus.se), <strong>Humlegårdens Ekolager / Mr. Malt</strong> (humle.se), <strong>PGW</strong> (pgw.se), <strong>Ölkompaniet</strong> och <strong>Lilla Köksbryggeriet</strong>. Se även <strong>shbf.se</strong> för Öltypsdefinitioner och hembryggarforum.
         </p>
       </div>
-
     </div>
   </div>
 </div>
@@ -912,4 +962,3 @@
 <script type="module" src="/src/main.js"></script>
 </body>
 </html>
-
