@@ -1376,12 +1376,23 @@ textarea {
   display: none !important;
 }
 
+body.mobile-mode {
+  overflow: hidden;
+  height: 100vh;
+  height: 100dvh;
+}
+
+body.mobile-mode #sidebar-backdrop,
+body.mobile-mode #mobile-stats-fab {
+  display: none !important;
+}
+
 #mobile-app-view {
   display: flex;
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
-  background: var(--bg-main);
+  background: var(--bg-primary);
   color: var(--text-primary);
   overflow: hidden;
   position: fixed;
