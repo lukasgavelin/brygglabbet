@@ -684,8 +684,12 @@
 
     <!-- Screen 1: Recept info & Volymer -->
     <section class="mobile-screen active" id="mobile-screen-recipe">
-      <div class="mobile-screen-header">
+      <div class="mobile-screen-header flex-between">
         <h2>Recept & Volymer</h2>
+        <div style="display:flex; gap:6px">
+          <button class="btn btn-ghost btn-sm" id="mobile-btn-preset-recipes">📋 Mallar</button>
+          <button class="btn btn-secondary btn-sm" id="mobile-btn-scale-recipe">⚖️ Skala</button>
+        </div>
       </div>
 
       <div class="mobile-card-form">
@@ -694,6 +698,12 @@
           <select id="mobile-recipe-style" class="mobile-select-lg">
             <option value="">— Välj stil —</option>
           </select>
+        </div>
+
+        <!-- Mobile Style Match Card -->
+        <div class="mobile-style-match-box" id="mobile-style-match-box">
+          <div class="mobile-style-match-title" id="mobile-style-match-name">Välj ölstil ovan</div>
+          <div id="mobile-style-bars-container"></div>
         </div>
 
         <div class="mobile-form-row-2">
@@ -732,6 +742,11 @@
         <button class="btn btn-primary btn-sm" id="mobile-btn-add-fermentable">＋ Lägg till malt</button>
       </div>
 
+      <div class="mobile-summary-banner" id="mobile-malt-summary">
+        <span>Totalt: <strong id="mobile-total-malt-kg">0.00 kg</strong></span>
+        <span>EBC: <strong id="mobile-total-malt-ebc">0</strong></span>
+      </div>
+
       <div id="mobile-fermentables-empty" class="mobile-empty-state">
         <div class="empty-icon">🌾</div>
         <p>Ingen malt tillagd ännu.</p>
@@ -748,6 +763,11 @@
         <button class="btn btn-primary btn-sm" id="mobile-btn-add-hop">＋ Lägg till humle</button>
       </div>
 
+      <div class="mobile-summary-banner" id="mobile-hops-summary">
+        <span>Totalt: <strong id="mobile-total-hops-g">0 g</strong></span>
+        <span>IBU: <strong id="mobile-total-hops-ibu">0.0</strong></span>
+      </div>
+
       <div id="mobile-hops-empty" class="mobile-empty-state">
         <div class="empty-icon">🌿</div>
         <p>Ingen humle tillagd ännu.</p>
@@ -760,22 +780,149 @@
     <!-- Screen 4: Jäst & Mäsksteg -->
     <section class="mobile-screen" id="mobile-screen-yeast">
       <div class="mobile-screen-header">
-        <h2>Jäst & Jäsning</h2>
+        <h2>Jäst & Mäskning</h2>
       </div>
+
       <div class="mobile-card-form">
-        <p class="section-label">Jästhantering</p>
-        <p class="text-muted" style="font-size:0.9rem">För avancerade jäst- och mäskinställningar, använd Skrivbordsvy.</p>
+        <p class="section-label">🧫 Jäststam & Förjäsning</p>
+
+        <div class="mobile-form-group">
+          <label for="mobile-yeast-select">Välj ur jästdatabas</label>
+          <select id="mobile-yeast-select" class="mobile-select-lg">
+            <option value="">— Välj jäststam —</option>
+          </select>
+        </div>
+
+        <div class="mobile-form-group">
+          <label for="mobile-yeast-name">Jästnamn (Anpassad)</label>
+          <input type="text" id="mobile-yeast-name" placeholder="t.ex. SafAle US-05">
+        </div>
+
+        <div class="mobile-form-row-2">
+          <div class="mobile-form-group">
+            <label for="mobile-yeast-lab">Tillverkare / Lab</label>
+            <input type="text" id="mobile-yeast-lab" placeholder="Fermentis">
+          </div>
+          <div class="mobile-form-group">
+            <label for="mobile-yeast-type">Jästtyp</label>
+            <select id="mobile-yeast-type">
+              <option value="ale">Ale (Överjäst)</option>
+              <option value="lager">Lager (Underjäst)</option>
+              <option value="wheat">Veteöl</option>
+              <option value="kviek">Kveik</option>
+              <option value="wild">Vild / Brett</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mobile-form-row-2">
+          <div class="mobile-form-group">
+            <label for="mobile-att-min">Förjäsning min (%)</label>
+            <input type="number" inputmode="decimal" id="mobile-att-min" value="72">
+          </div>
+          <div class="mobile-form-group">
+            <label for="mobile-att-max">Förjäsning max (%)</label>
+            <input type="number" inputmode="decimal" id="mobile-att-max" value="78">
+          </div>
+        </div>
+
+        <hr class="mobile-menu-divider" style="margin: 16px 0">
+
+        <p class="section-label">🌡️ Mäskprofil & Mäsksteg</p>
+        <div class="mobile-preset-buttons">
+          <button class="preset-btn" data-mobile-mash="single_light">65°C Torrt</button>
+          <button class="preset-btn" data-mobile-mash="single_medium">67°C Medium</button>
+          <button class="preset-btn" data-mobile-mash="single_full">69°C Fylligt</button>
+        </div>
+
+        <div id="mobile-mash-steps-list" class="mobile-cards-list" style="margin-top:12px"></div>
+
+        <button class="btn btn-secondary btn-sm" id="mobile-btn-add-mash-step" style="margin-top:10px; width:100%">＋ Lägg till mäsksteg</button>
       </div>
     </section>
 
-    <!-- Screen 5: Vatten & Mer -->
+    <!-- Screen 5: Vatten & Utrustning -->
     <section class="mobile-screen" id="mobile-screen-water">
       <div class="mobile-screen-header">
         <h2>Vatten & Utrustning</h2>
       </div>
+
       <div class="mobile-card-form">
-        <p class="section-label">Inställningar</p>
-        <p class="text-muted" style="font-size:0.9rem">För detaljerade vattenjusteringar och salter, använd Skrivbordsvy.</p>
+        <p class="section-label">⚙️ Utrustningsprofil</p>
+
+        <div class="mobile-form-group">
+          <label for="mobile-equipment-preset">Bryggverk / Utrustning</label>
+          <select id="mobile-equipment-preset" class="mobile-select-lg"></select>
+        </div>
+
+        <div class="mobile-water-calc-card">
+          <div class="mobile-water-calc-row">
+            <span>Mäskvatten:</span>
+            <strong id="mobile-mash-water">— L</strong>
+          </div>
+          <div class="mobile-water-calc-row">
+            <span>Lakvatten:</span>
+            <strong id="mobile-sparge-water">— L</strong>
+          </div>
+          <div class="mobile-water-calc-row total">
+            <span>Totalt vatten:</span>
+            <strong id="mobile-total-water">— L</strong>
+          </div>
+        </div>
+
+        <hr class="mobile-menu-divider" style="margin: 16px 0">
+
+        <p class="section-label">💧 Vattenprofil & Salter</p>
+
+        <div class="mobile-form-group">
+          <label for="mobile-water-preset">Ladda vatten-preset</label>
+          <select id="mobile-water-preset" class="mobile-select-lg">
+            <option value="">— Välj profil —</option>
+          </select>
+        </div>
+
+        <div class="mobile-salt-grid">
+          <div class="mobile-salt-item">
+            <label>Gips (CaSO₄)</label>
+            <div class="mobile-stepper">
+              <button class="stepper-btn" data-salt="gypsum" data-dir="-1">–</button>
+              <input type="number" inputmode="decimal" class="stepper-input" id="mobile-salt-gypsum" value="0" step="0.5">
+              <button class="stepper-btn" data-salt="gypsum" data-dir="1">+</button>
+            </div>
+          </div>
+
+          <div class="mobile-salt-item">
+            <label>Kalciumklorid (CaCl₂)</label>
+            <div class="mobile-stepper">
+              <button class="stepper-btn" data-salt="cacl2" data-dir="-1">–</button>
+              <input type="number" inputmode="decimal" class="stepper-input" id="mobile-salt-cacl2" value="0" step="0.5">
+              <button class="stepper-btn" data-salt="cacl2" data-dir="1">+</button>
+            </div>
+          </div>
+
+          <div class="mobile-salt-item">
+            <label>Epsomsalt (MgSO₄)</label>
+            <div class="mobile-stepper">
+              <button class="stepper-btn" data-salt="epsom" data-dir="-1">–</button>
+              <input type="number" inputmode="decimal" class="stepper-input" id="mobile-salt-epsom" value="0" step="0.5">
+              <button class="stepper-btn" data-salt="epsom" data-dir="1">+</button>
+            </div>
+          </div>
+
+          <div class="mobile-salt-item">
+            <label>Bordssalt (NaCl)</label>
+            <div class="mobile-stepper">
+              <button class="stepper-btn" data-salt="nacl" data-dir="-1">–</button>
+              <input type="number" inputmode="decimal" class="stepper-input" id="mobile-salt-nacl" value="0" step="0.5">
+              <button class="stepper-btn" data-salt="nacl" data-dir="1">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mobile-water-summary-box">
+          <span>Cl⁻ / SO₄²⁻-kvot:</span>
+          <strong id="mobile-water-ratio">1.0 (Balanserad)</strong>
+        </div>
       </div>
     </section>
 

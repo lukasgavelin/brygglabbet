@@ -1797,4 +1797,131 @@ body.mobile-mode #mobile-stats-fab {
   font-weight: 700;
 }
 
+/* --- Mobile Component Extensions -------------------------- */
+.mobile-summary-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.mobile-style-match-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 14px;
+}
+.mobile-style-match-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-bright);
+  margin-bottom: 8px;
+}
+.mobile-style-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.72rem;
+  margin-bottom: 6px;
+}
+.mobile-style-row:last-child {
+  margin-bottom: 0;
+}
+.mobile-style-row .lbl {
+  width: 70px;
+  color: var(--text-secondary);
+}
+.mobile-style-row .bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.mobile-style-row .bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+.mobile-style-row .range {
+  width: 70px;
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.mobile-preset-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.mobile-preset-buttons .preset-btn {
+  flex: 1;
+  font-size: 0.76rem;
+  padding: 8px 4px;
+}
+
+.mobile-water-calc-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.84rem;
+}
+.mobile-water-calc-row {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-secondary);
+}
+.mobile-water-calc-row.total {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 6px;
+  font-weight: 700;
+  color: var(--accent-bright);
+}
+
+.mobile-salt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+.mobile-salt-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+}
+.mobile-salt-item label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.mobile-water-summary-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-top: 12px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+
 
