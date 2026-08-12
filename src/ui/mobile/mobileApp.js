@@ -18,7 +18,7 @@ import {
 import { setupMobileNav } from './mobileNav.js';
 import { renderMobileFermentablesCards, renderMobileHopsCards } from './mobileCards.js';
 import { STYLES, YEASTS, EQUIPMENT_PROFILES, WATER_PROFILES, MASH_PRESETS } from '../../core/data.js';
-import { saveRecipe, newRecipe, openRecipeModal, exportJSON, importJSON } from '../recipes.js';
+import { saveRecipe, newRecipe, openRecipeModal, openPresetRecipesModal, exportJSON, importJSON } from '../recipes.js';
 import { escHtml } from '../toast.js';
 
 let isMobileViewActive = false;
@@ -185,7 +185,7 @@ function setupMobileInputs(recalculateCallback) {
 
   // Quick Action Modals
   document.getElementById('mobile-btn-preset-recipes')?.addEventListener('click', () => {
-    openModal('modal-preset-recipes');
+    openPresetRecipesModal(recalculateCallback);
   });
   document.getElementById('mobile-btn-scale-recipe')?.addEventListener('click', () => {
     openModal('modal-scale-recipe');

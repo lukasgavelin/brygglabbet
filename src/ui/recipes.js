@@ -7,6 +7,7 @@ import { calculateOG, formatSG, scaleRecipe } from '../core/calculations.js';
 import { PRESET_RECIPES } from '../core/data.js';
 import { openModal, closeModal } from './modals.js';
 import { showToast, escHtml } from './toast.js';
+import { recalculate } from './sidebar.js';
 import { renderFermentablesTable } from './fermentables.js';
 import { renderHopsTable } from './hops.js';
 import { renderMashTable } from './mash.js';
@@ -111,6 +112,7 @@ export function openRecipeModal(recalculateCallback) {
 }
 
 export function loadPresetRecipe(presetId, recalculateCallback) {
+  const cb = typeof recalculateCallback === 'function' ? recalculateCallback : recalculate;
   const preset = PRESET_RECIPES.find((p) => p.id === presetId);
   if (!preset) return;
 
@@ -170,11 +172,12 @@ export function loadPresetRecipe(presetId, recalculateCallback) {
     document.getElementById(id)?.classList.remove('collapsed');
   });
 
-  syncUIFromState(recalculateCallback);
+  syncUIFromState(cb);
   showToast(`🍺 Exempelrecept "${preset.name}" inläst & skalat till ${targetVol}L (${eqName})!`, 'success');
 }
 
 export function openPresetRecipesModal(recalculateCallback) {
+  const cb = typeof recalculateCallback === 'function' ? recalculateCallback : recalculate;
   const container = document.getElementById('preset-recipes-list');
   if (!container) return;
 
@@ -205,10 +208,19 @@ export function openPresetRecipesModal(recalculateCallback) {
     `;
   }).join('');
 
+  container.querySelectorAll('.btn-load-preset').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const presetId = btn.getAttribute('data-preset-id');
+      loadPresetRecipe(presetId, cb);
+    });
+  });
+
   container.querySelectorAll('.preset-recipe-card').forEach((card) => {
-    card.addEventListener('click', (e) => {
+    card.addEventListener('click', () => {
       const presetId = card.getAttribute('data-preset-id');
-      loadPresetRecipe(presetId, recalculateCallback);
+      loadPresetRecipe(presetId, cb);
     });
   });
 
