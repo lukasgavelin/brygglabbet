@@ -110,6 +110,70 @@ export function openRecipeModal(recalculateCallback) {
   openModal('modal-recipes');
 }
 
+export function loadPresetRecipe(presetId, recalculateCallback) {
+  const preset = PRESET_RECIPES.find((p) => p.id === presetId);
+  if (!preset) return;
+
+  pushHistory();
+
+  const targetVol = State.equipment?.batchVolume || State.recipe?.batchVolume || 20;
+  const eqName = State.equipment?.name || 'Standard Gryta 30L';
+  const baseVol = preset.recipe.batchVolume || 20;
+  const factor = targetVol / baseVol;
+
+  State.recipe = {
+    ...preset.recipe,
+    batchVolume: targetVol,
+    boilVolume: Math.round((preset.recipe.boilVolume || 25) * factor),
+  };
+
+  State.fermentables = (preset.fermentables || []).map((f) => ({
+    ...f,
+    id: generateId(),
+    amount: Math.round(f.amount * factor * 100) / 100,
+  }));
+
+  State.hops = (preset.hops || []).map((h) => ({
+    ...h,
+    id: generateId(),
+    amount: Math.round(h.amount * factor),
+  }));
+
+  State.yeast = preset.yeast ? JSON.parse(JSON.stringify(preset.yeast)) : { name: '' };
+  State.mash = (preset.mash || []).map((m) => ({ ...m, id: generateId() }));
+
+  if (preset.water) {
+    State.water = {
+      volume: Math.round((preset.water.volume || 25) * factor),
+      base: { ...(preset.water.base || { ca: 0, mg: 0, na: 0, cl: 0, so4: 0, hco3: 0 }) },
+      salts: {
+        gypsum: Math.round((preset.water.salts?.gypsum || 0) * factor * 10) / 10,
+        calciumChloride: Math.round((preset.water.salts?.calciumChloride || 0) * factor * 10) / 10,
+        epsomSalt: Math.round((preset.water.salts?.epsomSalt || 0) * factor * 10) / 10,
+        tableSalt: Math.round((preset.water.salts?.tableSalt || 0) * factor * 10) / 10,
+        chalk: Math.round((preset.water.salts?.chalk || 0) * factor * 10) / 10,
+        bakingSoda: Math.round((preset.water.salts?.bakingSoda || 0) * factor * 10) / 10,
+      },
+    };
+  }
+
+  let maxId = 0;
+  [...State.fermentables, ...State.hops, ...State.mash].forEach((x) => {
+    if (x.id && x.id > maxId) maxId = x.id;
+  });
+  setNextId(maxId);
+
+  closeModal('modal-preset-recipes');
+
+  // Uncollapse accordion sections so the loaded recipe is visible immediately!
+  ['sec-equipment', 'sec-water', 'sec-fermentables', 'sec-mash', 'sec-hops', 'sec-yeast', 'sec-recipe-info'].forEach((id) => {
+    document.getElementById(id)?.classList.remove('collapsed');
+  });
+
+  syncUIFromState(recalculateCallback);
+  showToast(`🍺 Exempelrecept "${preset.name}" inläst & skalat till ${targetVol}L (${eqName})!`, 'success');
+}
+
 export function openPresetRecipesModal(recalculateCallback) {
   const container = document.getElementById('preset-recipes-list');
   if (!container) return;
@@ -123,7 +187,7 @@ export function openPresetRecipesModal(recalculateCallback) {
     const scaledTotalMalt = preset.fermentables.reduce((sum, f) => sum + (f.amount * factor), 0).toFixed(2);
 
     return `
-      <div class="preset-recipe-card">
+      <div class="preset-recipe-card" data-preset-id="${preset.id}" style="cursor:pointer">
         <div class="preset-recipe-info">
           <div class="preset-recipe-title">
             <span>🍺 ${escHtml(preset.name)}</span>
@@ -141,90 +205,14 @@ export function openPresetRecipesModal(recalculateCallback) {
     `;
   }).join('');
 
-  container.querySelectorAll('.btn-load-preset').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const presetId = e.currentTarget.getAttribute('data-preset-id');
-      const preset = PRESET_RECIPES.find((p) => p.id === presetId);
-      if (!preset) return;
-
-      const baseVol = preset.recipe.batchVolume || 20;
-      const factor = targetVol / baseVol;
-
-      pushHistory();
-
-      State.recipe = {
-        ...preset.recipe,
-        batchVolume: targetVol,
-        boilVolume: Math.round((preset.recipe.boilVolume || 25) * factor),
-      };
-      State.fermentables = preset.fermentables.map((f) => ({
-        ...f,
-        id: generateId(),
-        amount: Math.round(f.amount * factor * 100) / 100,
-      }));
-      State.hops = preset.hops.map((h) => ({
-        ...h,
-        id: generateId(),
-        amount: Math.round(h.amount * factor),
-      }));
-      State.yeast = { ...preset.yeast };
-      State.mash = preset.mash.map((m) => ({ ...m, id: generateId() }));
-      State.water = {
-        volume: Math.round((preset.water.volume || 25) * factor),
-        base: { ...preset.water.base },
-        salts: {
-          gypsum: Math.round((preset.water.salts.gypsum || 0) * factor * 10) / 10,
-          calciumChloride: Math.round((preset.water.salts.calciumChloride || 0) * factor * 10) / 10,
-          epsomSalt: Math.round((preset.water.salts.epsomSalt || 0) * factor * 10) / 10,
-          tableSalt: Math.round((preset.water.salts.tableSalt || 0) * factor * 10) / 10,
-          chalk: Math.round((preset.water.salts.chalk || 0) * factor * 10) / 10,
-          bakingSoda: Math.round((preset.water.salts.bakingSoda || 0) * factor * 10) / 10,
-        },
-      };
-
-      closeModal('modal-preset-recipes');
-      syncUIFromState(recalculateCallback);
-      showToast(`🍺 Exempelrecept "${preset.name}" inläst & skalat till ${targetVol}L (${eqName})!`, 'success');
+  container.querySelectorAll('.preset-recipe-card').forEach((card) => {
+    card.addEventListener('click', (e) => {
+      const presetId = card.getAttribute('data-preset-id');
+      loadPresetRecipe(presetId, recalculateCallback);
     });
   });
 
   openModal('modal-preset-recipes');
-}
-
-export function loadPresetRecipe(presetId, recalculateCallback) {
-  const preset = PRESET_RECIPES.find((p) => p.id === presetId);
-  if (!preset) return;
-
-  // Clone recipe state
-  const newState = createInitialState();
-  newState.recipe = JSON.parse(JSON.stringify(preset.recipe));
-
-  // Maintain existing equipment settings if set, or sync batch size
-  if (State.equipment) {
-    newState.equipment = {
-      ...State.equipment,
-      batchVolume: preset.recipe.batchVolume,
-      efficiency: preset.recipe.efficiency,
-    };
-  }
-
-  newState.fermentables = preset.fermentables.map((f) => ({ ...f, id: generateId() }));
-  newState.hops = preset.hops.map((h) => ({ ...h, id: generateId() }));
-  newState.yeast = JSON.parse(JSON.stringify(preset.yeast));
-  newState.mash = preset.mash.map((m) => ({ ...m, id: generateId() }));
-  newState.water = JSON.parse(JSON.stringify(preset.water));
-
-  Object.assign(State, newState);
-
-  let maxId = 0;
-  [...State.fermentables, ...State.hops, ...State.mash].forEach((x) => {
-    if (x.id && x.id > maxId) maxId = x.id;
-  });
-  setNextId(maxId);
-
-  syncUIFromState(recalculateCallback);
-  showToast(`✨ Receptmall laddad: ${preset.name}`, 'success');
 }
 
 export function scaleCurrentRecipe(targetBatchVol, targetEff, recalculateCallback) {
