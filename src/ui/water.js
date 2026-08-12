@@ -11,8 +11,23 @@ import {
 } from '../core/calculations.js';
 
 export function setupWaterTab(recalculateCallback) {
-  const baseIds = ['w-ca', 'w-mg', 'w-na', 'w-cl', 'w-so4', 'w-hco3'];
-  const saltIds = ['s-gypsum', 's-cacl2', 's-epsom', 's-salt', 's-chalk', 's-baking-soda'];
+  const baseIds = [
+    'w-base-ca', 'w-ca',
+    'w-base-mg', 'w-mg',
+    'w-base-na', 'w-na',
+    'w-base-cl', 'w-cl',
+    'w-base-so4', 'w-so4',
+    'w-base-hco3', 'w-hco3',
+  ];
+
+  const saltIds = [
+    'w-salt-gypsum', 's-gypsum', 'salt-gypsum',
+    'w-salt-cacl2', 's-cacl2', 'salt-cacl2',
+    'w-salt-epsom', 's-epsom', 'salt-epsom',
+    'w-salt-nacl', 's-salt', 'salt-nacl',
+    'w-salt-chalk', 's-chalk', 'salt-caco3',
+    'w-salt-baking', 's-baking-soda', 'salt-nahco3',
+  ];
 
   baseIds.forEach((id) => {
     document.getElementById(id)?.addEventListener('input', () => {
@@ -28,75 +43,113 @@ export function setupWaterTab(recalculateCallback) {
     });
   });
 
-  document.getElementById('w-volume')?.addEventListener('input', () => {
-    syncWaterFromUI();
-    recalculateCallback();
+  const volIds = ['water-total-volume', 'w-volume'];
+  volIds.forEach((id) => {
+    document.getElementById(id)?.addEventListener('input', () => {
+      syncWaterFromUI();
+      recalculateCallback();
+    });
   });
 
-  document.getElementById('water-profile-select')?.addEventListener('change', (e) => {
-    const profile = WATER_PROFILES.find((p) => p.name === e.target.value);
-    if (!profile) return;
-    State.water.base = {
-      ca: profile.ca,
-      mg: profile.mg,
-      na: profile.na,
-      cl: profile.cl,
-      so4: profile.so4,
-      hco3: profile.hco3,
-    };
-    syncWaterToUI();
-    recalculateCallback();
+  const selIds = ['water-profile-preset', 'water-profile-select'];
+  selIds.forEach((id) => {
+    const sel = document.getElementById(id);
+    sel?.addEventListener('change', (e) => {
+      const profile = WATER_PROFILES.find((p) => p.name === e.target.value);
+      if (!profile) return;
+      State.water.base = {
+        ca: profile.ca,
+        mg: profile.mg,
+        na: profile.na,
+        cl: profile.cl,
+        so4: profile.so4,
+        hco3: profile.hco3,
+      };
+      syncWaterToUI();
+      recalculateCallback();
+    });
   });
 }
 
 export function populateWaterProfileSelector() {
-  const sel = document.getElementById('water-profile-select');
-  if (!sel) return;
-  WATER_PROFILES.forEach((p) => {
-    const opt = document.createElement('option');
-    opt.value = p.name;
-    opt.textContent = p.name;
-    sel.appendChild(opt);
+  const selIds = ['water-profile-preset', 'water-profile-select'];
+  selIds.forEach((id) => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Anpassad profil (Svenska städer / RO) —</option>';
+    WATER_PROFILES.forEach((p) => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
   });
+}
+
+function getNumVal(ids, fallback = 0) {
+  for (const id of ids) {
+    const el = document.getElementById(id);
+    if (el) {
+      const val = parseFloat(el.value);
+      if (!isNaN(val)) return val;
+    }
+  }
+  return fallback;
 }
 
 function syncWaterFromUI() {
   State.water.base = {
-    ca: parseFloat(document.getElementById('w-ca')?.value) || 0,
-    mg: parseFloat(document.getElementById('w-mg')?.value) || 0,
-    na: parseFloat(document.getElementById('w-na')?.value) || 0,
-    cl: parseFloat(document.getElementById('w-cl')?.value) || 0,
-    so4: parseFloat(document.getElementById('w-so4')?.value) || 0,
-    hco3: parseFloat(document.getElementById('w-hco3')?.value) || 0,
+    ca: getNumVal(['w-base-ca', 'w-ca'], 0),
+    mg: getNumVal(['w-base-mg', 'w-mg'], 0),
+    na: getNumVal(['w-base-na', 'w-na'], 0),
+    cl: getNumVal(['w-base-cl', 'w-cl'], 0),
+    so4: getNumVal(['w-base-so4', 'w-so4'], 0),
+    hco3: getNumVal(['w-base-hco3', 'w-hco3'], 0),
   };
+
   State.water.salts = {
-    gypsum: parseFloat(document.getElementById('s-gypsum')?.value) || 0,
-    calciumChloride: parseFloat(document.getElementById('s-cacl2')?.value) || 0,
-    epsomSalt: parseFloat(document.getElementById('s-epsom')?.value) || 0,
-    tableSalt: parseFloat(document.getElementById('s-salt')?.value) || 0,
-    chalk: parseFloat(document.getElementById('s-chalk')?.value) || 0,
-    bakingSoda: parseFloat(document.getElementById('s-baking-soda')?.value) || 0,
+    gypsum: getNumVal(['w-salt-gypsum', 's-gypsum', 'salt-gypsum'], 0),
+    calciumChloride: getNumVal(['w-salt-cacl2', 's-cacl2', 'salt-cacl2'], 0),
+    epsomSalt: getNumVal(['w-salt-epsom', 's-epsom', 'salt-epsom'], 0),
+    tableSalt: getNumVal(['w-salt-nacl', 's-salt', 'salt-nacl'], 0),
+    chalk: getNumVal(['w-salt-chalk', 's-chalk', 'salt-caco3'], 0),
+    bakingSoda: getNumVal(['w-salt-baking', 's-baking-soda', 'salt-nahco3'], 0),
   };
-  State.water.volume = parseFloat(document.getElementById('w-volume')?.value) || 25;
+
+  State.water.volume = getNumVal(['water-total-volume', 'w-volume'], 25);
 }
 
 export function syncWaterToUI() {
-  const b = State.water.base;
-  const setVal = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.value = val;
+  const b = State.water.base || {};
+  const s = State.water.salts || {};
+
+  const setVal = (ids, val) => {
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val ?? 0;
+    });
   };
-  setVal('w-ca', b.ca);
-  setVal('w-mg', b.mg);
-  setVal('w-na', b.na);
-  setVal('w-cl', b.cl);
-  setVal('w-so4', b.so4);
-  setVal('w-hco3', b.hco3);
+
+  setVal(['w-base-ca', 'w-ca'], b.ca);
+  setVal(['w-base-mg', 'w-mg'], b.mg);
+  setVal(['w-base-na', 'w-na'], b.na);
+  setVal(['w-base-cl', 'w-cl'], b.cl);
+  setVal(['w-base-so4', 'w-so4'], b.so4);
+  setVal(['w-base-hco3', 'w-hco3'], b.hco3);
+
+  setVal(['w-salt-gypsum', 's-gypsum', 'salt-gypsum'], s.gypsum);
+  setVal(['w-salt-cacl2', 's-cacl2', 'salt-cacl2'], s.calciumChloride);
+  setVal(['w-salt-epsom', 's-epsom', 'salt-epsom'], s.epsomSalt);
+  setVal(['w-salt-nacl', 's-salt', 'salt-nacl'], s.tableSalt);
+  setVal(['w-salt-chalk', 's-chalk', 'salt-caco3'], s.chalk);
+  setVal(['w-salt-baking', 's-baking-soda', 'salt-nahco3'], s.bakingSoda);
+
+  setVal(['water-total-volume', 'w-volume'], State.water.volume || 25);
 }
 
 export function renderWaterPanel(waterResult) {
   const ions = ['ca', 'mg', 'na', 'cl', 'so4', 'hco3'];
-  const b = State.water.base;
+  const b = State.water.base || {};
 
   ions.forEach((ion) => {
     const baseVal = b[ion] || 0;
@@ -106,11 +159,11 @@ export function renderWaterPanel(waterResult) {
 
     const baseEl = el(`wt-base-${ion}`);
     const saltEl = el(`wt-salt-${ion}`);
-    const resEl = el(`wt-res-${ion}`);
+    const resEl = el(`wt-res-${ion}`) || el(`w-res-${ion}`);
 
     if (baseEl) baseEl.textContent = baseVal.toFixed(1);
     if (saltEl) saltEl.textContent = saltVal >= 0 ? `+${saltVal.toFixed(1)}` : saltVal.toFixed(1);
-    if (resEl) resEl.textContent = resVal.toFixed(1);
+    if (resEl) resEl.textContent = `${resVal.toFixed(0)} ppm`;
   });
 
   // RA
@@ -159,8 +212,8 @@ export function renderWaterPanel(waterResult) {
 
   // Cl:SO4 ratio
   const bal = chlorideSulfateBalance(waterResult);
-  const ratioEl = document.getElementById('w-ratio-value');
-  if (ratioEl) ratioEl.textContent = bal.ratio.toFixed(2);
+  const ratioEl = document.getElementById('w-ratio-value') || document.getElementById('w-res-ratio');
+  if (ratioEl) ratioEl.textContent = `${bal.ratio.toFixed(1)} (${bal.label})`;
 
   const ratioLabel = document.getElementById('w-ratio-label');
   if (ratioLabel) {

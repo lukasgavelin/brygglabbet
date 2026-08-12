@@ -9,7 +9,7 @@ import { setupTabNavigation } from './ui/tabs.js';
 import { setupYeastTab, populateYeastSelector } from './ui/yeast.js';
 import { setupMashTab } from './ui/mash.js';
 import { setupWaterTab, populateWaterProfileSelector } from './ui/water.js';
-import { setupEquipmentListeners, syncEquipmentFromUI } from './ui/equipment.js';
+import { setupEquipmentListeners, syncEquipmentFromUI, populateEquipmentSelector } from './ui/equipment.js';
 import {
   openFermentableModal,
   openHopModal,
@@ -40,6 +40,7 @@ import { debounce } from './ui/utils.js';
 const debouncedRecalculate = debounce(recalculate, 150);
 
 document.addEventListener('DOMContentLoaded', () => {
+  populateEquipmentSelector();
   populateStyleSelector();
   populateWaterProfileSelector();
   populateYeastSelector();
