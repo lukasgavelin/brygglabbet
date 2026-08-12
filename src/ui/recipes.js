@@ -119,25 +119,28 @@ export function openPresetRecipesModal(recalculateCallback) {
     const scaledTotalMalt = preset.fermentables.reduce((sum, f) => sum + (f.amount * factor), 0).toFixed(2);
 
     return `
-      <div class="preset-recipe-card" style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:12px">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px">
-          <h4 style="margin:0; font-weight:700; color:var(--text-primary)">🍺 ${escHtml(preset.name)}</h4>
-          <span class="badge-tag">${preset.styleId}</span>
+      <div class="preset-recipe-card">
+        <div class="preset-recipe-info">
+          <div class="preset-recipe-title">
+            <span>🍺 ${escHtml(preset.name)}</span>
+            <span class="badge-tag">${preset.styleId}</span>
+          </div>
+          <p class="preset-recipe-desc">${escHtml(preset.description)}</p>
+          <div class="preset-recipe-meta">
+            ⚡ Skalas automatiskt till din utrustning: <strong>${targetVol} L</strong> (${eqName}) • Total malt: <strong>${scaledTotalMalt} kg</strong>
+          </div>
         </div>
-        <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:8px">${escHtml(preset.description)}</p>
-        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px">
-          Skalas automatiskt till din utrustning: <strong>${targetVol} L</strong> (${eqName}) • Total malt: <strong>${scaledTotalMalt} kg</strong>
-        </div>
-        <button class="btn btn-primary btn-sm btn-load-preset" data-preset-id="${preset.id}">
-          ⚡ Ladda & Skala till min utrustning (${targetVol} L)
+        <button type="button" class="btn btn-primary btn-sm btn-load-preset" data-preset-id="${preset.id}">
+          ⚡ Ladda & Skala (${targetVol} L)
         </button>
       </div>
     `;
   }).join('');
 
   container.querySelectorAll('.btn-load-preset').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const presetId = btn.dataset.presetId;
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const presetId = e.currentTarget.getAttribute('data-preset-id');
       const preset = PRESET_RECIPES.find((p) => p.id === presetId);
       if (!preset) return;
 
@@ -146,7 +149,11 @@ export function openPresetRecipesModal(recalculateCallback) {
 
       pushHistory();
 
-      State.recipe = { ...preset.recipe, batchVolume: targetVol, boilVolume: Math.round((preset.recipe.boilVolume || 25) * factor) };
+      State.recipe = {
+        ...preset.recipe,
+        batchVolume: targetVol,
+        boilVolume: Math.round((preset.recipe.boilVolume || 25) * factor),
+      };
       State.fermentables = preset.fermentables.map((f) => ({
         ...f,
         id: generateId(),
