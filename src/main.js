@@ -33,7 +33,7 @@ import {
 } from './ui/recipes.js';
 import { recalculate, setupMobileSidebar } from './ui/sidebar.js';
 import { initMobileApp } from './ui/mobile/mobileApp.js';
-import { setupInputSteppers } from './ui/stepper.js';
+import { setupPrintHandler, triggerPrint } from './ui/print.js';
 import { debounce } from './ui/utils.js';
 
 const debouncedRecalculate = debounce(recalculate, 150);
@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupMobileSidebar();
   initMobileApp(recalculate);
 
+  setupPrintHandler();
   loadDefaultRecipe(recalculate);
   checkAndRestoreSession(recalculate);
   setupInputSteppers(debouncedRecalculate);
@@ -94,7 +95,7 @@ function setupHeaderControls() {
   document.getElementById('btn-open')?.addEventListener('click', () => openRecipeModal(recalculate));
   document.getElementById('btn-save')?.addEventListener('click', saveRecipe);
   document.getElementById('btn-swe-info')?.addEventListener('click', () => openModal('modal-swe-info'));
-  document.getElementById('btn-print')?.addEventListener('click', () => window.print());
+  document.getElementById('btn-print')?.addEventListener('click', triggerPrint);
 
   // Undo & Redo
   document.getElementById('btn-undo')?.addEventListener('click', () => {

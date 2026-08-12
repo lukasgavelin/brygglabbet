@@ -1958,72 +1958,196 @@ body.mobile-mode #mobile-stats-fab {
 }
 
 /* ---------------------------------------------------------
-   Media rules: Print / PDF Export
+   Media rules: Print / PDF Export (Professional Brew Sheet)
    --------------------------------------------------------- */
 @media print {
-  #app-header .header-actions,
+  @page {
+    margin: 12mm;
+    size: portrait;
+  }
+
+  #app-header,
   #quick-nav,
   .accordion-header-actions,
   .accordion-header .chevron-icon,
   .btn,
+  .stepper-btn,
   #mobile-app-view,
   .modal,
   .toast,
-  #mobile-stats-fab {
+  #mobile-stats-fab,
+  #sidebar,
+  .empty-state {
     display: none !important;
   }
 
   body {
     background: #ffffff !important;
-    color: #111111 !important;
-    font-size: 12pt;
+    color: #000000 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 10pt;
+    line-height: 1.35;
   }
 
-  #desktop-app-view, #app-body, #main-content {
+  #desktop-app-view, #app-body, #main-content, #tab-content {
     display: block !important;
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+    overflow: visible !important;
   }
 
-  #sidebar {
-    position: static !important;
-    width: 100% !important;
-    box-shadow: none !important;
-    border: 1px solid #ccc !important;
-    margin-top: 20px;
-    background: #f9f9f9 !important;
-    color: #111111 !important;
+  /* Print Banner Header */
+  #print-brew-banner {
+    border-bottom: 2px solid #222;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  .print-title {
+    font-size: 16pt;
+    font-weight: 800;
+    margin: 0 0 4px 0;
+    color: #000;
+  }
+  .print-meta {
+    font-size: 9pt;
+    color: #444;
+  }
+  .print-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+    background: #f4f4f4;
+    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 4px;
+  }
+  .print-metric-box {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+  }
+  .print-metric-label {
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    color: #555;
+  }
+  .print-metric-val {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #000;
   }
 
+  /* Accordion Cards in Print */
   .accordion-card {
-    border: 1px solid #ddd !important;
+    border: 1px solid #bbb !important;
     box-shadow: none !important;
     background: #fff !important;
-    color: #111 !important;
+    color: #000 !important;
     page-break-inside: avoid;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+    border-radius: 4px !important;
   }
-
+  .accordion-header {
+    background: #eeeeee !important;
+    padding: 6px 10px !important;
+    border-bottom: 1px solid #ccc !important;
+  }
+  .accordion-title {
+    font-size: 11pt !important;
+    font-weight: 700 !important;
+    color: #000 !important;
+  }
   .accordion-content {
     display: block !important;
+    padding: 10px !important;
   }
 
-  table {
+  /* Tables in Print */
+  table, .data-table, .ingredient-table {
     border-collapse: collapse !important;
     width: 100% !important;
+    margin-top: 6px !important;
+    font-size: 9pt !important;
   }
-
-  th, td {
+  th {
+    background: #e8e8e8 !important;
+    color: #000 !important;
+    font-weight: 700 !important;
+    border: 1px solid #999 !important;
+    padding: 4px 6px !important;
+    text-align: left;
+  }
+  td {
     border: 1px solid #ccc !important;
-    padding: 6px 8px !important;
-    color: #111 !important;
+    padding: 4px 6px !important;
+    color: #000 !important;
   }
 
+  /* Form Elements in Print */
   input, select, textarea {
     border: none !important;
     background: transparent !important;
-    color: #111 !important;
+    color: #000 !important;
+    font-weight: 600 !important;
+    font-size: 9.5pt !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+  .input-group {
+    display: inline-flex !important;
+    align-items: center;
+  }
+  .input-addon {
+    background: transparent !important;
+    border: none !important;
+    color: #333 !important;
+    font-weight: 600 !important;
+    padding-left: 3px !important;
+  }
+
+  /* Brew Day Log Section */
+  #print-brew-log {
+    border: 1px solid #999;
+    padding: 10px;
+    margin-top: 14px;
+    page-break-inside: avoid;
+    border-radius: 4px;
+  }
+  .print-section-title {
+    font-size: 11pt;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 4px;
+  }
+  .print-log-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+  }
+  .print-log-field {
+    display: flex;
+    align-items: flex-end;
+    font-size: 9pt;
+  }
+  .print-log-label {
+    font-weight: 600;
+    color: #222;
+    white-space: nowrap;
+    margin-right: 6px;
+  }
+  .print-log-line {
+    flex: 1;
+    border-bottom: 1px dotted #666;
+    height: 14px;
+  }
+  .print-log-notes-box {
+    border: 1px solid #ccc;
+    height: 60px;
+    margin-top: 4px;
+    background: #fafafa;
   }
 }
 
