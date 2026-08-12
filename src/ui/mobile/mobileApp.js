@@ -18,9 +18,11 @@ import {
 import { setupMobileNav } from './mobileNav.js';
 import { renderMobileFermentablesCards, renderMobileHopsCards } from './mobileCards.js';
 import { STYLES, YEASTS, EQUIPMENT_PROFILES, WATER_PROFILES, MASH_PRESETS } from '../../core/data.js';
-import { saveRecipe, newRecipe, openRecipeModal, openPresetRecipesModal, exportJSON, importJSON } from '../recipes.js';
+import { saveRecipe, newRecipe, openRecipeModal, openPresetRecipesModal, exportJSON } from '../recipes.js';
+import { openModal, openFermentableModal, openHopModal } from '../modals.js';
 import { escHtml } from '../toast.js';
 
+// eslint-disable-next-line no-unused-vars
 let isMobileViewActive = false;
 
 export function initMobileApp(recalculateCallback) {

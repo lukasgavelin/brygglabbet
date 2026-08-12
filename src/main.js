@@ -36,6 +36,7 @@ import { initMobileApp } from './ui/mobile/mobileApp.js';
 import { toggleBrewdayView } from './ui/brewday.js';
 import { setupPrintHandler, triggerPrint } from './ui/print.js';
 import { debounce } from './ui/utils.js';
+import { setupInputSteppers } from './ui/stepper.js';
 
 const debouncedRecalculate = debounce(recalculate, 150);
 

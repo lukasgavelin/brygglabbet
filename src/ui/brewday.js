@@ -49,7 +49,7 @@ export function toggleBrewdayView(recalculateCallback) {
  * Renders the 2-column Brew Day view.
  * @param {Function} recalculateCallback - Recalculate callback
  */
-export function renderBrewdayContent(recalculateCallback) {
+export function renderBrewdayContent(_recalculateCallback) {
   const container = document.getElementById('brewday-view');
   if (!container) return;
 

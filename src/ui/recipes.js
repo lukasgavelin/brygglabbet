@@ -2,7 +2,7 @@
  * Recipe persistence (localStorage, JSON import/export, default recipe).
  */
 
-import { State, createInitialState, setNextId, generateId } from '../state.js';
+import { State, createInitialState, setNextId, generateId, pushHistory } from '../state.js';
 import { calculateOG, formatSG, scaleRecipe } from '../core/calculations.js';
 import { PRESET_RECIPES } from '../core/data.js';
 import { openModal, closeModal } from './modals.js';
@@ -414,8 +414,9 @@ export function importJSON(e, recalculateCallback) {
           return;
         }
 
-        const { _version, exportDate, ...stateData } = data;
-        Object.assign(State, stateData);
+        delete data._version;
+        delete data.exportDate;
+        Object.assign(State, data);
 
         let maxId = 0;
         [...(State.fermentables || []), ...(State.hops || []), ...(State.mash || [])].forEach(
