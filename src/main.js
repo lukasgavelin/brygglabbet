@@ -33,6 +33,7 @@ import {
 } from './ui/recipes.js';
 import { recalculate, setupMobileSidebar } from './ui/sidebar.js';
 import { initMobileApp } from './ui/mobile/mobileApp.js';
+import { setupInputSteppers } from './ui/stepper.js';
 import { debounce } from './ui/utils.js';
 
 const debouncedRecalculate = debounce(recalculate, 150);
@@ -59,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadDefaultRecipe(recalculate);
   checkAndRestoreSession(recalculate);
+  setupInputSteppers(debouncedRecalculate);
   recalculate();
 });
 

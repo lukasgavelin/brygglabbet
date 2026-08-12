@@ -488,18 +488,52 @@ textarea { resize: vertical; min-height: 80px; }
   align-items: center;
 }
 .input-group input {
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  border-radius: 0;
+  border-left: none;
   border-right: none;
+  text-align: center;
 }
-.input-addon {
+.input-group input:first-child {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  border-left: 1px solid var(--border);
+}
+.input-group .input-addon {
+  border-radius: 0;
+}
+.input-group .input-addon:last-child {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.stepper-btn {
   background: var(--bg-card-alt);
   border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  font-weight: 700;
+  min-width: 36px;
+  height: 38px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+.stepper-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+.stepper-btn:active {
+  background: var(--accent);
+  color: #fff;
+}
+.stepper-btn.stepper-minus {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+.stepper-btn.stepper-plus {
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  padding: 8px 10px;
-  color: var(--text-muted);
-  font-size: 0.82rem;
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
 /* --- Ingredient Tables ---------------------------------- */
