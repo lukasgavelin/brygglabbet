@@ -33,6 +33,7 @@ import {
 } from './ui/recipes.js';
 import { recalculate, setupMobileSidebar } from './ui/sidebar.js';
 import { initMobileApp } from './ui/mobile/mobileApp.js';
+import { toggleBrewdayView } from './ui/brewday.js';
 import { setupPrintHandler, triggerPrint } from './ui/print.js';
 import { debounce } from './ui/utils.js';
 
@@ -94,6 +95,7 @@ function setupHeaderControls() {
   });
   document.getElementById('btn-open')?.addEventListener('click', () => openRecipeModal(recalculate));
   document.getElementById('btn-save')?.addEventListener('click', saveRecipe);
+  document.getElementById('btn-toggle-brewday')?.addEventListener('click', () => toggleBrewdayView(recalculate));
   document.getElementById('btn-swe-info')?.addEventListener('click', () => openModal('modal-swe-info'));
   document.getElementById('btn-print')?.addEventListener('click', triggerPrint);
 
