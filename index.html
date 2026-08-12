@@ -47,11 +47,17 @@
 
     <!-- Quick Navigation (Smooth Scroll Links) -->
     <nav id="quick-nav" role="navigation" aria-label="Snabblänkar till receptsektioner">
-      <a href="#sec-recipe-info" class="quick-nav-btn active">
-        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Info & Volym
+      <a href="#sec-equipment" class="quick-nav-btn active">
+        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span> Utrustning
+      </a>
+      <a href="#sec-water" class="quick-nav-btn">
+        <span class="quick-icon">💧</span> Vatten
       </a>
       <a href="#sec-fermentables" class="quick-nav-btn">
         <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></span> Malt
+      </a>
+      <a href="#sec-mash" class="quick-nav-btn">
+        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></span> Mäsk
       </a>
       <a href="#sec-hops" class="quick-nav-btn">
         <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></span> Humle
@@ -59,253 +65,16 @@
       <a href="#sec-yeast" class="quick-nav-btn">
         <span class="quick-icon">🧫</span> Jäst
       </a>
-      <a href="#sec-equipment" class="quick-nav-btn">
-        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span> Utrustning
-      </a>
-      <a href="#sec-mash" class="quick-nav-btn">
-        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></span> Mäsk
-      </a>
-      <a href="#sec-water" class="quick-nav-btn">
-        <span class="quick-icon">💧</span> Vatten
+      <a href="#sec-recipe-info" class="quick-nav-btn">
+        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Info & Stil
       </a>
     </nav>
 
     <!-- Continuous Recipe Sheet Container -->
     <div id="tab-content">
 
-      <!-- ===== 1. RECEPTINFO & GRUNDDATA ============================= -->
-      <section id="sec-recipe-info" class="accordion-card">
-        <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Receptinformation & Grunddata</h2>
-          <div class="accordion-header-actions">
-            <div style="display:flex; gap:8px">
-              <button class="btn btn-ghost btn-sm" id="tab-btn-preset-recipes"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3m-3.5-6.5l-2 2m-7 7l-2 2m0-11l2 2m7 7l2 2"/></svg> Exempelrecept</button>
-              <button class="btn btn-secondary btn-sm" id="tab-btn-scale-recipe"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 16l3-8 3 8a3 3 0 0 1-6 0zM2 16l3-8 3 8a3 3 0 0 1-6 0zM12 3v18M3 7h18"/></svg> Skala recept</button>
-            </div>
-            <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-        </div>
-
-        <div class="accordion-content">
-          <div class="card-grid-2">
-            <div class="card">
-              <p class="section-label">Ölstil</p>
-              <div class="form-group">
-                <label class="form-label" for="recipe-style">BJCP-stil</label>
-                <select id="recipe-style">
-                  <option value="">— Välj stil —</option>
-                </select>
-              </div>
-            </div>
-            <div class="card">
-              <p class="section-label">Anteckningar</p>
-              <div class="form-group">
-                <label class="form-label" for="recipe-notes">Receptnoteringar</label>
-                <textarea id="recipe-notes" placeholder="Fritext om receptet, inspirationer, anpassningar..."></textarea>
-              </div>
-            </div>
-          </div>
-
-          <div class="card-grid-3">
-            <div class="card">
-              <p class="section-label">Volymer</p>
-              <div class="form-group" style="margin-bottom:10px">
-                <label class="form-label" for="batch-volume">Bryggvolym (Jäskärl)</label>
-                <div class="input-group">
-                  <input type="number" inputmode="decimal" id="batch-volume" value="20" min="1" max="1000" step="0.5">
-                  <span class="input-addon">L</span>
-                </div>
-                <span class="form-hint">Volym öl i fermentorn</span>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="boil-volume">Kokvolym (Pre-boil)</label>
-                <div class="input-group">
-                  <input type="number" inputmode="decimal" id="boil-volume" value="25" min="1" max="1000" step="0.5">
-                  <span class="input-addon">L</span>
-                </div>
-                <span class="form-hint">Beräknas från utrustning</span>
-              </div>
-            </div>
-
-            <div class="card">
-              <p class="section-label">Kok & Effektivitet</p>
-              <div class="form-group" style="margin-bottom:10px">
-                <label class="form-label" for="boil-time">Koktid</label>
-                <div class="input-group">
-                  <input type="number" inputmode="decimal" id="boil-time" value="60" min="0" max="240" step="5">
-                  <span class="input-addon">min</span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="efficiency">Bryggeffektivitet</label>
-                <div class="input-group">
-                  <input type="number" inputmode="decimal" id="efficiency" value="75" min="10" max="100" step="1">
-                  <span class="input-addon">%</span>
-                </div>
-                <span class="form-hint">Mäskeffektivitet för bryggningen</span>
-              </div>
-            </div>
-
-            <div class="card">
-              <p class="section-label">Förjäsningsgrad</p>
-              <div class="form-group" style="margin-bottom:10px">
-                <label class="form-label">Förjäsning min</label>
-                <div class="input-group">
-                  <input type="number" inputmode="decimal" id="att-min" value="72" min="40" max="100" step="1">
-                  <span class="input-addon">%</span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Förjäsning max</label>
-                <div class="input-group">
-                  <input type="number" inputmode="decimal" id="att-max" value="78" min="40" max="100" step="1">
-                  <span class="input-addon">%</span>
-                </div>
-                <span class="form-hint">Förväntad förjäsningsgrad</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== 2. MALT & RÅVAROR ============================= -->
-      <section id="sec-fermentables" class="accordion-card">
-        <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></span> Malt & Jäsbara Råvaror</h2>
-          <div class="accordion-header-actions">
-            <span class="accordion-badge" id="badge-fermentables">0.00 kg | 0 EBC</span>
-            <button class="btn btn-primary btn-sm" id="btn-add-fermentable">＋ Lägg till</button>
-            <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-        </div>
-
-        <div class="accordion-content">
-          <div class="ingredient-table-wrap">
-            <table class="ingredient-table" id="fermentables-table">
-              <thead>
-                <tr>
-                  <th class="col-name">Malt / Råvara</th>
-                  <th class="col-amount">Mängd (kg)</th>
-                  <th class="col-value">EBC</th>
-                  <th class="col-value">Utbyte %</th>
-                  <th class="col-result">%</th>
-                  <th class="col-result">OG-bidrag</th>
-                  <th class="col-result">Färg (EBC)</th>
-                  <th class="col-action"></th>
-                </tr>
-              </thead>
-              <tbody id="fermentables-body"></tbody>
-              <tfoot>
-                <tr>
-                  <td>Totalt</td>
-                  <td id="fermentables-total-kg">0.00 kg</td>
-                  <td colspan="2"></td>
-                  <td>100%</td>
-                  <td id="fermentables-total-gu">—</td>
-                  <td colspan="2"></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          <div id="fermentables-empty" class="empty-state">
-            Inga råvaror tillagda ännu. Klicka på "Lägg till" för att välja ur maltbiblioteket.
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== 3. HUMLE ============================= -->
-      <section id="sec-hops" class="accordion-card">
-        <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></span> Humleschema</h2>
-          <div class="accordion-header-actions">
-            <span class="accordion-badge" id="badge-hops">0 g | 0 IBU</span>
-            <button class="btn btn-primary btn-sm" id="btn-add-hop">＋ Lägg till</button>
-            <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-        </div>
-
-        <div class="accordion-content">
-          <div class="ingredient-table-wrap">
-            <table class="ingredient-table" id="hops-table">
-              <thead>
-                <tr>
-                  <th class="col-name">Humlesort</th>
-                  <th class="col-amount">Mängd (g)</th>
-                  <th class="col-value">Alfa (%)</th>
-                  <th class="col-value">Tid (min)</th>
-                  <th class="col-unit">Form</th>
-                  <th class="col-unit">Användning</th>
-                  <th class="col-result">IBU-bidrag</th>
-                  <th class="col-action"></th>
-                </tr>
-              </thead>
-              <tbody id="hops-body"></tbody>
-              <tfoot>
-                <tr>
-                  <td>Totalt</td>
-                  <td id="hops-total-g">0 g</td>
-                  <td colspan="4"></td>
-                  <td id="hops-total-ibu">0.0 IBU</td>
-                  <td></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          <div id="hops-empty" class="empty-state">
-            Ingen humle tillagd ännu. Klicka på "Lägg till" för att välja ur humlebiblioteket.
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== 4. JÄST & FERMENTERING ============================= -->
-      <section id="sec-yeast" class="accordion-card">
-        <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon">🧫</span> Jäst & Jäsning</h2>
-          <div class="accordion-header-actions">
-            <span class="accordion-badge" id="badge-yeast">Ingen jäst vald</span>
-            <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-        </div>
-
-        <div class="accordion-content">
-          <div class="card-grid-2">
-            <div class="card">
-              <p class="section-label">Jäststam</p>
-              <div class="form-group" style="margin-bottom:10px">
-                <label class="form-label" for="yeast-select">Välj ur jästdatabas</label>
-                <select id="yeast-select">
-                  <option value="">— Välj jäststram —</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="yeast-name">Jästnamn (Anpassad)</label>
-                <input type="text" id="yeast-name" placeholder="t.ex. SafAle US-05">
-              </div>
-            </div>
-
-            <div class="card">
-              <p class="section-label">Parametrar</p>
-              <div class="form-group" style="margin-bottom:10px">
-                <label class="form-label" for="yeast-lab">Tillverkare / Lab</label>
-                <input type="text" id="yeast-lab" placeholder="t.ex. Fermentis, Lallemand, Wyeast">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="yeast-type">Jästtyp</label>
-                <select id="yeast-type">
-                  <option value="ale">Ale (Överjäst)</option>
-                  <option value="lager">Lager (Underjäst)</option>
-                  <option value="wheat">Veteöl</option>
-                  <option value="kviek">Kveik</option>
-                  <option value="wild">Vild / Brett</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== 5. UTRUSTNING ============================= -->
-      <section id="sec-equipment" class="accordion-card collapsed">
+      <!-- ===== 1. UTRUSTNING & VOLYMER ============================= -->
+      <section id="sec-equipment" class="accordion-card">
         <div class="accordion-header" data-toggle="accordion">
           <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span> Utrustningsprofil & Volymberäkning</h2>
           <div class="accordion-header-actions">
@@ -369,50 +138,7 @@
         </div>
       </section>
 
-      <!-- ===== 6. MÄSKNING ============================= -->
-      <section id="sec-mash" class="accordion-card collapsed">
-        <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></span> Mäskningsprofil & Steg</h2>
-          <div class="accordion-header-actions">
-            <span class="accordion-badge" id="badge-mash">Enkelsteg 67°C</span>
-            <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-        </div>
-
-        <div class="accordion-content">
-          <div style="margin-bottom:14px">
-            <p class="section-label" style="margin-bottom:6px">Välj mäskprofil-preset</p>
-            <div class="preset-grid">
-              <button class="preset-btn" data-mash-preset="single_light">Enkelsteg Torrt (65°C)</button>
-              <button class="preset-btn" data-mash-preset="single_medium">Enkelsteg Medium (67°C)</button>
-              <button class="preset-btn" data-mash-preset="single_full">Enkelsteg Fylligt (69°C)</button>
-              <button class="preset-btn" data-mash-preset="step_dekoktion">Flersteg / Dekoktion</button>
-            </div>
-          </div>
-
-          <div class="ingredient-table-wrap">
-            <table class="ingredient-table" id="mash-table">
-              <thead>
-                <tr>
-                  <th class="col-name">Stegnamn</th>
-                  <th class="col-value">Temp (°C)</th>
-                  <th class="col-value">Tid (min)</th>
-                  <th class="col-name">Typ / Beskrivning</th>
-                  <th class="col-action"></th>
-                </tr>
-              </thead>
-              <tbody id="mash-body"></tbody>
-            </table>
-          </div>
-
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px">
-            <button class="btn btn-secondary btn-sm" id="btn-add-mash-step">＋ Lägg till mäsksteg</button>
-            <div id="mash-summary-text" style="font-size:0.83rem; color:var(--text-secondary)"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== 7. VATTENBEHANDLING ============================= -->
+      <!-- ===== 2. VATTENBEHANDLING ============================= -->
       <section id="sec-water" class="accordion-card collapsed">
         <div class="accordion-header" data-toggle="accordion">
           <h2 class="accordion-title"><span class="title-icon">💧</span> Vattenprofil & Salttillsatser</h2>
@@ -528,6 +254,280 @@
               <div><span style="font-size:0.75rem; color:var(--text-muted)">Cl⁻</span><div id="w-res-cl" style="font-weight:700">0 ppm</div></div>
               <div><span style="font-size:0.75rem; color:var(--text-muted)">SO₄²⁻</span><div id="w-res-so4" style="font-weight:700">0 ppm</div></div>
               <div><span style="font-size:0.75rem; color:var(--text-muted)">Cl / SO₄</span><div id="w-res-ratio" style="font-weight:700; color:var(--accent-bright)">1.0 (Balanserad)</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 3. MALT & RÅVAROR ============================= -->
+      <section id="sec-fermentables" class="accordion-card">
+        <div class="accordion-header" data-toggle="accordion">
+          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></span> Malt & Jäsbara Råvaror</h2>
+          <div class="accordion-header-actions">
+            <span class="accordion-badge" id="badge-fermentables">0.00 kg | 0 EBC</span>
+            <button class="btn btn-primary btn-sm" id="btn-add-fermentable">＋ Lägg till</button>
+            <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <div class="accordion-content">
+          <div class="ingredient-table-wrap">
+            <table class="ingredient-table" id="fermentables-table">
+              <thead>
+                <tr>
+                  <th class="col-name">Malt / Råvara</th>
+                  <th class="col-amount">Mängd (kg)</th>
+                  <th class="col-value">EBC</th>
+                  <th class="col-value">Utbyte %</th>
+                  <th class="col-result">%</th>
+                  <th class="col-result">OG-bidrag</th>
+                  <th class="col-result">Färg (EBC)</th>
+                  <th class="col-action"></th>
+                </tr>
+              </thead>
+              <tbody id="fermentables-body"></tbody>
+              <tfoot>
+                <tr>
+                  <td>Totalt</td>
+                  <td id="fermentables-total-kg">0.00 kg</td>
+                  <td colspan="2"></td>
+                  <td>100%</td>
+                  <td id="fermentables-total-gu">—</td>
+                  <td colspan="2"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div id="fermentables-empty" class="empty-state">
+            Inga råvaror tillagda ännu. Klicka på "Lägg till" för att välja ur maltbiblioteket.
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 4. MÄSKNING ============================= -->
+      <section id="sec-mash" class="accordion-card collapsed">
+        <div class="accordion-header" data-toggle="accordion">
+          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></span> Mäskningsprofil & Steg</h2>
+          <div class="accordion-header-actions">
+            <span class="accordion-badge" id="badge-mash">Enkelsteg 67°C</span>
+            <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <div class="accordion-content">
+          <div style="margin-bottom:14px">
+            <p class="section-label" style="margin-bottom:6px">Välj mäskprofil-preset</p>
+            <div class="preset-grid">
+              <button class="preset-btn" data-mash-preset="single_light">Enkelsteg Torrt (65°C)</button>
+              <button class="preset-btn" data-mash-preset="single_medium">Enkelsteg Medium (67°C)</button>
+              <button class="preset-btn" data-mash-preset="single_full">Enkelsteg Fylligt (69°C)</button>
+              <button class="preset-btn" data-mash-preset="step_dekoktion">Flersteg / Dekoktion</button>
+            </div>
+          </div>
+
+          <div class="ingredient-table-wrap">
+            <table class="ingredient-table" id="mash-table">
+              <thead>
+                <tr>
+                  <th class="col-name">Stegnamn</th>
+                  <th class="col-value">Temp (°C)</th>
+                  <th class="col-value">Tid (min)</th>
+                  <th class="col-name">Typ / Beskrivning</th>
+                  <th class="col-action"></th>
+                </tr>
+              </thead>
+              <tbody id="mash-body"></tbody>
+            </table>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px">
+            <button class="btn btn-secondary btn-sm" id="btn-add-mash-step">＋ Lägg till mäsksteg</button>
+            <div id="mash-summary-text" style="font-size:0.83rem; color:var(--text-secondary)"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 5. HUMLE ============================= -->
+      <section id="sec-hops" class="accordion-card">
+        <div class="accordion-header" data-toggle="accordion">
+          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></span> Humleschema</h2>
+          <div class="accordion-header-actions">
+            <span class="accordion-badge" id="badge-hops">0 g | 0 IBU</span>
+            <button class="btn btn-primary btn-sm" id="btn-add-hop">＋ Lägg till</button>
+            <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <div class="accordion-content">
+          <div class="ingredient-table-wrap">
+            <table class="ingredient-table" id="hops-table">
+              <thead>
+                <tr>
+                  <th class="col-name">Humlesort</th>
+                  <th class="col-amount">Mängd (g)</th>
+                  <th class="col-value">Alfa (%)</th>
+                  <th class="col-value">Tid (min)</th>
+                  <th class="col-unit">Form</th>
+                  <th class="col-unit">Användning</th>
+                  <th class="col-result">IBU-bidrag</th>
+                  <th class="col-action"></th>
+                </tr>
+              </thead>
+              <tbody id="hops-body"></tbody>
+              <tfoot>
+                <tr>
+                  <td>Totalt</td>
+                  <td id="hops-total-g">0 g</td>
+                  <td colspan="4"></td>
+                  <td id="hops-total-ibu">0.0 IBU</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div id="hops-empty" class="empty-state">
+            Ingen humle tillagd ännu. Klicka på "Lägg till" för att välja ur humlebiblioteket.
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 6. JÄST & FERMENTERING ============================= -->
+      <section id="sec-yeast" class="accordion-card">
+        <div class="accordion-header" data-toggle="accordion">
+          <h2 class="accordion-title"><span class="title-icon">🧫</span> Jäst & Jäsning</h2>
+          <div class="accordion-header-actions">
+            <span class="accordion-badge" id="badge-yeast">Ingen jäst vald</span>
+            <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <div class="accordion-content">
+          <div class="card-grid-2">
+            <div class="card">
+              <p class="section-label">Jäststam</p>
+              <div class="form-group" style="margin-bottom:10px">
+                <label class="form-label" for="yeast-select">Välj ur jästdatabas</label>
+                <select id="yeast-select">
+                  <option value="">— Välj jäststram —</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="yeast-name">Jästnamn (Anpassad)</label>
+                <input type="text" id="yeast-name" placeholder="t.ex. SafAle US-05">
+              </div>
+            </div>
+
+            <div class="card">
+              <p class="section-label">Parametrar</p>
+              <div class="form-group" style="margin-bottom:10px">
+                <label class="form-label" for="yeast-lab">Tillverkare / Lab</label>
+                <input type="text" id="yeast-lab" placeholder="t.ex. Fermentis, Lallemand, Wyeast">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="yeast-type">Jästtyp</label>
+                <select id="yeast-type">
+                  <option value="ale">Ale (Överjäst)</option>
+                  <option value="lager">Lager (Underjäst)</option>
+                  <option value="wheat">Veteöl</option>
+                  <option value="kviek">Kveik</option>
+                  <option value="wild">Vild / Brett</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 7. RECEPTINFO & GRUNDDATA ============================= -->
+      <section id="sec-recipe-info" class="accordion-card">
+        <div class="accordion-header" data-toggle="accordion">
+          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Receptinformation & Grunddata</h2>
+          <div class="accordion-header-actions">
+            <div style="display:flex; gap:8px">
+              <button class="btn btn-ghost btn-sm" id="tab-btn-preset-recipes"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3m-3.5-6.5l-2 2m-7 7l-2 2m0-11l2 2m7 7l2 2"/></svg> Exempelrecept</button>
+              <button class="btn btn-secondary btn-sm" id="tab-btn-scale-recipe"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 16l3-8 3 8a3 3 0 0 1-6 0zM2 16l3-8 3 8a3 3 0 0 1-6 0zM12 3v18M3 7h18"/></svg> Skala recept</button>
+            </div>
+            <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <div class="accordion-content">
+          <div class="card-grid-2">
+            <div class="card">
+              <p class="section-label">Ölstil</p>
+              <div class="form-group">
+                <label class="form-label" for="recipe-style">BJCP-stil</label>
+                <select id="recipe-style">
+                  <option value="">— Välj stil —</option>
+                </select>
+              </div>
+            </div>
+            <div class="card">
+              <p class="section-label">Anteckningar</p>
+              <div class="form-group">
+                <label class="form-label" for="recipe-notes">Receptnoteringar</label>
+                <textarea id="recipe-notes" placeholder="Fritext om receptet, inspirationer, anpassningar..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-grid-3">
+            <div class="card">
+              <p class="section-label">Volymer</p>
+              <div class="form-group" style="margin-bottom:10px">
+                <label class="form-label" for="batch-volume">Bryggvolym (Jäskärl)</label>
+                <div class="input-group">
+                  <input type="number" inputmode="decimal" id="batch-volume" value="20" min="1" max="1000" step="0.5">
+                  <span class="input-addon">L</span>
+                </div>
+                <span class="form-hint">Volym öl i fermentorn</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="boil-volume">Kokvolym (Pre-boil)</label>
+                <div class="input-group">
+                  <input type="number" inputmode="decimal" id="boil-volume" value="25" min="1" max="1000" step="0.5">
+                  <span class="input-addon">L</span>
+                </div>
+                <span class="form-hint">Beräknas från utrustning</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <p class="section-label">Kok & Effektivitet</p>
+              <div class="form-group" style="margin-bottom:10px">
+                <label class="form-label" for="boil-time">Koktid</label>
+                <div class="input-group">
+                  <input type="number" inputmode="decimal" id="boil-time" value="60" min="0" max="240" step="5">
+                  <span class="input-addon">min</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="efficiency">Bryggeffektivitet</label>
+                <div class="input-group">
+                  <input type="number" inputmode="decimal" id="efficiency" value="75" min="10" max="100" step="1">
+                  <span class="input-addon">%</span>
+                </div>
+                <span class="form-hint">Mäskeffektivitet för bryggningen</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <p class="section-label">Förjäsningsgrad</p>
+              <div class="form-group" style="margin-bottom:10px">
+                <label class="form-label">Förjäsning min</label>
+                <div class="input-group">
+                  <input type="number" inputmode="decimal" id="att-min" value="72" min="40" max="100" step="1">
+                  <span class="input-addon">%</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Förjäsning max</label>
+                <div class="input-group">
+                  <input type="number" inputmode="decimal" id="att-max" value="78" min="40" max="100" step="1">
+                  <span class="input-addon">%</span>
+                </div>
+                <span class="form-hint">Förväntad förjäsningsgrad</span>
+              </div>
             </div>
           </div>
         </div>
