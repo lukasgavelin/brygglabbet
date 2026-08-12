@@ -68,18 +68,21 @@ export function setupTabNavigation() {
 }
 
 export function updateAccordionBadges() {
+  const batchVol = State.recipe?.batchVolume || State.equipment?.batchVolume || 20;
+  const eff = State.recipe?.efficiency || State.equipment?.efficiency || 75;
+
   // 1. Fermentables badge
-  const totalMaltKg = State.fermentables.reduce((s, f) => s + (f.amount || 0), 0);
-  const ebcResult = calculateEBC(State.fermentables, State.recipe.batchVolume);
+  const totalMaltKg = (State.fermentables || []).reduce((s, f) => s + (f.amount || 0), 0);
+  const ebcResult = calculateEBC(State.fermentables || [], batchVol);
   const badgeFerm = document.getElementById('badge-fermentables');
   if (badgeFerm) {
     badgeFerm.textContent = `${totalMaltKg.toFixed(2)} kg | ${ebcResult.ebc.toFixed(0)} EBC`;
   }
 
   // 2. Hops badge
-  const ogResult = calculateOG(State.fermentables, State.recipe.batchVolume, State.recipe.efficiency);
-  const ibuResult = calculateIBU(State.hops, ogResult.sg, State.recipe.batchVolume);
-  const totalHopsG = State.hops.reduce((s, h) => s + (h.amount || 0), 0);
+  const ogResult = calculateOG(State.fermentables || [], batchVol, eff);
+  const ibuResult = calculateIBU(State.hops || [], ogResult.sg, batchVol);
+  const totalHopsG = (State.hops || []).reduce((s, h) => s + (h.amount || 0), 0);
   const badgeHops = document.getElementById('badge-hops');
   if (badgeHops) {
     badgeHops.textContent = `${totalHopsG} g | ${ibuResult.total.toFixed(0)} IBU`;
@@ -88,29 +91,34 @@ export function updateAccordionBadges() {
   // 3. Yeast badge
   const badgeYeast = document.getElementById('badge-yeast');
   if (badgeYeast) {
-    const name = State.yeast.name || 'Ej vald';
-    const attMid = Math.round((State.yeast.attMin + State.yeast.attMax) / 2);
-    badgeYeast.textContent = `${name} (${attMid}%)`;
+    const name = State.yeast?.name || 'Ingen jäst vald';
+    const attMin = State.yeast?.attMin ?? 72;
+    const attMax = State.yeast?.attMax ?? 78;
+    const attMid = Math.round((attMin + attMax) / 2);
+    badgeYeast.textContent = State.yeast?.name ? `${name} (${attMid}%)` : 'Ingen jäst vald';
   }
 
   // 4. Equipment badge
   const badgeEq = document.getElementById('badge-equipment');
   if (badgeEq) {
-    badgeEq.textContent = `${State.recipe.batchVolume}L @ ${State.recipe.efficiency}%`;
+    const eqName = State.equipment?.name || 'Standard Gryta 30L';
+    badgeEq.textContent = `${eqName} (${batchVol}L @ ${eff}%)`;
   }
 
   // 5. Mash badge
   const badgeMash = document.getElementById('badge-mash');
   if (badgeMash) {
-    const stepsCount = State.mash.steps ? State.mash.steps.length : 0;
-    const totalTime = State.mash.steps ? State.mash.steps.reduce((s, st) => s + (st.time || 0), 0) : 0;
-    badgeMash.textContent = `${totalTime} min | ${stepsCount} steg`;
+    const stepsArr = Array.isArray(State.mash) ? State.mash : [];
+    const stepsCount = stepsArr.length;
+    const totalTime = stepsArr.reduce((s, st) => s + (st.time || 0), 0);
+    const firstTemp = stepsCount > 0 && stepsArr[0].temp ? `${stepsArr[0].temp}°C` : '';
+    badgeMash.textContent = stepsCount > 0 ? `${stepsCount} steg (${totalTime} min ${firstTemp})`.trim() : 'Inga mäsksteg';
   }
 
   // 6. Water badge
   const badgeWater = document.getElementById('badge-water');
   if (badgeWater) {
-    const profileName = State.water.base?.name || 'Basvatten';
+    const profileName = State.water?.base?.name || 'Kranvatten';
     badgeWater.textContent = profileName;
   }
 }

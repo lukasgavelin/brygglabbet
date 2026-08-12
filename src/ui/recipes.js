@@ -8,6 +8,7 @@ import { PRESET_RECIPES } from '../core/data.js';
 import { openModal, closeModal } from './modals.js';
 import { showToast, escHtml } from './toast.js';
 import { recalculate } from './sidebar.js';
+import { updateAccordionBadges } from './tabs.js';
 import { renderFermentablesTable } from './fermentables.js';
 import { renderHopsTable } from './hops.js';
 import { renderMashTable } from './mash.js';
@@ -165,7 +166,13 @@ export function loadPresetRecipe(presetId, recalculateCallback) {
   });
   setNextId(maxId);
 
+  // Force close modal
   closeModal('modal-preset-recipes');
+  const modalEl = document.getElementById('modal-preset-recipes');
+  if (modalEl) {
+    modalEl.classList.add('hidden');
+    modalEl.style.display = 'none';
+  }
 
   // Uncollapse accordion sections so the loaded recipe is visible immediately!
   ['sec-equipment', 'sec-water', 'sec-fermentables', 'sec-mash', 'sec-hops', 'sec-yeast', 'sec-recipe-info'].forEach((id) => {
@@ -208,23 +215,22 @@ export function openPresetRecipesModal(recalculateCallback) {
     `;
   }).join('');
 
-  container.querySelectorAll('.btn-load-preset').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      const presetId = btn.getAttribute('data-preset-id');
-      loadPresetRecipe(presetId, cb);
-    });
-  });
-
   container.querySelectorAll('.preset-recipe-card').forEach((card) => {
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const presetId = card.getAttribute('data-preset-id');
-      loadPresetRecipe(presetId, cb);
+      if (presetId) {
+        loadPresetRecipe(presetId, cb);
+      }
     });
   });
 
-  openModal('modal-preset-recipes');
+  const modalEl = document.getElementById('modal-preset-recipes');
+  if (modalEl) {
+    modalEl.style.display = '';
+    modalEl.classList.remove('hidden');
+  }
 }
 
 export function scaleCurrentRecipe(targetBatchVol, targetEff, recalculateCallback) {
@@ -290,6 +296,7 @@ export function syncUIFromState(recalculateCallback) {
   renderMobileFermentablesCards(recalculateCallback);
   renderMobileHopsCards(recalculateCallback);
   setupInputSteppers(recalculateCallback);
+  updateAccordionBadges();
   if (typeof recalculateCallback === 'function') {
     recalculateCallback();
   }
