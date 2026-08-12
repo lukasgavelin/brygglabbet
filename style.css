@@ -233,6 +233,60 @@ body {
 }
 .btn-danger:hover { background: var(--danger-dim); }
 
+/* Header Dropdown Menu */
+.header-menu-wrap {
+  position: relative;
+  display: inline-block;
+}
+.header-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  min-width: 230px;
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  padding: 6px 0;
+}
+.header-dropdown.open {
+  display: flex;
+}
+.dropdown-header {
+  padding: 6px 14px 2px 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.dropdown-item:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+.dropdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
 .btn-sm { padding: 5px 10px; font-size: 0.78rem; }
 .btn-icon { padding: 6px 8px; }
 

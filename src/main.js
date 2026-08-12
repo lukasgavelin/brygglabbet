@@ -95,10 +95,27 @@ function setupHeaderControls() {
     newRecipe(recalculate);
   });
   document.getElementById('btn-open')?.addEventListener('click', () => openRecipeModal(recalculate));
+  document.getElementById('btn-presets')?.addEventListener('click', () => openPresetRecipesModal(recalculate));
   document.getElementById('btn-save')?.addEventListener('click', saveRecipe);
   document.getElementById('btn-toggle-brewday')?.addEventListener('click', () => toggleBrewdayView(recalculate));
   document.getElementById('btn-swe-info')?.addEventListener('click', () => openModal('modal-swe-info'));
   document.getElementById('btn-print')?.addEventListener('click', triggerPrint);
+
+  // Kebab / Dropdown menu toggle
+  const menuBtn = document.getElementById('btn-header-menu');
+  const dropdown = document.getElementById('header-dropdown-menu');
+  if (menuBtn && dropdown) {
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle('open');
+    });
+
+    document.addEventListener('click', () => dropdown.classList.remove('open'));
+
+    dropdown.querySelectorAll('button').forEach((btn) => {
+      btn.addEventListener('click', () => dropdown.classList.remove('open'));
+    });
+  }
 
   // Undo & Redo
   document.getElementById('btn-undo')?.addEventListener('click', () => {

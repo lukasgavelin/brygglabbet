@@ -107,28 +107,75 @@ export function openRecipeModal(recalculateCallback) {
 }
 
 export function openPresetRecipesModal(recalculateCallback) {
-  const list = document.getElementById('preset-recipes-list');
-  if (!list) return;
+  const container = document.getElementById('preset-recipes-list');
+  if (!container) return;
 
-  list.innerHTML = '';
-  PRESET_RECIPES.forEach((preset) => {
-    const div = document.createElement('div');
-    div.className = 'preset-recipe-card';
-    div.innerHTML = `
-      <div class="preset-recipe-info">
-        <div class="preset-recipe-title">${escHtml(preset.name)} <span class="badge">${escHtml(preset.styleId)}</span></div>
-        <div class="preset-recipe-desc">${escHtml(preset.description)}</div>
-        <div class="preset-recipe-meta">${preset.recipe.batchVolume}L · ${preset.fermentables.length} maltsorter · ${preset.hops.length} humlegivor</div>
+  const targetVol = State.equipment?.batchVolume || State.recipe?.batchVolume || 20;
+  const eqName = State.equipment?.name || 'Standard Gryta 30L';
+
+  container.innerHTML = PRESET_RECIPES.map((preset) => {
+    const baseVol = preset.recipe.batchVolume || 20;
+    const factor = targetVol / baseVol;
+    const scaledTotalMalt = preset.fermentables.reduce((sum, f) => sum + (f.amount * factor), 0).toFixed(2);
+
+    return `
+      <div class="preset-recipe-card" style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:12px">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px">
+          <h4 style="margin:0; font-weight:700; color:var(--text-primary)">🍺 ${escHtml(preset.name)}</h4>
+          <span class="badge-tag">${preset.styleId}</span>
+        </div>
+        <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:8px">${escHtml(preset.description)}</p>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px">
+          Skalas automatiskt till din utrustning: <strong>${targetVol} L</strong> (${eqName}) • Total malt: <strong>${scaledTotalMalt} kg</strong>
+        </div>
+        <button class="btn btn-primary btn-sm btn-load-preset" data-preset-id="${preset.id}">
+          ⚡ Ladda & Skala till min utrustning (${targetVol} L)
+        </button>
       </div>
-      <button class="btn btn-primary btn-sm" data-use-preset="${preset.id}">Använd som mall</button>
     `;
+  }).join('');
 
-    div.querySelector('[data-use-preset]')?.addEventListener('click', () => {
-      loadPresetRecipe(preset.id, recalculateCallback);
+  container.querySelectorAll('.btn-load-preset').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const presetId = btn.dataset.presetId;
+      const preset = PRESET_RECIPES.find((p) => p.id === presetId);
+      if (!preset) return;
+
+      const baseVol = preset.recipe.batchVolume || 20;
+      const factor = targetVol / baseVol;
+
+      pushHistory();
+
+      State.recipe = { ...preset.recipe, batchVolume: targetVol, boilVolume: Math.round((preset.recipe.boilVolume || 25) * factor) };
+      State.fermentables = preset.fermentables.map((f) => ({
+        ...f,
+        id: generateId(),
+        amount: Math.round(f.amount * factor * 100) / 100,
+      }));
+      State.hops = preset.hops.map((h) => ({
+        ...h,
+        id: generateId(),
+        amount: Math.round(h.amount * factor),
+      }));
+      State.yeast = { ...preset.yeast };
+      State.mash = preset.mash.map((m) => ({ ...m, id: generateId() }));
+      State.water = {
+        volume: Math.round((preset.water.volume || 25) * factor),
+        base: { ...preset.water.base },
+        salts: {
+          gypsum: Math.round((preset.water.salts.gypsum || 0) * factor * 10) / 10,
+          calciumChloride: Math.round((preset.water.salts.calciumChloride || 0) * factor * 10) / 10,
+          epsomSalt: Math.round((preset.water.salts.epsomSalt || 0) * factor * 10) / 10,
+          tableSalt: Math.round((preset.water.salts.tableSalt || 0) * factor * 10) / 10,
+          chalk: Math.round((preset.water.salts.chalk || 0) * factor * 10) / 10,
+          bakingSoda: Math.round((preset.water.salts.bakingSoda || 0) * factor * 10) / 10,
+        },
+      };
+
       closeModal('modal-preset-recipes');
+      syncUIFromState(recalculateCallback);
+      showToast(`🍺 Exempelrecept "${preset.name}" inläst & skalat till ${targetVol}L (${eqName})!`, 'success');
     });
-
-    list.appendChild(div);
   });
 
   openModal('modal-preset-recipes');
