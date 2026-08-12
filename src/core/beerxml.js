@@ -113,18 +113,18 @@ export function importBeerXML(xmlString) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(xmlString, 'text/xml');
 
-  const recipeNode = doc.querySelector('RECIPE');
+  const recipeNode = doc.getElementsByTagName('RECIPE')[0];
   if (!recipeNode) {
     throw new Error('No <RECIPE> tag found in BeerXML document');
   }
 
-  const getText = (parent, selector, fallback = '') => {
-    const el = parent.querySelector(selector);
+  const getText = (parent, tagName, fallback = '') => {
+    const el = parent.getElementsByTagName(tagName)[0];
     return el ? el.textContent.trim() : fallback;
   };
 
-  const getNum = (parent, selector, fallback = 0) => {
-    const val = parseFloat(getText(parent, selector));
+  const getNum = (parent, tagName, fallback = 0) => {
+    const val = parseFloat(getText(parent, tagName));
     return isNaN(val) ? fallback : val;
   };
 
@@ -135,7 +135,7 @@ export function importBeerXML(xmlString) {
   const efficiency = getNum(recipeNode, 'EFFICIENCY', 75);
   const notes = getText(recipeNode, 'NOTES', '');
 
-  const fermentables = Array.from(recipeNode.querySelectorAll('FERMENTABLE')).map((fNode, i) => {
+  const fermentables = Array.from(recipeNode.getElementsByTagName('FERMENTABLE')).map((fNode, i) => {
     const fName = getText(fNode, 'NAME', `Malt ${i + 1}`);
     const amountKg = getNum(fNode, 'AMOUNT', 1.0);
     const yieldPct = getNum(fNode, 'YIELD', 75);
@@ -152,7 +152,7 @@ export function importBeerXML(xmlString) {
     };
   });
 
-  const hops = Array.from(recipeNode.querySelectorAll('HOP')).map((hNode, i) => {
+  const hops = Array.from(recipeNode.getElementsByTagName('HOP')).map((hNode, i) => {
     const hName = getText(hNode, 'NAME', `Humle ${i + 1}`);
     const amountKg = getNum(hNode, 'AMOUNT', 0.025);
     const alpha = getNum(hNode, 'ALPHA', 5.0);
@@ -178,7 +178,7 @@ export function importBeerXML(xmlString) {
     };
   });
 
-  const yeastNode = recipeNode.querySelector('YEAST');
+  const yeastNode = recipeNode.getElementsByTagName('YEAST')[0];
   const yeast = yeastNode
     ? {
         name: getText(yeastNode, 'NAME', 'Importerad Jäst'),
@@ -201,7 +201,7 @@ export function importBeerXML(xmlString) {
         notes: '',
       };
 
-  const mashSteps = Array.from(recipeNode.querySelectorAll('MASH_STEP')).map((mNode, i) => ({
+  const mashSteps = Array.from(recipeNode.getElementsByTagName('MASH_STEP')).map((mNode, i) => ({
     id: i + 1,
     name: getText(mNode, 'NAME', `Steg ${i + 1}`),
     type: getText(mNode, 'TYPE', '').toLowerCase().includes('temp') ? 'Steg' : 'Infusion',

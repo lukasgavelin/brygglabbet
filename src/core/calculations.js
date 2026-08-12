@@ -303,29 +303,50 @@ export function calculateResidualAlkalinity(profile) {
 }
 
 /**
- * Estimates mash pH based on water profile and dark malt proportion.
- * @param {Record<string, number>} waterProfile - Water profile
- * @param {Array<{amount: number, ebc: number}>} fermentables - Grain bill
- * @returns {number} Estimated mash pH
+ * Estimates mash pH using the scientific Kolbach / Troester buffering model.
+ * Accounts for base malt distilled water pH, caramel/roasted malt titratable acidity,
+ * water residual alkalinity (RA), and mash thickness.
+ *
+ * @param {Record<string, number>} waterProfile - Ion concentrations in ppm
+ * @param {Array<{amount: number, ebc: number, type?: string}>} fermentables - Grain bill
+ * @param {number} [mashRatio=3.0] - Water to grain ratio in L/kg
+ * @returns {number} Estimated mash pH (clamped between 4.50 and 6.50)
  */
-export function estimateMashPH(waterProfile, fermentables) {
-  const ra = calculateResidualAlkalinity(waterProfile);
-  const totalKg = fermentables.reduce((s, f) => s + (f.amount || 0), 0);
+export function estimateMashPH(waterProfile, fermentables, mashRatio = 3.0) {
+  const totalKg = (fermentables || []).reduce((sum, f) => {
+    if (f.type === 'sugar') return sum;
+    return sum + (Number(f.amount) || 0);
+  }, 0);
 
-  let darkAdjust = 0;
+  if (totalKg <= 0) return MASH_PH_REFERENCE;
+
+  let totalGrainAcidity_mEq = 0;
+
   fermentables.forEach((f) => {
-    if (f.ebc > 300 && totalKg > 0) {
-      darkAdjust -= 0.025 * (f.amount / totalKg) * 100;
-    } else if (f.ebc > 120 && totalKg > 0) {
-      darkAdjust -= 0.01 * (f.amount / totalKg) * 100;
-    } else if (f.ebc > 40 && totalKg > 0) {
-      darkAdjust -= 0.005 * (f.amount / totalKg) * 100;
+    if (f.type === 'sugar') return;
+    const kg = Number(f.amount) || 0;
+    const ebc = Number(f.ebc) || 4;
+
+    if (ebc > 15 && ebc <= 300) {
+      const acidityFactor = 0.08 + (ebc / 300) * 0.15;
+      totalGrainAcidity_mEq += kg * 1000 * (acidityFactor / 100);
+    } else if (ebc > 300) {
+      const acidityFactor = 0.25 + Math.min(1.0, ebc / 1400) * 0.2;
+      totalGrainAcidity_mEq += kg * 1000 * (acidityFactor / 100);
     }
   });
 
-  const raAdjust = ra / 357;
-  const estimatedPH = MASH_PH_REFERENCE + darkAdjust + raAdjust;
-  return Math.min(6.5, Math.max(4.5, estimatedPH));
+  const baseMaltPH = MASH_PH_REFERENCE;
+  const grainAcidityDeltaPH = -(totalGrainAcidity_mEq / (totalKg * 45));
+  const distilledMashPH = baseMaltPH + grainAcidityDeltaPH;
+
+  const ra = calculateResidualAlkalinity(waterProfile);
+  const ra_mEqPerL = ra / 50;
+  const ratio = Math.max(1.5, Number(mashRatio) || 3.0);
+  const raDeltaPH = ra_mEqPerL * 0.085 * (ratio / 3.0);
+
+  const estimatedPH = distilledMashPH + raDeltaPH;
+  return Math.min(6.5, Math.max(4.5, Math.round(estimatedPH * 100) / 100));
 }
 
 /**

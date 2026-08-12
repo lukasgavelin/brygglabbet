@@ -186,6 +186,18 @@ describe('Brewing Calculations Module', () => {
       expect(ph).toBeLessThanOrEqual(6.5);
     });
 
+    it('lowers estimated mash pH for dark roasted malts', () => {
+      const water = { ca: 20, mg: 5, na: 10, cl: 20, so4: 20, hco3: 50 };
+      const paleGrain = [{ amount: 4, ebc: 5 }];
+      const darkGrain = [
+        { amount: 3.5, ebc: 5 },
+        { amount: 0.5, ebc: 1200 },
+      ];
+      const palePH = estimateMashPH(water, paleGrain);
+      const darkPH = estimateMashPH(water, darkGrain);
+      expect(darkPH).toBeLessThan(palePH);
+    });
+
     it('provides chloride to sulfate balance assessment', () => {
       const malty = { cl: 100, so4: 40 };
       const hoppy = { cl: 30, so4: 150 };
