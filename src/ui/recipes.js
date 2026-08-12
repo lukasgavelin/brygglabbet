@@ -7,10 +7,14 @@ import { calculateOG, formatSG, scaleRecipe } from '../core/calculations.js';
 import { PRESET_RECIPES } from '../core/data.js';
 import { openModal, closeModal } from './modals.js';
 import { showToast, escHtml } from './toast.js';
+import { renderFermentablesTable } from './fermentables.js';
+import { renderHopsTable } from './hops.js';
+import { renderMashTable } from './mash.js';
 import { syncYeastToUI } from './yeast.js';
 import { syncWaterToUI } from './water.js';
-import { renderMashTable } from './mash.js';
 import { syncEquipmentToUI } from './equipment.js';
+import { renderMobileFermentablesCards, renderMobileHopsCards } from './mobile/mobileCards.js';
+import { setupInputSteppers } from './stepper.js';
 import { exportBeerXML, importBeerXML } from '../core/beerxml.js';
 
 const LOCAL_STORAGE_KEY = 'brygglabbet_recipes';
@@ -281,7 +285,14 @@ export function syncUIFromState(recalculateCallback) {
   syncYeastToUI();
   syncWaterToUI();
   renderMashTable(recalculateCallback);
-  recalculateCallback();
+  renderFermentablesTable(recalculateCallback);
+  renderHopsTable(recalculateCallback);
+  renderMobileFermentablesCards(recalculateCallback);
+  renderMobileHopsCards(recalculateCallback);
+  setupInputSteppers(recalculateCallback);
+  if (typeof recalculateCallback === 'function') {
+    recalculateCallback();
+  }
 }
 
 const AUTOSAVE_STORAGE_KEY = 'brygglabbet_autosave';
