@@ -1923,5 +1923,76 @@ body.mobile-mode #mobile-stats-fab {
   color: var(--text-secondary);
 }
 
+/* ---------------------------------------------------------
+   Media rules: Print / PDF Export
+   --------------------------------------------------------- */
+@media print {
+  #app-header .header-actions,
+  #quick-nav,
+  .accordion-header-actions,
+  .accordion-header .chevron-icon,
+  .btn,
+  #mobile-app-view,
+  .modal,
+  .toast,
+  #mobile-stats-fab {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #111111 !important;
+    font-size: 12pt;
+  }
+
+  #desktop-app-view, #app-body, #main-content {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #sidebar {
+    position: static !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    margin-top: 20px;
+    background: #f9f9f9 !important;
+    color: #111111 !important;
+  }
+
+  .accordion-card {
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    color: #111 !important;
+    page-break-inside: avoid;
+    margin-bottom: 16px;
+  }
+
+  .accordion-content {
+    display: block !important;
+  }
+
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  th, td {
+    border: 1px solid #ccc !important;
+    padding: 6px 8px !important;
+    color: #111 !important;
+  }
+
+  input, select, textarea {
+    border: none !important;
+    background: transparent !important;
+    color: #111 !important;
+  }
+}
+
+
 
 

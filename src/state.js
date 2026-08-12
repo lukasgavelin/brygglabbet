@@ -75,3 +75,63 @@ export function createInitialState() {
 }
 
 export const State = createInitialState();
+
+const historyStack = [];
+const redoStack = [];
+const MAX_HISTORY = 30;
+
+/**
+ * Saves a snapshot of the current state to the undo history stack.
+ */
+export function pushHistory() {
+  const snapshot = JSON.stringify(State);
+  if (historyStack.length > 0 && historyStack[historyStack.length - 1] === snapshot) {
+    return;
+  }
+  historyStack.push(snapshot);
+  if (historyStack.length > MAX_HISTORY) {
+    historyStack.shift();
+  }
+  redoStack.length = 0;
+}
+
+/**
+ * Undoes the last action if available.
+ * @param {Function} onStateRestored - Callback after restoring state
+ * @returns {boolean} Whether undo was executed
+ */
+export function undoState(onStateRestored) {
+  if (historyStack.length === 0) return false;
+  redoStack.push(JSON.stringify(State));
+  const previousState = JSON.parse(historyStack.pop());
+  Object.assign(State, previousState);
+  if (typeof onStateRestored === 'function') {
+    onStateRestored();
+  }
+  return true;
+}
+
+/**
+ * Redoes the last undone action if available.
+ * @param {Function} onStateRestored - Callback after restoring state
+ * @returns {boolean} Whether redo was executed
+ */
+export function redoState(onStateRestored) {
+  if (redoStack.length === 0) return false;
+  historyStack.push(JSON.stringify(State));
+  const nextState = JSON.parse(redoStack.pop());
+  Object.assign(State, nextState);
+  if (typeof onStateRestored === 'function') {
+    onStateRestored();
+  }
+  return true;
+}
+
+export function canUndo() {
+  return historyStack.length > 0;
+}
+
+export function canRedo() {
+  return redoStack.length > 0;
+}
+

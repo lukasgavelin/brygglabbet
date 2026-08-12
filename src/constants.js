@@ -19,6 +19,8 @@ export const TINSETH_BIGNESS_BASE = 0.000125;
 export const TINSETH_TIME_FACTOR = 0.04;
 export const TINSETH_TIME_DIVISOR = 4.15;
 export const PELLET_UTILIZATION_MULTIPLIER = 1.1;
+export const WHIRLPOOL_IBU_FACTOR = 0.2; // 20% utilization for whirlpool additions
+export const BOIL_SG_CORRECTION_FACTOR = 0.5; // Average boil gravity estimate factor
 
 // Mash & Water Constants
 export const MASH_PH_REFERENCE = 5.72; // Reference pH for pale malt in neutral water

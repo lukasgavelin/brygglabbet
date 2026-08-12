@@ -25,6 +25,7 @@ import { updateStyleMatch } from './styleMatch.js';
 import { renderWaterRequirementCard } from './equipment.js';
 import { updateAccordionBadges } from './tabs.js';
 import { updateMobileUI } from './mobile/mobileApp.js';
+import { autosaveSession } from './recipes.js';
 
 export function recalculate() {
   const ogResult = calculateOG(
@@ -81,6 +82,7 @@ export function recalculate() {
   renderWaterRequirementCard();
   updateAccordionBadges();
   updateMobileUI(recalculate);
+  autosaveSession();
 }
 
 function updateSidebarStats({ sg, plato, fg_sg, fg_plato, abv, ibu, ebc, bugu, apparentAtt }) {

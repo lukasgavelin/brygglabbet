@@ -11,6 +11,7 @@ import { syncYeastToUI } from './yeast.js';
 import { syncWaterToUI } from './water.js';
 import { renderMashTable } from './mash.js';
 import { syncEquipmentToUI } from './equipment.js';
+import { exportBeerXML, importBeerXML } from '../core/beerxml.js';
 
 const LOCAL_STORAGE_KEY = 'brygglabbet_recipes';
 const FALLBACK_STORAGE_KEY = 'brew_recipes';
@@ -33,6 +34,11 @@ export function saveRecipe() {
   State.recipe.name = name;
 
   const all = getSavedRecipes();
+  if (all[name]) {
+    if (!confirm(`Ett recept med namnet "${name}" finns redan. Vill du skriva över det?`)) {
+      return;
+    }
+  }
   all[name] = JSON.parse(JSON.stringify(State));
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(all));
   showToast(`💾 Recept sparat: ${name}`, 'success');
@@ -224,9 +230,64 @@ export function syncUIFromState(recalculateCallback) {
   recalculateCallback();
 }
 
+const AUTOSAVE_STORAGE_KEY = 'brygglabbet_autosave';
+
+export function autosaveSession() {
+  try {
+    sessionStorage.setItem(
+      AUTOSAVE_STORAGE_KEY,
+      JSON.stringify({
+        state: State,
+        savedAt: Date.now(),
+      })
+    );
+  } catch (err) {
+    console.warn('Autosave error:', err);
+  }
+}
+
+export function checkAndRestoreSession(recalculateCallback) {
+  try {
+    const raw = sessionStorage.getItem(AUTOSAVE_STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data && data.state && data.savedAt) {
+      const ageMinutes = (Date.now() - data.savedAt) / (1000 * 60);
+      if (ageMinutes < 60) {
+        const recipeName = data.state.recipe?.name || 'recept';
+        if (
+          confirm(
+            `Hittade en automatisk sparfil för "${recipeName}" (från ${Math.round(
+              ageMinutes
+            )} min sedan). Vill du återställa den?`
+          )
+        ) {
+          Object.assign(State, data.state);
+          let maxId = 0;
+          [...(State.fermentables || []), ...(State.hops || []), ...(State.mash || [])].forEach(
+            (x) => {
+              if (x.id && x.id > maxId) maxId = x.id;
+            }
+          );
+          setNextId(maxId);
+          syncUIFromState(recalculateCallback);
+          showToast('🔄 Autosparad session återställd', 'success');
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Restore session error:', err);
+  }
+}
+
 export function exportJSON() {
   const name = State.recipe.name || 'recept';
-  const data = JSON.stringify(State, null, 2);
+  const exportPayload = {
+    _version: 1,
+    exportDate: new Date().toISOString(),
+    ...State,
+  };
+  const data = JSON.stringify(exportPayload, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -237,19 +298,67 @@ export function exportJSON() {
   showToast('📤 Recept exporterat som JSON', 'success');
 }
 
+export function exportBeerXMLFile() {
+  const name = State.recipe.name || 'recept';
+  const xmlContent = exportBeerXML(State);
+  const blob = new Blob([xmlContent], { type: 'application/xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${name.replace(/[^a-z0-9åäö]/gi, '_')}.xml`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('🍺 Recept exporterat som BeerXML', 'success');
+}
+
 export function importJSON(e, recalculateCallback) {
   const file = e.target.files[0];
   if (!file) return;
 
+  const isXml = file.name.endsWith('.xml') || file.name.endsWith('.beerxml');
+
   const reader = new FileReader();
   reader.onload = (evt) => {
     try {
-      const data = JSON.parse(evt.target.result);
-      Object.assign(State, data);
-      syncUIFromState(recalculateCallback);
-      showToast(`📥 Recept importerat: ${State.recipe.name || 'Okänt'}`, 'success');
-    } catch {
-      showToast('⚠️ Ogiltig JSON-fil', 'error');
+      if (isXml) {
+        const stateSlice = importBeerXML(evt.target.result);
+        Object.assign(State, stateSlice);
+        let maxId = 0;
+        [...(State.fermentables || []), ...(State.hops || []), ...(State.mash || [])].forEach(
+          (x) => {
+            if (x.id && x.id > maxId) maxId = x.id;
+          }
+        );
+        setNextId(maxId);
+        syncUIFromState(recalculateCallback);
+        showToast(`🍺 BeerXML importerat: ${State.recipe.name || 'Okänt'}`, 'success');
+      } else {
+        const data = JSON.parse(evt.target.result);
+        if (!data || typeof data !== 'object') {
+          throw new Error('Invalid format');
+        }
+        if (!data.recipe || !Array.isArray(data.fermentables) || !Array.isArray(data.hops)) {
+          showToast('⚠️ Ogiltigt recept-format: nödvändiga fält saknas', 'error');
+          return;
+        }
+
+        const { _version, exportDate, ...stateData } = data;
+        Object.assign(State, stateData);
+
+        let maxId = 0;
+        [...(State.fermentables || []), ...(State.hops || []), ...(State.mash || [])].forEach(
+          (x) => {
+            if (x.id && x.id > maxId) maxId = x.id;
+          }
+        );
+        setNextId(maxId);
+
+        syncUIFromState(recalculateCallback);
+        showToast(`📥 Recept importerat: ${State.recipe.name || 'Okänt'}`, 'success');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('⚠️ Ogiltig receptfil', 'error');
     }
     e.target.value = '';
   };

@@ -2,24 +2,9 @@
  * Toast notifications and string escaping utility.
  */
 
-/**
- * Escapes HTML characters to prevent XSS.
- * @param {string} str - Raw string
- * @returns {string} Escaped string
- */
-export function escHtml(str) {
-  return String(str || '').replace(
-    /[&<>"']/g,
-    (ch) =>
-      ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;',
-      })[ch]
-  );
-}
+import { escHtml } from './utils.js';
+export { escHtml };
+
 
 /**
  * Shows a toast notification message.

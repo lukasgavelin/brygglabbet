@@ -3,7 +3,7 @@
  * Clean Code: High-level orchestrator initializing components.
  */
 
-import { State } from './state.js';
+import { State, pushHistory, undoState, redoState } from './state.js';
 import { STYLES } from './core/data.js';
 import { setupTabNavigation } from './ui/tabs.js';
 import { setupYeastTab, populateYeastSelector } from './ui/yeast.js';
@@ -25,11 +25,17 @@ import {
   openPresetRecipesModal,
   scaleCurrentRecipe,
   exportJSON,
+  exportBeerXMLFile,
   importJSON,
   loadDefaultRecipe,
+  checkAndRestoreSession,
+  syncUIFromState,
 } from './ui/recipes.js';
 import { recalculate, setupMobileSidebar } from './ui/sidebar.js';
 import { initMobileApp } from './ui/mobile/mobileApp.js';
+import { debounce } from './ui/utils.js';
+
+const debouncedRecalculate = debounce(recalculate, 150);
 
 document.addEventListener('DOMContentLoaded', () => {
   populateStyleSelector();
@@ -38,19 +44,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupTabNavigation();
   setupHeaderControls();
+  setupKeyboardShortcuts();
   setupRecipeInputs();
-  setupEquipmentListeners(recalculate);
+  setupEquipmentListeners(debouncedRecalculate);
 
   setupFermentableEvents();
   setupHopEvents();
-  setupYeastTab(recalculate);
-  setupMashTab(recalculate);
-  setupWaterTab(recalculate);
+  setupYeastTab(debouncedRecalculate);
+  setupMashTab(debouncedRecalculate);
+  setupWaterTab(debouncedRecalculate);
   setupModalClose();
   setupMobileSidebar();
   initMobileApp(recalculate);
 
   loadDefaultRecipe(recalculate);
+  checkAndRestoreSession(recalculate);
   recalculate();
 });
 
@@ -73,36 +81,77 @@ function populateStyleSelector() {
 }
 
 function setupHeaderControls() {
+  document.getElementById('recipe-name-input')?.addEventListener('focus', () => pushHistory());
   document.getElementById('recipe-name-input')?.addEventListener('input', (e) => {
     State.recipe.name = e.target.value;
   });
-  document.getElementById('btn-new')?.addEventListener('click', () => newRecipe(recalculate));
+  document.getElementById('btn-new')?.addEventListener('click', () => {
+    pushHistory();
+    newRecipe(recalculate);
+  });
   document.getElementById('btn-open')?.addEventListener('click', () => openRecipeModal(recalculate));
   document.getElementById('btn-save')?.addEventListener('click', saveRecipe);
   document.getElementById('btn-swe-info')?.addEventListener('click', () => openModal('modal-swe-info'));
+  document.getElementById('btn-print')?.addEventListener('click', () => window.print());
+
+  // Undo & Redo
+  document.getElementById('btn-undo')?.addEventListener('click', () => {
+    undoState(() => syncUIFromState(recalculate));
+  });
+  document.getElementById('btn-redo')?.addEventListener('click', () => {
+    redoState(() => syncUIFromState(recalculate));
+  });
 
   // Export & Import in Header
   document.getElementById('btn-export')?.addEventListener('click', exportJSON);
+  document.getElementById('btn-export-beerxml')?.addEventListener('click', exportBeerXMLFile);
   document.getElementById('btn-import')?.addEventListener('click', () => {
     document.getElementById('import-file-input')?.click();
   });
   document.getElementById('import-file-input')?.addEventListener('change', (e) => {
+    pushHistory();
     importJSON(e, recalculate);
   });
 
   // Recipe action triggers inside Receptinfo card
   document
     .getElementById('tab-btn-preset-recipes')
-    ?.addEventListener('click', () => openPresetRecipesModal(recalculate));
+    ?.addEventListener('click', () => {
+      pushHistory();
+      openPresetRecipesModal(recalculate);
+    });
   document
     .getElementById('tab-btn-scale-recipe')
     ?.addEventListener('click', () => openScaleModal());
 
   document.getElementById('btn-confirm-scale')?.addEventListener('click', () => {
+    pushHistory();
     const targetVol = document.getElementById('scale-target-volume')?.value;
     const targetEff = document.getElementById('scale-target-efficiency')?.value;
     scaleCurrentRecipe(targetVol, targetEff, recalculate);
     closeModal('modal-scale-recipe');
+  });
+}
+
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      if (!isInput || (isInput && document.activeElement?.type === 'checkbox')) {
+        if (e.shiftKey) {
+          e.preventDefault();
+          redoState(() => syncUIFromState(recalculate));
+        } else {
+          e.preventDefault();
+          undoState(() => syncUIFromState(recalculate));
+        }
+      }
+    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+      if (!isInput) {
+        e.preventDefault();
+        redoState(() => syncUIFromState(recalculate));
+      }
+    }
   });
 }
 
@@ -119,7 +168,7 @@ function setupRecipeInputs() {
   ids.forEach((id) => {
     document.getElementById(id)?.addEventListener('input', () => {
       syncRecipeFromUI();
-      recalculate();
+      debouncedRecalculate();
     });
   });
 

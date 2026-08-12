@@ -15,6 +15,8 @@ import {
   TINSETH_TIME_FACTOR,
   TINSETH_TIME_DIVISOR,
   PELLET_UTILIZATION_MULTIPLIER,
+  WHIRLPOOL_IBU_FACTOR,
+  BOIL_SG_CORRECTION_FACTOR,
   MASH_PH_REFERENCE,
   ALKALINITY_HCO3_TO_CACO3,
   RA_CA_DIVISOR,
@@ -150,13 +152,15 @@ export function tinsethUtilization(og_sg, time_min) {
  */
 export function calculateIBU(hops, og_sg, volume_L) {
   if (!volume_L || volume_L <= 0) return { total: 0, perHop: [] };
-  const boilSG = 1 + (og_sg - 1) * 0.5;
+  const boilSG = 1 + (og_sg - 1) * BOIL_SG_CORRECTION_FACTOR;
 
   let total = 0;
   const perHop = hops.map((h) => {
     if (h.use === 'dry-hop' || h.use === 'torrhumle') return 0;
     const pelletBonus = h.form === 'pellets' ? PELLET_UTILIZATION_MULTIPLIER : 1.0;
-    const u = tinsethUtilization(boilSG, h.time || 0);
+    const isWhirlpool = h.use === 'whirlpool';
+    const baseUtilization = tinsethUtilization(boilSG, isWhirlpool ? Math.max(h.time || 0, 15) : (h.time || 0));
+    const u = isWhirlpool ? baseUtilization * WHIRLPOOL_IBU_FACTOR : baseUtilization;
     const ibu = (h.amount * (h.alpha / 100) * u * pelletBonus * 1000) / volume_L;
     total += ibu;
     return ibu;
