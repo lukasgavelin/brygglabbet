@@ -58,6 +58,7 @@ export function setupWaterTab(recalculateCallback) {
       const profile = WATER_PROFILES.find((p) => p.name === e.target.value);
       if (!profile) return;
       State.water.base = {
+        name: profile.name,
         ca: profile.ca,
         mg: profile.mg,
         na: profile.na,
@@ -98,7 +99,9 @@ function getNumVal(ids, fallback = 0) {
 }
 
 function syncWaterFromUI() {
+  const currentName = State.water?.base?.name;
   State.water.base = {
+    name: currentName || 'Anpassat vatten',
     ca: getNumVal(['w-base-ca', 'w-ca'], 0),
     mg: getNumVal(['w-base-mg', 'w-mg'], 0),
     na: getNumVal(['w-base-na', 'w-na'], 0),

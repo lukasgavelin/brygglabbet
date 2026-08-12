@@ -52,6 +52,11 @@ export function syncEquipmentToUI() {
   setInputVal('eq-fermenter-loss', eq.fermenterLoss ?? 1.0);
   setInputVal('eq-grain-abs', eq.grainAbsorption ?? 0.96);
   setInputVal('eq-mash-ratio', eq.mashRatio ?? 3.0);
+
+  const mainBatchInput = document.getElementById('batch-volume');
+  const mainEffInput = document.getElementById('efficiency');
+  if (mainBatchInput && document.activeElement !== mainBatchInput) mainBatchInput.value = eq.batchVolume ?? 20;
+  if (mainEffInput && document.activeElement !== mainEffInput) mainEffInput.value = eq.efficiency ?? 75;
 }
 
 /**
@@ -60,8 +65,6 @@ export function syncEquipmentToUI() {
 export function syncEquipmentFromUI() {
   if (!State.equipment) State.equipment = {};
 
-  State.equipment.name = document.getElementById('eq-name')?.value || State.equipment.name || 'Anpassad Utrustning';
-  
   const getNumVal = (id, fallback) => {
     const el = document.getElementById(id);
     if (!el) return fallback;
@@ -79,6 +82,30 @@ export function syncEquipmentFromUI() {
   State.equipment.fermenterLoss = getNumVal('eq-fermenter-loss', 1.0);
   State.equipment.grainAbsorption = getNumVal('eq-grain-abs', 0.96);
   State.equipment.mashRatio = getNumVal('eq-mash-ratio', 3.0);
+
+  const customNameInput = document.getElementById('eq-name');
+  if (customNameInput && customNameInput.value.trim()) {
+    State.equipment.name = customNameInput.value.trim();
+  }
+
+  // Check if current parameters match preset or are custom
+  const currentPreset = EQUIPMENT_PROFILES.find((p) => p.id === State.equipment.id);
+  if (currentPreset) {
+    if (
+      currentPreset.batchVolume !== batchVol ||
+      currentPreset.efficiency !== eff ||
+      currentPreset.boilOffRate !== State.equipment.boilOffRate ||
+      currentPreset.kettleLoss !== State.equipment.kettleLoss
+    ) {
+      State.equipment.id = '';
+      State.equipment.name = 'Anpassad Utrustning';
+      const selIds = ['equipment-preset', 'equipment-profile-select', 'mobile-equipment-preset'];
+      selIds.forEach((id) => {
+        const sel = document.getElementById(id);
+        if (sel) sel.value = '';
+      });
+    }
+  }
 
   // Sync batch volume & efficiency to main recipe object as well
   State.recipe.batchVolume = batchVol;

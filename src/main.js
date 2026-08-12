@@ -198,6 +198,7 @@ function setupRecipeInputs() {
 
   document.getElementById('recipe-notes')?.addEventListener('input', (e) => {
     State.recipe.notes = e.target.value;
+    debouncedRecalculate();
   });
   document.getElementById('recipe-style')?.addEventListener('change', (e) => {
     State.recipe.styleId = e.target.value;

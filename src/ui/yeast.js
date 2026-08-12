@@ -37,11 +37,13 @@ export function setupYeastTab(recalculateCallback) {
     document.getElementById(id)?.addEventListener('input', (e) => {
       const field = id === 'yeast-name' ? 'name' : 'lab';
       State.yeast[field] = e.target.value;
+      recalculateCallback();
     });
   });
 
   document.getElementById('yeast-type')?.addEventListener('change', (e) => {
     State.yeast.type = e.target.value;
+    recalculateCallback();
   });
 
   document.getElementById('yeast-att-min')?.addEventListener('input', (e) => {
