@@ -2195,6 +2195,10 @@ body.mobile-mode #mobile-stats-fab {
   }
 }
 
+#print-container {
+  display: none;
+}
+
 /* ---------------------------------------------------------
    Media rules: Print / PDF Export (Professional Brew Sheet)
    --------------------------------------------------------- */
