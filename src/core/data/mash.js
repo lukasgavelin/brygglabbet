@@ -10,6 +10,35 @@ export const MASH_PRESETS = {
       { name: 'Avmäskning', type: 'Infusion', temp: 78, time: 10 },
     ],
   },
+  single_light: {
+    name: 'Enkelsteg Torrt',
+    steps: [
+      { name: 'Sackarifikation', type: 'Infusion', temp: 65, time: 60 },
+      { name: 'Avmäskning', type: 'Infusion', temp: 78, time: 10 },
+    ],
+  },
+  single_medium: {
+    name: 'Enkelsteg Medium',
+    steps: [
+      { name: 'Sackarifikation', type: 'Infusion', temp: 67, time: 60 },
+      { name: 'Avmäskning', type: 'Infusion', temp: 78, time: 10 },
+    ],
+  },
+  single_full: {
+    name: 'Enkelsteg Fylligt',
+    steps: [
+      { name: 'Sackarifikation', type: 'Infusion', temp: 69, time: 60 },
+      { name: 'Avmäskning', type: 'Infusion', temp: 78, time: 10 },
+    ],
+  },
+  step_dekoktion: {
+    name: 'Flersteg / Dekoktion',
+    steps: [
+      { name: 'Beta-amylasrast', type: 'Steg', temp: 63, time: 30 },
+      { name: 'Sackarifikation', type: 'Dekoktion', temp: 68, time: 40 },
+      { name: 'Avmäskning', type: 'Steg', temp: 78, time: 10 },
+    ],
+  },
   step_mash: {
     name: 'Stegmäskning',
     steps: [

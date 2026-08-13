@@ -313,6 +313,9 @@ function renderMobileMashSteps(recalculateCallback) {
   container.innerHTML = '';
 
   State.mash.forEach((step) => {
+    if (step.id === undefined || step.id === null) {
+      step.id = generateId();
+    }
     const card = document.createElement('div');
     card.className = 'mobile-card';
     card.innerHTML = `

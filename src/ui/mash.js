@@ -14,9 +14,9 @@ export function setupMashTab(recalculateCallback) {
     );
   });
 
-  document.querySelectorAll('.preset-btn').forEach((btn) => {
+  document.querySelectorAll('[data-mash-preset]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const preset = MASH_PRESETS[btn.dataset.preset];
+      const preset = MASH_PRESETS[btn.dataset.mashPreset];
       if (!preset) return;
       State.mash = preset.steps.map((s) => ({ ...s, id: generateId() }));
       renderMashTable(recalculateCallback);
@@ -53,9 +53,12 @@ export function renderMashTable(recalculateCallback) {
 
   tbody.innerHTML = '';
   State.mash.forEach((s, idx) => {
+    if (s.id === undefined || s.id === null) {
+      s.id = generateId();
+    }
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td style="color:var(--text-muted);font-size:0.8rem">${idx + 1}</td>
+      <td style="color:var(--text-muted);font-size:0.8rem;text-align:center">${idx + 1}</td>
       <td class="col-name">
         <input type="text" value="${escHtml(s.name)}" placeholder="Stegnamn" data-id="${s.id}" data-field="name">
       </td>
