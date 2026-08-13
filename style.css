@@ -2193,6 +2193,148 @@ body.mobile-mode #mobile-stats-fab {
   .brewday-col-right {
     display: none;
   }
+/* Bryggdag Wizard/Stepper layout additions */
+.brewday-progress-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  height: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.brewday-progress-bar {
+  background: var(--accent);
+  height: 100%;
+  width: 0%;
+  border-radius: var(--radius-sm);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brewday-steps-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+.brewday-step-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brewday-step-card.brewday-step-active {
+  opacity: 1;
+  filter: none;
+  pointer-events: auto;
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  z-index: 2;
+}
+
+.brewday-step-card.brewday-step-inactive {
+  opacity: 0.35;
+  filter: grayscale(40%);
+  transform: scale(0.98);
+  z-index: 1;
+}
+
+.brewday-step-card.brewday-step-inactive input,
+.brewday-step-card.brewday-step-inactive button,
+.brewday-step-card.brewday-step-inactive textarea {
+  pointer-events: none;
+}
+
+.brewday-step-card.brewday-step-completed {
+  opacity: 0.65;
+  filter: none;
+  border-color: #10b981;
+}
+
+.brewday-step-card.brewday-step-completed .brewday-step-num {
+  background: #10b981 !important;
+}
+
+.brewday-wizard-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 12px 0;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+.brewday-wizard-nav .btn {
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brewday-header-timer {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+}
+
+.timer-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+.timer-pulse-dot.running {
+  animation: timerPulse 1.5s infinite;
+}
+
+@keyframes timerPulse {
+  0% { transform: scale(0.9); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 12px #ef4444; }
+  100% { transform: scale(0.9); opacity: 0.5; }
+}
+
+.brewday-step-inner-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px dashed var(--border);
+  padding-top: 10px;
+}
+
+.brewday-step-inner-checklist li label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.brewday-step-inner-checklist li input[type="checkbox"]:checked + span {
+  text-decoration: line-through;
+  color: var(--text-muted, #888);
 }
 
 #print-container {
