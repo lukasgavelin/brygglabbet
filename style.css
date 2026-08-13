@@ -2334,7 +2334,7 @@ body.mobile-mode #mobile-stats-fab {
     color: #222;
   }
 
-  .print-steps-list > li strong {
+  .print-steps-list > li > strong {
     font-size: 10.5pt;
     color: #000;
     display: block;
