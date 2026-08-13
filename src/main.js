@@ -62,8 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileApp(recalculate);
 
   setupPrintHandler();
-  loadDefaultRecipe(recalculate);
-  checkAndRestoreSession(recalculate);
+  const restored = checkAndRestoreSession(recalculate);
+  if (!restored) {
+    loadDefaultRecipe(recalculate);
+  }
   setupInputSteppers(debouncedRecalculate);
   recalculate();
 });

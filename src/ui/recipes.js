@@ -304,8 +304,21 @@ export function syncUIFromState(recalculateCallback) {
 
 const AUTOSAVE_STORAGE_KEY = 'brygglabbet_autosave';
 
+function isStateDefault(state) {
+  const defaults = createInitialState();
+  return state.recipe?.name === defaults.recipe.name &&
+         state.recipe?.batchVolume === defaults.recipe.batchVolume &&
+         (state.fermentables || []).length === 0 &&
+         (state.hops || []).length === 0 &&
+         (state.mash || []).length === 0;
+}
+
 export function autosaveSession() {
   try {
+    if (isStateDefault(State)) {
+      sessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
+      return;
+    }
     sessionStorage.setItem(
       AUTOSAVE_STORAGE_KEY,
       JSON.stringify({
@@ -321,9 +334,13 @@ export function autosaveSession() {
 export function checkAndRestoreSession(recalculateCallback) {
   try {
     const raw = sessionStorage.getItem(AUTOSAVE_STORAGE_KEY);
-    if (!raw) return;
+    if (!raw) return false;
     const data = JSON.parse(raw);
     if (data && data.state && data.savedAt) {
+      if (isStateDefault(data.state)) {
+        sessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
+        return false;
+      }
       const ageMinutes = (Date.now() - data.savedAt) / (1000 * 60);
       if (ageMinutes < 60) {
         const recipeName = data.state.recipe?.name || 'recept';
@@ -344,11 +361,16 @@ export function checkAndRestoreSession(recalculateCallback) {
           setNextId(maxId);
           syncUIFromState(recalculateCallback);
           showToast('🔄 Autosparad session återställd', 'success');
+          return true;
         }
       }
     }
+    sessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
+    return false;
   } catch (err) {
     console.warn('Restore session error:', err);
+    sessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
+    return false;
   }
 }
 
