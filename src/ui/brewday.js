@@ -432,9 +432,14 @@ export function renderBrewdayContent(recalculateCallback) {
       </div>
       <!-- Timer indicator container -->
       <div id="brewday-header-timer-container"></div>
-      <div class="brewday-tab-switch">
-        <button class="btn btn-sm btn-primary brewday-mobile-tab active" data-btab="ingredients">🌾 Ingredienser</button>
-        <button class="btn btn-sm btn-secondary brewday-mobile-tab" data-btab="steps">⏱️ Brygguiden</button>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn btn-secondary btn-sm" id="btn-close-brewday-header" title="Avsluta bryggdag och återgå till receptet">
+          📝 Tillbaka till receptet
+        </button>
+        <div class="brewday-tab-switch">
+          <button class="btn btn-sm btn-primary brewday-mobile-tab active" data-btab="ingredients">🌾 Ingredienser</button>
+          <button class="btn btn-sm btn-secondary brewday-mobile-tab" data-btab="steps">⏱️ Brygguiden</button>
+        </div>
       </div>
     </div>
 
@@ -540,9 +545,10 @@ export function renderBrewdayContent(recalculateCallback) {
           <div style="font-size: 0.9rem; font-weight: bold; color: var(--text-secondary);">
             Steg ${currentStepIndex + 1} av ${totalSteps}
           </div>
-          <button class="btn btn-primary" id="btn-wizard-next" ${currentStepIndex === totalSteps - 1 ? 'disabled' : ''}>
-            Nästa steg ➡️
-          </button>
+          ${currentStepIndex === totalSteps - 1
+            ? `<button class="btn btn-success" id="btn-wizard-finish" style="background:#10b981; color:#fff; border:none; font-weight:bold; padding: 8px 18px;">🎉 Slutför bryggdag</button>`
+            : `<button class="btn btn-primary" id="btn-wizard-next">Nästa steg ➡️</button>`
+          }
         </div>
       </div>
     </div>
@@ -624,6 +630,25 @@ export function renderBrewdayContent(recalculateCallback) {
         }
       }, 50);
     }
+  });
+
+  // Close & Finish Brewday buttons
+  document.getElementById('btn-close-brewday-header')?.addEventListener('click', () => {
+    toggleBrewdayView(recalculateCallback);
+  });
+
+  document.getElementById('btn-wizard-finish')?.addEventListener('click', () => {
+    if (measuredOG || measuredPH || brewNotes) {
+      let logMsg = `Bryggdag genomförd ${new Date().toLocaleDateString('sv-SE')}:`;
+      if (measuredOG) logMsg += ` Uppmätt OG = ${measuredOG}.`;
+      if (measuredPH) logMsg += ` Faktiskt pH = ${measuredPH}.`;
+      if (brewNotes) logMsg += `\n${brewNotes}`;
+
+      State.recipe.notes = State.recipe.notes ? `${State.recipe.notes}\n\n${logMsg}` : logMsg;
+    }
+
+    showToast('🎉 Bryggdagen är slutförd! Återgår till receptet.', 'success');
+    toggleBrewdayView(recalculateCallback);
   });
 
   // Save brewlog notes
