@@ -169,14 +169,9 @@ export function setupEquipmentListeners(recalculateCallback) {
  */
 export function renderWaterRequirementCard() {
   const volumes = calculateWaterVolumes(
-    State.equipment.batchVolume || State.recipe.batchVolume,
-    State.recipe.boilTime || 60,
-    State.equipment.boilOffRate || 3.0,
-    State.equipment.kettleLoss || 2.0,
-    State.equipment.fermenterLoss || 1.0,
+    State.equipment,
     State.fermentables,
-    State.equipment.grainAbsorption || 0.96,
-    State.equipment.mashRatio || 3.0
+    State.recipe.boilTime || 60
   );
 
   State.recipe.boilVolume = volumes.boilVolume;
