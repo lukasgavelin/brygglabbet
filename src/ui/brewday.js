@@ -39,22 +39,30 @@ let brewNotes = '';
  * @param {Function} recalculateCallback - Callback to trigger recalculations
  */
 export function toggleBrewdayView(recalculateCallback) {
-  const recipeView = document.getElementById('app-body');
+  const desktopView = document.getElementById('desktop-app-view');
+  const mobileView = document.getElementById('mobile-app-view');
   const brewdayView = document.getElementById('brewday-view');
   const btnToggle = document.getElementById('btn-toggle-brewday');
 
-  if (!recipeView || !brewdayView) return;
+  if (!brewdayView) return;
 
   isBrewdayOpen = !isBrewdayOpen;
 
   if (isBrewdayOpen) {
-    recipeView.classList.add('hidden');
+    desktopView?.classList.add('view-hidden');
+    mobileView?.classList.add('view-hidden');
     brewdayView.classList.remove('hidden');
+
     if (btnToggle) {
       btnToggle.classList.add('btn-primary');
       btnToggle.classList.remove('btn-secondary');
       btnToggle.innerHTML = '<span class="quick-icon">📝</span> Receptbyggaren';
     }
+
+    // Hide mobile dropdown if open
+    document.getElementById('mobile-menu-dropdown')?.classList.remove('open');
+    document.getElementById('mobile-menu-backdrop')?.classList.remove('open');
+
     renderBrewdayContent(recalculateCallback);
     showToast('🍺 Välkommen till Bryggdagsläget!', 'info');
     
@@ -67,7 +75,13 @@ export function toggleBrewdayView(recalculateCallback) {
     }, 150);
   } else {
     brewdayView.classList.add('hidden');
-    recipeView.classList.remove('hidden');
+
+    if (document.body.classList.contains('mobile-mode')) {
+      mobileView?.classList.remove('view-hidden');
+    } else {
+      desktopView?.classList.remove('view-hidden');
+    }
+
     if (btnToggle) {
       btnToggle.classList.add('btn-secondary');
       btnToggle.classList.remove('btn-primary');

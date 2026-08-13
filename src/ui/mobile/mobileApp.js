@@ -3,7 +3,7 @@
  * Connects shared application State with Mobile UI elements, sticky metrics, and advanced controls.
  */
 
-import { State, generateId } from '../../state.js';
+import { State, generateId, undoState, redoState } from '../../state.js';
 import {
   calculateOG,
   calculateFG,
@@ -20,8 +20,10 @@ import { syncWaterToUI } from '../water.js';
 import { setupMobileNav } from './mobileNav.js';
 import { renderMobileFermentablesCards, renderMobileHopsCards } from './mobileCards.js';
 import { STYLES, YEASTS, EQUIPMENT_PROFILES, WATER_PROFILES, MASH_PRESETS } from '../../core/data.js';
-import { saveRecipe, newRecipe, openRecipeModal, openPresetRecipesModal, exportJSON } from '../recipes.js';
+import { saveRecipe, newRecipe, openRecipeModal, openPresetRecipesModal, exportJSON, exportBeerXMLFile, syncUIFromState } from '../recipes.js';
 import { openModal, openFermentableModal, openHopModal } from '../modals.js';
+import { toggleBrewdayView } from '../brewday.js';
+import { triggerPrint } from '../print.js';
 import { escHtml } from '../toast.js';
 
 // eslint-disable-next-line no-unused-vars
@@ -488,12 +490,21 @@ function populateMobileWaterSelector() {
 }
 
 function setupMobileMenuActions(recalculateCallback) {
+  document.getElementById('mobile-menu-brewday')?.addEventListener('click', () => toggleBrewdayView(recalculateCallback));
+  document.getElementById('mobile-menu-print')?.addEventListener('click', triggerPrint);
   document.getElementById('mobile-menu-new')?.addEventListener('click', () => newRecipe(recalculateCallback));
   document.getElementById('mobile-menu-open')?.addEventListener('click', () => openRecipeModal(recalculateCallback));
   document.getElementById('mobile-menu-save')?.addEventListener('click', saveRecipe);
   document.getElementById('mobile-menu-export')?.addEventListener('click', exportJSON);
+  document.getElementById('mobile-menu-export-beerxml')?.addEventListener('click', exportBeerXMLFile);
   document.getElementById('mobile-menu-import')?.addEventListener('click', () => {
     document.getElementById('import-file-input')?.click();
+  });
+  document.getElementById('mobile-menu-undo')?.addEventListener('click', () => {
+    undoState(() => syncUIFromState(recalculateCallback));
+  });
+  document.getElementById('mobile-menu-redo')?.addEventListener('click', () => {
+    redoState(() => syncUIFromState(recalculateCallback));
   });
   document.getElementById('mobile-menu-guide')?.addEventListener('click', () => openModal('modal-swe-info'));
 }

@@ -1465,6 +1465,7 @@ textarea {
    PARALLELLT MOBIL-UI (#mobile-app-view) STYLES
    ========================================================= */
 
+.hidden,
 .view-hidden {
   display: none !important;
 }
