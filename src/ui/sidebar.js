@@ -13,6 +13,7 @@ import {
   calculateApparentAttenuation,
   calculatePreboilGravity,
   calculateWaterProfile,
+  calculateWaterVolumes,
   sgToPlato,
   formatSG,
   ebcToColor,
@@ -26,6 +27,14 @@ import { renderWaterRequirementCard } from './equipment.js';
 import { updateAccordionBadges } from './tabs.js';
 import { updateMobileUI } from './mobile/mobileApp.js';
 import { autosaveSession } from './recipes.js';
+
+function safeRun(label, fn) {
+  try {
+    fn();
+  } catch (err) {
+    console.error(`[recalculate] Fel i "${label}":`, err);
+  }
+}
 
 export function recalculate() {
   const ogResult = calculateOG(
@@ -63,7 +72,14 @@ export function recalculate() {
     State.water.volume
   );
 
-  updateSidebarStats({
+  const volumes = calculateWaterVolumes(
+    State.equipment,
+    State.fermentables,
+    State.recipe.boilTime || 60
+  );
+  State.recipe.boilVolume = volumes.boilVolume;
+
+  safeRun('SidebarStats', () => updateSidebarStats({
     sg,
     plato,
     fg_sg,
@@ -73,16 +89,16 @@ export function recalculate() {
     ebc,
     bugu,
     apparentAtt,
-  });
-  updatePreboilDisplay(preboilSG, preboilPlato, evapPct);
-  updateStyleMatch({ og: sg, fg: fg_sg, ibu: ibuResult.total, ebc, abv }, State.recipe.styleId);
-  renderFermentablesTable(recalculate);
-  renderHopsTable(recalculate);
-  renderWaterPanel(waterResult);
-  renderWaterRequirementCard();
-  updateAccordionBadges();
-  updateMobileUI(recalculate);
-  autosaveSession();
+  }));
+  safeRun('PreboilDisplay', () => updatePreboilDisplay(preboilSG, preboilPlato, evapPct));
+  safeRun('StyleMatch', () => updateStyleMatch({ og: sg, fg: fg_sg, ibu: ibuResult.total, ebc, abv }, State.recipe.styleId));
+  safeRun('FermentablesTable', () => renderFermentablesTable(recalculate));
+  safeRun('HopsTable', () => renderHopsTable(recalculate));
+  safeRun('WaterPanel', () => renderWaterPanel(waterResult));
+  safeRun('WaterRequirement', () => renderWaterRequirementCard(volumes));
+  safeRun('AccordionBadges', () => updateAccordionBadges());
+  safeRun('MobileUI', () => updateMobileUI(recalculate));
+  safeRun('Autosave', () => autosaveSession());
 }
 
 function updateSidebarStats({ sg, plato, fg_sg, fg_plato, abv, ibu, ebc, bugu, apparentAtt }) {

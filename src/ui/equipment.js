@@ -4,7 +4,6 @@
 
 import { State } from '../state.js';
 import { EQUIPMENT_PROFILES } from '../core/data.js';
-import { calculateWaterVolumes } from '../core/calculations.js';
 
 /**
  * Populates all equipment dropdown selectors across desktop and mobile.
@@ -47,7 +46,6 @@ export function syncEquipmentToUI() {
   setInputVal('eq-batch-vol', eq.batchVolume ?? 20);
   setInputVal('eq-efficiency', eq.efficiency ?? 75);
   setInputVal('eq-boiloff', eq.boilOffRate ?? 3.0);
-  setInputVal('eq-boil-off', eq.boilOffRate ?? 3.0);
   setInputVal('eq-kettle-loss', eq.kettleLoss ?? 2.0);
   setInputVal('eq-fermenter-loss', eq.fermenterLoss ?? 1.0);
   setInputVal('eq-grain-abs', eq.grainAbsorption ?? 0.96);
@@ -78,7 +76,7 @@ export function syncEquipmentFromUI() {
 
   State.equipment.batchVolume = batchVol;
   State.equipment.efficiency = eff;
-  State.equipment.boilOffRate = getNumVal('eq-boiloff', getNumVal('eq-boil-off', 3.0));
+  State.equipment.boilOffRate = getNumVal('eq-boiloff', 3.0);
   State.equipment.kettleLoss = getNumVal('eq-kettle-loss', 2.0);
   State.equipment.fermenterLoss = getNumVal('eq-fermenter-loss', 1.0);
   State.equipment.grainAbsorption = getNumVal('eq-grain-abs', 0.96);
@@ -147,7 +145,6 @@ export function setupEquipmentListeners(recalculateCallback) {
     'eq-batch-vol',
     'eq-efficiency',
     'eq-boiloff',
-    'eq-boil-off',
     'eq-kettle-loss',
     'eq-fermenter-loss',
     'eq-grain-abs',
@@ -167,14 +164,9 @@ export function setupEquipmentListeners(recalculateCallback) {
 /**
  * Renders the calculated water requirements summary card.
  */
-export function renderWaterRequirementCard() {
-  const volumes = calculateWaterVolumes(
-    State.equipment,
-    State.fermentables,
-    State.recipe.boilTime || 60
-  );
+export function renderWaterRequirementCard(volumes) {
+  if (!volumes) return;
 
-  State.recipe.boilVolume = volumes.boilVolume;
   const boilVolInput = document.getElementById('boil-volume');
   if (boilVolInput && document.activeElement !== boilVolInput) {
     boilVolInput.value = volumes.boilVolume;

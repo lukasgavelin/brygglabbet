@@ -3,7 +3,7 @@
  * Connects shared application State with Mobile UI elements, sticky metrics, and advanced controls.
  */
 
-import { State } from '../../state.js';
+import { State, generateId } from '../../state.js';
 import {
   calculateOG,
   calculateFG,
@@ -12,9 +12,11 @@ import {
   calculateEBC,
   calculateWaterVolumes,
   calculateWaterProfile,
+  chlorideSulfateBalance,
   formatSG,
   ebcToColor,
 } from '../../core/calculations.js';
+import { syncWaterToUI } from '../water.js';
 import { setupMobileNav } from './mobileNav.js';
 import { renderMobileFermentablesCards, renderMobileHopsCards } from './mobileCards.js';
 import { STYLES, YEASTS, EQUIPMENT_PROFILES, WATER_PROFILES, MASH_PRESETS } from '../../core/data.js';
@@ -91,16 +93,9 @@ export function updateMobileUI(recalculateCallback) {
   setVal('mobile-total-water', `${waterReq.totalWater.toFixed(1)} L`);
 
   // 4. Water Salts & Cl:SO4 ratio
-  const baseProfile = {
-    ca: State.water.baseCa || 0,
-    mg: State.water.baseMg || 0,
-    na: State.water.baseNa || 0,
-    cl: State.water.baseCl || 0,
-    so4: State.water.baseSo4 || 0,
-    hco3: State.water.baseHco3 || 0,
-  };
-  const waterIons = calculateWaterProfile(baseProfile, State.water.salts, State.recipe.batchVolume);
-  const ratioText = waterIons.ratio > 0 ? `${waterIons.ratio.toFixed(1)} (${waterIons.ratioDesc})` : '1.0 (Balanserad)';
+  const waterIons = calculateWaterProfile(State.water.base, State.water.salts, State.recipe.batchVolume);
+  const ratioResult = chlorideSulfateBalance(waterIons);
+  const ratioText = ratioResult.ratio > 0 ? `${ratioResult.ratio.toFixed(1)} (${ratioResult.label})` : '1.0 (Balanserad)';
   setVal('mobile-water-ratio', ratioText);
 
   // 5. Style Match Card
@@ -257,13 +252,16 @@ function setupMobileWaterInputs(recalculateCallback) {
     sel.addEventListener('change', (e) => {
       const found = WATER_PROFILES.find((p) => p.name === e.target.value);
       if (found) {
-        State.water.profileName = found.name;
-        State.water.baseCa = found.ca;
-        State.water.baseMg = found.mg;
-        State.water.baseNa = found.na;
-        State.water.baseCl = found.cl;
-        State.water.baseSo4 = found.so4;
-        State.water.baseHco3 = found.hco3;
+        State.water.base = {
+          name: found.name,
+          ca: found.ca,
+          mg: found.mg,
+          na: found.na,
+          cl: found.cl,
+          so4: found.so4,
+          hco3: found.hco3,
+        };
+        syncWaterToUI();
         recalculateCallback();
       }
     });
@@ -289,8 +287,7 @@ function setupMobileMashInputs(recalculateCallback) {
       const presetKey = btn.dataset.mobileMash;
       const preset = MASH_PRESETS[presetKey];
       if (preset) {
-        State.mash.profileName = preset.name;
-        State.mash.steps = preset.steps.map((s, idx) => ({ ...s, id: Date.now() + idx }));
+        State.mash = preset.steps.map((s) => ({ ...s, id: generateId() }));
         recalculateCallback();
       }
     });
@@ -298,8 +295,8 @@ function setupMobileMashInputs(recalculateCallback) {
 
   // Add Mash Step
   document.getElementById('mobile-btn-add-mash-step')?.addEventListener('click', () => {
-    State.mash.steps.push({
-      id: Date.now(),
+    State.mash.push({
+      id: generateId(),
       name: 'Försockring',
       temp: 67,
       time: 60,
@@ -315,7 +312,7 @@ function renderMobileMashSteps(recalculateCallback) {
 
   container.innerHTML = '';
 
-  State.mash.steps.forEach((step) => {
+  State.mash.forEach((step) => {
     const card = document.createElement('div');
     card.className = 'mobile-card';
     card.innerHTML = `
@@ -356,7 +353,7 @@ function renderMobileMashSteps(recalculateCallback) {
     inp.addEventListener('change', (e) => {
       const id = parseInt(e.target.dataset.id);
       const field = e.target.dataset.field;
-      const step = State.mash.steps.find((s) => s.id === id);
+      const step = State.mash.find((s) => s.id === id);
       if (step) {
         step[field] = field === 'name' ? e.target.value : parseFloat(e.target.value) || 0;
         recalculateCallback();
@@ -370,7 +367,7 @@ function renderMobileMashSteps(recalculateCallback) {
       const id = parseInt(btn.dataset.id);
       const field = btn.dataset.stepField;
       const dir = parseFloat(btn.dataset.dir);
-      const step = State.mash.steps.find((s) => s.id === id);
+      const step = State.mash.find((s) => s.id === id);
       if (step) {
         step[field] = Math.max(0, step[field] + dir);
         recalculateCallback();
@@ -382,7 +379,7 @@ function renderMobileMashSteps(recalculateCallback) {
   container.querySelectorAll('[data-remove-step]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const id = parseInt(btn.dataset.removeStep);
-      State.mash.steps = State.mash.steps.filter((s) => s.id !== id);
+      State.mash = State.mash.filter((s) => s.id !== id);
       recalculateCallback();
     });
   });
