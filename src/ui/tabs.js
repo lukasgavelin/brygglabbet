@@ -118,7 +118,11 @@ export function updateAccordionBadges() {
   // 6. Water badge
   const badgeWater = document.getElementById('badge-water');
   if (badgeWater) {
-    const profileName = State.water?.base?.name || 'Kranvatten';
-    badgeWater.textContent = profileName;
+    const profileName = State.water?.base?.name || 'Anpassat vatten';
+    const salts = State.water?.salts || {};
+    const totalSalts = Object.values(salts).reduce((s, v) => s + (v || 0), 0);
+    badgeWater.textContent = totalSalts > 0
+      ? `${profileName} (+${totalSalts.toFixed(1)} g salter)`
+      : profileName;
   }
 }

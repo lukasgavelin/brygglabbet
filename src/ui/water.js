@@ -100,14 +100,28 @@ function getNumVal(ids, fallback = 0) {
 
 function syncWaterFromUI() {
   const currentName = State.water?.base?.name;
+
+  const newCa = getNumVal(['w-base-ca', 'w-ca'], 0);
+  const newMg = getNumVal(['w-base-mg', 'w-mg'], 0);
+  const newNa = getNumVal(['w-base-na', 'w-na'], 0);
+  const newCl = getNumVal(['w-base-cl', 'w-cl'], 0);
+  const newSo4 = getNumVal(['w-base-so4', 'w-so4'], 0);
+  const newHco3 = getNumVal(['w-base-hco3', 'w-hco3'], 0);
+
+  // Om värdena har ändrats från originalprofilens värden, markera som anpassat
+  const oldBase = State.water.base;
+  const valuesChanged =
+    oldBase.ca !== newCa || oldBase.mg !== newMg || oldBase.na !== newNa ||
+    oldBase.cl !== newCl || oldBase.so4 !== newSo4 || oldBase.hco3 !== newHco3;
+
   State.water.base = {
-    name: currentName || 'Anpassat vatten',
-    ca: getNumVal(['w-base-ca', 'w-ca'], 0),
-    mg: getNumVal(['w-base-mg', 'w-mg'], 0),
-    na: getNumVal(['w-base-na', 'w-na'], 0),
-    cl: getNumVal(['w-base-cl', 'w-cl'], 0),
-    so4: getNumVal(['w-base-so4', 'w-so4'], 0),
-    hco3: getNumVal(['w-base-hco3', 'w-hco3'], 0),
+    name: valuesChanged ? 'Anpassat vatten' : (currentName || 'Kranvatten'),
+    ca: newCa,
+    mg: newMg,
+    na: newNa,
+    cl: newCl,
+    so4: newSo4,
+    hco3: newHco3,
   };
 
   State.water.salts = {

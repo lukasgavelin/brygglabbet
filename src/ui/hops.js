@@ -70,7 +70,11 @@ export function renderHopsTable(recalculateCallback) {
     tbody.appendChild(tr);
   });
 
-  tbody.querySelectorAll('input, select').forEach((el) => {
+  tbody.querySelectorAll('input').forEach((el) => {
+    el.addEventListener('input', (e) => onHopInputChange(e, recalculateCallback));
+    el.addEventListener('change', (e) => onHopInputChange(e, recalculateCallback));
+  });
+  tbody.querySelectorAll('select').forEach((el) => {
     el.addEventListener('change', (e) => onHopInputChange(e, recalculateCallback));
   });
   tbody.querySelectorAll('[data-remove="hop"]').forEach((btn) => {

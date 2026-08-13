@@ -61,7 +61,7 @@ export function createInitialState() {
     mash: [],
     water: {
       volume: 25,
-      base: { ca: 50, mg: 10, na: 20, cl: 50, so4: 50, hco3: 100 },
+      base: { name: 'Kranvatten', ca: 50, mg: 10, na: 20, cl: 50, so4: 50, hco3: 100 },
       salts: {
         gypsum: 0,
         calciumChloride: 0,

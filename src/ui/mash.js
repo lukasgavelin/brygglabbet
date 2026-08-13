@@ -80,6 +80,7 @@ export function renderMashTable(recalculateCallback) {
   });
 
   tbody.querySelectorAll('input, select').forEach((el) => {
+    el.addEventListener('input', (e) => onMashInputChange(e, recalculateCallback));
     el.addEventListener('change', (e) => onMashInputChange(e, recalculateCallback));
   });
   tbody.querySelectorAll('[data-remove="mash"]').forEach((btn) => {

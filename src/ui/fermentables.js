@@ -65,6 +65,7 @@ export function renderFermentablesTable(recalculateCallback) {
   });
 
   tbody.querySelectorAll('input').forEach((inp) => {
+    inp.addEventListener('input', (e) => onFermentableInputChange(e, recalculateCallback));
     inp.addEventListener('change', (e) => onFermentableInputChange(e, recalculateCallback));
   });
   tbody.querySelectorAll('[data-remove="fermentable"]').forEach((btn) => {

@@ -72,8 +72,9 @@ export function syncEquipmentFromUI() {
     return isNaN(val) ? fallback : val;
   };
 
-  const batchVol = getNumVal('batch-volume', getNumVal('eq-batch-vol', 20));
-  const eff = getNumVal('efficiency', getNumVal('eq-efficiency', 75));
+  // Prioritera utrustningssektionens egna fält; faller tillbaka på receptflikens fält
+  const batchVol = getNumVal('eq-batch-vol', getNumVal('batch-volume', 20));
+  const eff = getNumVal('eq-efficiency', getNumVal('efficiency', 75));
 
   State.equipment.batchVolume = batchVol;
   State.equipment.efficiency = eff;
