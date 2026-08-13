@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { State, createInitialState } from '../src/state.js';
-import { setupMashTab, addMashStep, renderMashTable } from '../src/ui/mash.js';
+import { setupMashTab, addMashStep } from '../src/ui/mash.js';
 import { MASH_PRESETS } from '../src/core/data.js';
 
 describe('Mash UI & State Integration', () => {
