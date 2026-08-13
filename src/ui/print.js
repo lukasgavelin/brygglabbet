@@ -14,6 +14,7 @@ import {
   calculateEBC,
   formatSG,
   calculateWaterVolumes,
+  sgToPlato,
 } from '../core/calculations.js';
 
 export function setupPrintHandler() {
@@ -46,8 +47,9 @@ function preparePrintView() {
 
     // Core Calculations
     const ogRes = calculateOG(fermentables, recipe.batchVolume || 20, recipe.efficiency || 75);
-    const fgRes = calculateFG(ogRes.sg, ((yeast.attMin || 72) + (yeast.attMax || 78)) / 2);
-    const abvRes = calculateABV(ogRes.sg, fgRes.sg);
+    const fg_sg = calculateFG(ogRes.sg, ((yeast.attMin || 72) + (yeast.attMax || 78)) / 2);
+    const fg_plato = sgToPlato(fg_sg);
+    const abv = calculateABV(ogRes.sg, fg_sg);
     const ibuRes = calculateIBU(hops, ogRes.sg, recipe.batchVolume || 20);
     const ebcRes = calculateEBC(fermentables, recipe.batchVolume || 20);
     const vols = calculateWaterVolumes(equipment, fermentables, recipe.boilTime || 60);
@@ -179,8 +181,8 @@ function preparePrintView() {
 
       <div class="print-metrics-row">
         <div class="metric-item"><strong>OG</strong><br>${formatSG(ogRes.sg)} (${ogRes.plato.toFixed(1)}°P)</div>
-        <div class="metric-item"><strong>FG</strong><br>${formatSG(fgRes.sg)} (${fgRes.plato.toFixed(1)}°P)</div>
-        <div class="metric-item"><strong>ABV</strong><br>${abvRes.abv.toFixed(1)}%</div>
+        <div class="metric-item"><strong>FG</strong><br>${formatSG(fg_sg)} (${fg_plato.toFixed(1)}°P)</div>
+        <div class="metric-item"><strong>ABV</strong><br>${abv.toFixed(1)}%</div>
         <div class="metric-item"><strong>Beska</strong><br>${ibuRes.total.toFixed(0)} IBU</div>
         <div class="metric-item"><strong>Färg</strong><br>${ebcRes.ebc.toFixed(0)} EBC</div>
         <div class="metric-item"><strong>Batchvolym</strong><br>${recipe.batchVolume || 20} L</div>
