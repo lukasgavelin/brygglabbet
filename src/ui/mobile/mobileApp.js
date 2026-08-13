@@ -24,6 +24,7 @@ import { saveRecipe, newRecipe, openRecipeModal, openPresetRecipesModal, exportJ
 import { openModal, openFermentableModal, openHopModal } from '../modals.js';
 import { toggleBrewdayView } from '../brewday.js';
 import { triggerPrint } from '../print.js';
+import { renderMashTable } from '../mash.js';
 import { escHtml } from '../toast.js';
 
 // eslint-disable-next-line no-unused-vars
@@ -383,8 +384,10 @@ function renderMobileMashSteps(recalculateCallback) {
   // Remove
   container.querySelectorAll('[data-remove-step]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const id = parseInt(btn.dataset.removeStep);
+      const id = parseInt(btn.dataset.removeStep, 10);
       State.mash = State.mash.filter((s) => s.id !== id);
+      renderMobileMashSteps(recalculateCallback);
+      renderMashTable(recalculateCallback);
       recalculateCallback();
     });
   });

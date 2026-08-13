@@ -7,12 +7,15 @@ import { MASH_PRESETS } from '../core/data.js';
 import { escHtml } from './toast.js';
 
 export function setupMashTab(recalculateCallback) {
-  document.getElementById('btn-add-mash-step')?.addEventListener('click', () => {
+  const handleAddStep = () => {
     addMashStep(
       { name: 'Sackarifikation', type: 'Infusion', temp: 67, time: 60 },
       recalculateCallback
     );
-  });
+  };
+
+  document.getElementById('btn-add-mash-step')?.addEventListener('click', handleAddStep);
+  document.getElementById('btn-add-mash-step-header')?.addEventListener('click', handleAddStep);
 
   document.querySelectorAll('[data-mash-preset]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -36,7 +39,7 @@ export function renderMashTable(recalculateCallback) {
   const empty = document.getElementById('mash-empty');
   const table = document.getElementById('mash-table');
 
-  if (!tbody || !empty || !table) return;
+  if (!tbody || !table) return;
 
   if (State.mash.length === 0) {
     table.style.display = 'none';
