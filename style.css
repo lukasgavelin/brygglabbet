@@ -2194,6 +2194,8 @@ body.mobile-mode #mobile-stats-fab {
   .brewday-col-right {
     display: none;
   }
+}
+
 /* Bryggdag Wizard/Stepper layout additions */
 .brewday-progress-container {
   background: var(--bg-secondary);
