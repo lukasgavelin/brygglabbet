@@ -103,7 +103,7 @@
                 <label class="form-label" for="recipe-style">
                   BJCP-ölistil
                   <span class="tooltip-wrap">
-                    <span class="help-icon" title="Välj en officiell BJCP-stil för att se hur ditt recept matchar stilens riktlinjer i sidopanelen.">?</span>
+                    <span class="help-icon" aria-label="Hjälp: BJCP-ölistil">?</span>
                     <span class="tooltip-text">Välj en officiell BJCP-stil för att se hur ditt recept matchar stilens riktlinjer (OG, FG, ABV, IBU, EBC) i sidopanelen.</span>
                   </span>
                 </label>
@@ -115,7 +115,7 @@
                 <label class="form-label" for="batch-volume">
                   Bryggvolym (Jäskärl)
                   <span class="tooltip-wrap">
-                    <span class="help-icon" title="Volym vört som du vill ha i jäskärlet efter kylning.">?</span>
+                    <span class="help-icon" aria-label="Hjälp: Bryggvolym">?</span>
                     <span class="tooltip-text">Slutlig volym vört i jäskärlet efter kylning. Alla malt- och humlegivor skalas mot denna volym.</span>
                   </span>
                 </label>
@@ -137,7 +137,7 @@
                   <label class="form-label" for="efficiency">
                     Effektivitet
                     <span class="tooltip-wrap">
-                      <span class="help-icon" title="Mäskeffektivitet för bryggningen (vanligtvis 70-80%).">?</span>
+                      <span class="help-icon" aria-label="Hjälp: Mäskeffektivitet">?</span>
                       <span class="tooltip-text">Mäskeffektivitet för bryggverket. Anger hur stor andel av maltens potentiella sockerarter som lakas ut till vörten.</span>
                     </span>
                   </label>
@@ -150,7 +150,7 @@
                   <label class="form-label" for="boil-time">
                     Koktid
                     <span class="tooltip-wrap">
-                      <span class="help-icon" title="Koktid för vörten (standard 60 minuter).">?</span>
+                      <span class="help-icon" aria-label="Hjälp: Koktid">?</span>
                       <span class="tooltip-text">Total koktid i minuter (standard 60 min, 90 min för ljus pilsnermalt).</span>
                     </span>
                   </label>
@@ -171,7 +171,7 @@
                 <label class="form-label" for="eq-boiloff">
                   Avdunstning
                   <span class="tooltip-wrap">
-                    <span class="help-icon" title="Hur många liter vätska som kokar bort per timme.">?</span>
+                    <span class="help-icon" aria-label="Hjälp: Avdunstning">?</span>
                     <span class="tooltip-text">Avdunstningstakt per timme under kraftigt kok (standard 3.0 L/h för elbryggverk).</span>
                   </span>
                 </label>
@@ -186,7 +186,7 @@
                 <label class="form-label" for="eq-kettle-loss">
                   Grytförlust
                   <span class="tooltip-wrap">
-                    <span class="help-icon" title="Vätska och bottensats (trub) som lämnas kvar i kokkärlet.">?</span>
+                    <span class="help-icon" aria-label="Hjälp: Grytförlust">?</span>
                     <span class="tooltip-text">Vätska och trub/humlerester som inte tappas över till jäskärlet.</span>
                   </span>
                 </label>
@@ -201,7 +201,7 @@
                 <label class="form-label" for="eq-grain-abs">
                   Maltabsorption
                   <span class="tooltip-wrap">
-                    <span class="help-icon" title="Hur mycket vatten krossad malt suger åt sig under mäskningen.">?</span>
+                    <span class="help-icon" aria-label="Hjälp: Maltabsorption">?</span>
                     <span class="tooltip-text">Hur mycket vatten malten suger upp och behåller efter lakning (standard 0.96 L per kg malt).</span>
                   </span>
                 </label>
@@ -216,7 +216,7 @@
                 <label class="form-label" for="boil-volume">
                   Kokvolym
                   <span class="tooltip-wrap">
-                    <span class="help-icon" title="Beräknad volym vört före koket startar (Pre-boil volume).">?</span>
+                    <span class="help-icon" aria-label="Hjälp: Kokvolym">?</span>
                     <span class="tooltip-text">Pre-boil vörtvolym i kokkärlet innan koket startar. Beräknas från batchvolym + kokavdunstning + grytförlust.</span>
                   </span>
                 </label>
@@ -440,7 +440,7 @@
                   <label class="form-label" for="att-min">
                     Förjäsning min
                     <span class="tooltip-wrap">
-                      <span class="help-icon" title="Lägsta förväntade förjäsningsgrad för jäststammen.">?</span>
+                      <span class="help-icon" aria-label="Hjälp: Förjäsning min">?</span>
                       <span class="tooltip-text">Anger hur stor del av vörtens sockerarter som jästen omvandlar till alkohol och koldioxid (standard 70–80%).</span>
                     </span>
                   </label>
@@ -453,7 +453,7 @@
                   <label class="form-label" for="att-max">
                     Förjäsning max
                     <span class="tooltip-wrap">
-                      <span class="help-icon" title="Högsta förväntade förjäsningsgrad för jäststammen.">?</span>
+                      <span class="help-icon" aria-label="Hjälp: Förjäsning max">?</span>
                       <span class="tooltip-text">Högsta förjäsningsgrad. Används för att beräkna förväntad slutgravitet (FG) och beräknad alkoholhalt (ABV).</span>
                     </span>
                   </label>
@@ -691,8 +691,8 @@
       <div class="stat-row">
         <span class="stat-label">
           Bitterhet/Malt (BU:GU)
-          <span class="tooltip-wrap tooltip-left">
-            <span class="help-icon" title="BU:GU visar balansen mellan beska (IBU) och sötma (GU). <0.5 är maltig, 0.5–0.7 balanserad, >0.8 bitter.">?</span>
+          <span class="tooltip-wrap">
+            <span class="help-icon" aria-label="Hjälp: Bitterhet/Malt-kvot">?</span>
             <span class="tooltip-text">Balans mellan beska (IBU) och sötma (GU). &lt;0.5 är maltfokuserad, 0.5–0.7 balanserad och &gt;0.8 utpräglat bitter/humledriven.</span>
           </span>
         </span>
@@ -716,8 +716,8 @@
       <div class="stat-row">
         <span class="stat-label">
           Mäskvatten
-          <span class="tooltip-wrap tooltip-left">
-            <span class="help-icon" title="Mäskvattenvolym = total maltvikt × mäskkvot.">?</span>
+          <span class="tooltip-wrap">
+            <span class="help-icon" aria-label="Hjälp: Mäskvatten">?</span>
             <span class="tooltip-text">Vattenvolym som tillsätts i mäskkärlet vid inmäskning (standard ca 3.0 L/kg malt).</span>
           </span>
         </span>
@@ -726,8 +726,8 @@
       <div class="stat-row">
         <span class="stat-label">
           Lakvatten
-          <span class="tooltip-wrap tooltip-left">
-            <span class="help-icon" title="Lakvattenvolym = totalt vattenbehov − mäskvatten.">?</span>
+          <span class="tooltip-wrap">
+            <span class="help-icon" aria-label="Hjälp: Lakvatten">?</span>
             <span class="tooltip-text">Vatten som värms till ~76–78°C för att skölja ut resterande sockerarter ur maltbädden.</span>
           </span>
         </span>
@@ -736,8 +736,8 @@
       <div class="stat-row">
         <span class="stat-label">
           Totalt vatten
-          <span class="tooltip-wrap tooltip-left">
-            <span class="help-icon" title="Totalt vattenbehov = kokvolym + maltabsorption.">?</span>
+          <span class="tooltip-wrap">
+            <span class="help-icon" aria-label="Hjälp: Totalt vatten">?</span>
             <span class="tooltip-text">Totalt vattenbehov för hela bryggningen, inklusive mäskvatten, lakvatten och maltabsorption.</span>
           </span>
         </span>
