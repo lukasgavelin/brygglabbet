@@ -139,7 +139,12 @@ function setupHeaderControls() {
     importJSON(e, recalculate);
   });
 
-  // Recipe action triggers inside Receptinfo card
+  // Recipe action triggers inside Section 7 (Anteckningar & CTA)
+  document.getElementById('cta-btn-start-brewday')?.addEventListener('click', () => {
+    toggleBrewdayView(recalculate);
+  });
+  document.getElementById('cta-btn-print')?.addEventListener('click', triggerPrint);
+
   document
     .getElementById('tab-btn-preset-recipes')
     ?.addEventListener('click', () => {

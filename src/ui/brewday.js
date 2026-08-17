@@ -30,6 +30,7 @@ let isBrewdayOpen = false;
 
 // UI Persistence state
 const checkedItems = new Set();
+const triggeredHopAlerts = new Set();
 let measuredOG = '';
 let measuredPH = '';
 let brewNotes = '';
@@ -321,6 +322,12 @@ export function renderBrewdayContent(recalculateCallback) {
             ${hopListHtml}
           </ul>
         ` : '<p style="margin-top:10px; font-style:italic; font-size:0.85rem;">Inga humletillsatser under koket.</p>'}
+        <div style="margin-top:16px;">
+          <label class="brewday-done-check">
+            <input type="checkbox" id="step-boil-ready" ${checkedItems.has('step-boil-ready') ? 'checked' : ''}> 
+            <span>Vörtkok och humlegivor slutförda</span>
+          </label>
+        </div>
       `;
     }
   });
@@ -705,6 +712,31 @@ function setupTimerControls() {
         clearInterval(activeTimer);
         activeTimer = setInterval(() => {
           timerSecondsRemaining--;
+
+          // Check for active boil hop additions
+          if (activeTimerTargetId === 'timer-display-boil' && State.hops && State.hops.length > 0) {
+            const boilHops = State.hops.filter((h) => h.use === 'kok' || h.use === 'whirlpool');
+            boilHops.forEach((h, hopIdx) => {
+              const targetSecs = (h.use === 'kok' ? (h.time || 0) : 0) * 60;
+              const alertKey = `${h.name}-${h.amount}-${targetSecs}`;
+              if (timerSecondsRemaining === targetSecs && !triggeredHopAlerts.has(alertKey)) {
+                triggeredHopAlerts.add(alertKey);
+                playAlarmNotification();
+                const timeLabel = h.time > 0 ? `${h.time} min kvar av koket` : 'Whirlpool / Kokslut';
+                showToast(`🌿 Humlegiva: Tillsätt ${h.amount} g ${h.name} (${timeLabel})!`, 'warning');
+
+                // Animate/highlight the checklist row
+                const hopCb = document.getElementById(`step-boil-hop-${hopIdx}`);
+                if (hopCb) {
+                  const label = hopCb.closest('li');
+                  if (label) {
+                    label.classList.add('hop-alert-active');
+                    setTimeout(() => label.classList.remove('hop-alert-active'), 15000);
+                  }
+                }
+              }
+            });
+          }
           
           if (timerSecondsRemaining <= 0) {
             clearInterval(activeTimer);
@@ -723,6 +755,29 @@ function setupTimerControls() {
             playAlarmNotification();
             showToast('⏰ Timern har löpt ut!', 'success');
             updateHeaderTimerIndicator();
+
+            // Auto-check completed step checkbox
+            if (activeTimerTargetId && activeTimerTargetId.startsWith('timer-display-mash-')) {
+              const mashIdx = activeTimerTargetId.replace('timer-display-mash-', '');
+              const cb = document.getElementById(`step-mash-${mashIdx}-ready`);
+              if (cb) {
+                cb.checked = true;
+                checkedItems.add(cb.id);
+              }
+            } else if (activeTimerTargetId === 'timer-display-boil') {
+              const cb = document.getElementById('step-boil-ready');
+              if (cb) {
+                cb.checked = true;
+                checkedItems.add(cb.id);
+              }
+            }
+
+            // Pulse Next button to guide user
+            const nextBtn = document.getElementById('btn-wizard-next');
+            if (nextBtn) {
+              nextBtn.classList.add('btn-pulse-next');
+              setTimeout(() => nextBtn.classList.remove('btn-pulse-next'), 7000);
+            }
           } else {
             const timeStr = formatSeconds(timerSecondsRemaining);
             const currentTargetEl = document.getElementById(activeTimerTargetId);
@@ -747,6 +802,9 @@ function setupTimerControls() {
         activeTimer = null;
         isTimerRunning = false;
         timerSecondsRemaining = totalSecs;
+        if (targetId === 'timer-display-boil') {
+          triggeredHopAlerts.clear();
+        }
       }
 
       if (targetEl) {

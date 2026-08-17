@@ -59,7 +59,7 @@
     <!-- Quick Navigation (Smooth Scroll Links) -->
     <nav id="quick-nav" role="navigation" aria-label="Snabblänkar till receptsektioner">
       <a href="#sec-equipment" class="quick-nav-btn active">
-        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span> Utrustning
+        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Grunddata & Utrustning
       </a>
       <a href="#sec-fermentables" class="quick-nav-btn">
         <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></span> Malt
@@ -77,48 +77,119 @@
         <span class="quick-icon">💧</span> Vatten (Valfritt)
       </a>
       <a href="#sec-recipe-info" class="quick-nav-btn">
-        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Info & Stil
+        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> Anteckningar & Bryggdag
       </a>
     </nav>
 
     <!-- Continuous Recipe Sheet Container -->
     <div id="tab-content">
 
-      <!-- ===== 1. UTRUSTNING & VOLYMER ============================= -->
+      <!-- ===== 1. GRUNDDATA & UTRUSTNINGSPROFIL ============================= -->
       <section id="sec-equipment" class="accordion-card collapsed">
         <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span> Utrustningsprofil & Volymberäkning</h2>
+          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Grunddata & Utrustningsprofil</h2>
           <div class="accordion-header-actions">
-            <span class="accordion-badge" id="badge-equipment">Preset: Standard 30L</span>
+            <span class="accordion-badge" id="badge-equipment">Standard 30L (20L @ 75%)</span>
             <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </div>
 
         <div class="accordion-content">
+          <!-- Ölstil & Receptmål -->
           <div class="card-grid-2" style="margin-bottom:14px">
             <div class="card">
-              <p class="section-label">Utrustningspreset</p>
+              <p class="section-label">Ölstil & Mål</p>
+              <div class="form-group" style="margin-bottom:10px">
+                <label class="form-label" for="recipe-style">
+                  BJCP-ölistil
+                  <span class="tooltip-wrap">
+                    <span class="help-icon" title="Välj en officiell BJCP-stil för att se hur ditt recept matchar stilens riktlinjer i sidopanelen.">?</span>
+                    <span class="tooltip-text">Välj en officiell BJCP-stil för att se hur ditt recept matchar stilens riktlinjer (OG, FG, ABV, IBU, EBC) i sidopanelen.</span>
+                  </span>
+                </label>
+                <select id="recipe-style">
+                  <option value="">— Välj stil —</option>
+                </select>
+              </div>
               <div class="form-group">
+                <label class="form-label" for="batch-volume">
+                  Bryggvolym (Jäskärl)
+                  <span class="tooltip-wrap">
+                    <span class="help-icon" title="Volym vört som du vill ha i jäskärlet efter kylning.">?</span>
+                    <span class="tooltip-text">Slutlig volym vört i jäskärlet efter kylning. Alla malt- och humlegivor skalas mot denna volym.</span>
+                  </span>
+                </label>
+                <div class="input-group">
+                  <input type="number" inputmode="decimal" id="batch-volume" value="20" min="1" max="1000" step="0.5">
+                  <span class="input-addon">L</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <p class="section-label">Utrustningspreset & Effektivitet</p>
+              <div class="form-group" style="margin-bottom:10px">
                 <label class="form-label" for="equipment-preset">Välj bryggverk / utrustning</label>
                 <select id="equipment-preset"></select>
               </div>
+              <div class="card-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="efficiency">
+                    Effektivitet
+                    <span class="tooltip-wrap">
+                      <span class="help-icon" title="Mäskeffektivitet för bryggningen (vanligtvis 70-80%).">?</span>
+                      <span class="tooltip-text">Mäskeffektivitet för bryggverket. Anger hur stor andel av maltens potentiella sockerarter som lakas ut till vörten.</span>
+                    </span>
+                  </label>
+                  <div class="input-group">
+                    <input type="number" inputmode="decimal" id="efficiency" value="75" min="10" max="100" step="1">
+                    <span class="input-addon">%</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="boil-time">
+                    Koktid
+                    <span class="tooltip-wrap">
+                      <span class="help-icon" title="Koktid för vörten (standard 60 minuter).">?</span>
+                      <span class="tooltip-text">Total koktid i minuter (standard 60 min, 90 min för ljus pilsnermalt).</span>
+                    </span>
+                  </label>
+                  <div class="input-group">
+                    <input type="number" inputmode="decimal" id="boil-time" value="60" min="0" max="240" step="5">
+                    <span class="input-addon">min</span>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <!-- Detaljerade grytparametrar -->
+          <p class="section-label" style="margin-bottom:8px">Utrustningsparametrar & Förluster</p>
+          <div class="card-grid-4" style="margin-bottom:14px">
             <div class="card">
-              <p class="section-label">Inställningar</p>
-              <div class="form-group" style="margin-bottom:8px">
-                <label class="form-label" for="eq-boiloff">Avdunstning (L/h)</label>
+              <div class="form-group">
+                <label class="form-label" for="eq-boiloff">
+                  Avdunstning
+                  <span class="tooltip-wrap">
+                    <span class="help-icon" title="Hur många liter vätska som kokar bort per timme.">?</span>
+                    <span class="tooltip-text">Avdunstningstakt per timme under kraftigt kok (standard 3.0 L/h för elbryggverk).</span>
+                  </span>
+                </label>
                 <div class="input-group">
                   <input type="number" inputmode="decimal" id="eq-boiloff" value="3.0" step="0.1" min="0">
                   <span class="input-addon">L/h</span>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div class="card-grid-3">
             <div class="card">
-              <div class="form-group" style="margin-bottom:8px">
-                <label class="form-label" for="eq-kettle-loss">Grytförlust (Trub/humle)</label>
+              <div class="form-group">
+                <label class="form-label" for="eq-kettle-loss">
+                  Grytförlust
+                  <span class="tooltip-wrap">
+                    <span class="help-icon" title="Vätska och bottensats (trub) som lämnas kvar i kokkärlet.">?</span>
+                    <span class="tooltip-text">Vätska och trub/humlerester som inte tappas över till jäskärlet.</span>
+                  </span>
+                </label>
                 <div class="input-group">
                   <input type="number" inputmode="decimal" id="eq-kettle-loss" value="2.0" step="0.5" min="0">
                   <span class="input-addon">L</span>
@@ -126,20 +197,32 @@
               </div>
             </div>
             <div class="card">
-              <div class="form-group" style="margin-bottom:8px">
-                <label class="form-label" for="eq-fermenter-loss">Jäskärlsförlust (Bottensats)</label>
+              <div class="form-group">
+                <label class="form-label" for="eq-grain-abs">
+                  Maltabsorption
+                  <span class="tooltip-wrap">
+                    <span class="help-icon" title="Hur mycket vatten krossad malt suger åt sig under mäskningen.">?</span>
+                    <span class="tooltip-text">Hur mycket vatten malten suger upp och behåller efter lakning (standard 0.96 L per kg malt).</span>
+                  </span>
+                </label>
                 <div class="input-group">
-                  <input type="number" inputmode="decimal" id="eq-fermenter-loss" value="1.0" step="0.5" min="0">
-                  <span class="input-addon">L</span>
+                  <input type="number" inputmode="decimal" id="eq-grain-abs" value="0.96" step="0.05" min="0.5">
+                  <span class="input-addon">L/kg</span>
                 </div>
               </div>
             </div>
             <div class="card">
-              <div class="form-group" style="margin-bottom:8px">
-                <label class="form-label" for="eq-grain-abs">Maltabsorption</label>
+              <div class="form-group">
+                <label class="form-label" for="boil-volume">
+                  Kokvolym
+                  <span class="tooltip-wrap">
+                    <span class="help-icon" title="Beräknad volym vört före koket startar (Pre-boil volume).">?</span>
+                    <span class="tooltip-text">Pre-boil vörtvolym i kokkärlet innan koket startar. Beräknas från batchvolym + kokavdunstning + grytförlust.</span>
+                  </span>
+                </label>
                 <div class="input-group">
-                  <input type="number" inputmode="decimal" id="eq-grain-abs" value="0.96" step="0.05" min="0.5">
-                  <span class="input-addon">L/kg</span>
+                  <input type="number" inputmode="decimal" id="boil-volume" value="25" min="1" max="1000" step="0.5">
+                  <span class="input-addon">L</span>
                 </div>
               </div>
             </div>
@@ -286,7 +369,7 @@
         </div>
       </section>
 
-      <!-- ===== 6. JÄST & FERMENTERING ============================= -->
+      <!-- ===== 5. JÄST & FERMENTERING ============================= -->
       <section id="sec-yeast" class="accordion-card collapsed">
         <div class="accordion-header" data-toggle="accordion">
           <h2 class="accordion-title"><span class="title-icon">🧫</span> Jäst & Jäsning</h2>
@@ -297,28 +380,30 @@
         </div>
 
         <div class="accordion-content">
-          <div class="card-grid-2">
+          <div class="card-grid-2" style="margin-bottom:14px">
             <div class="card">
-              <p class="section-label">Jäststam</p>
+              <p class="section-label">Jäststam & Tillverkare</p>
               <div class="form-group" style="margin-bottom:10px">
                 <label class="form-label" for="yeast-select">Välj ur jästdatabas</label>
                 <select id="yeast-select">
-                  <option value="">— Välj jäststram —</option>
+                  <option value="">— Välj jäststam —</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label class="form-label" for="yeast-name">Jästnamn (Anpassad)</label>
-                <input type="text" id="yeast-name" placeholder="t.ex. SafAle US-05">
+              <div class="card-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="yeast-name">Jästnamn</label>
+                  <input type="text" id="yeast-name" placeholder="t.ex. SafAle US-05">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="yeast-lab">Tillverkare / Lab</label>
+                  <input type="text" id="yeast-lab" placeholder="t.ex. Fermentis">
+                </div>
               </div>
             </div>
 
             <div class="card">
-              <p class="section-label">Parametrar</p>
+              <p class="section-label">Jästtyp & Jästemperatur</p>
               <div class="form-group" style="margin-bottom:10px">
-                <label class="form-label" for="yeast-lab">Tillverkare / Lab</label>
-                <input type="text" id="yeast-lab" placeholder="t.ex. Fermentis, Lallemand, Wyeast">
-              </div>
-              <div class="form-group">
                 <label class="form-label" for="yeast-type">Jästtyp</label>
                 <select id="yeast-type">
                   <option value="ale">Ale (Överjäst)</option>
@@ -328,6 +413,60 @@
                   <option value="wild">Vild / Brett</option>
                 </select>
               </div>
+              <div class="card-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="yeast-temp-min">Jästemperatur min</label>
+                  <div class="input-group">
+                    <input type="number" inputmode="decimal" id="yeast-temp-min" value="18" step="1">
+                    <span class="input-addon">°C</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="yeast-temp-max">Jästemperatur max</label>
+                  <div class="input-group">
+                    <input type="number" inputmode="decimal" id="yeast-temp-max" value="22" step="1">
+                    <span class="input-addon">°C</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-grid-2">
+            <div class="card">
+              <p class="section-label">Förväntad Förjäsningsgrad (Attenuation)</p>
+              <div class="card-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="att-min">
+                    Förjäsning min
+                    <span class="tooltip-wrap">
+                      <span class="help-icon" title="Lägsta förväntade förjäsningsgrad för jäststammen.">?</span>
+                      <span class="tooltip-text">Anger hur stor del av vörtens sockerarter som jästen omvandlar till alkohol och koldioxid (standard 70–80%).</span>
+                    </span>
+                  </label>
+                  <div class="input-group">
+                    <input type="number" inputmode="decimal" id="att-min" value="72" min="40" max="100" step="1">
+                    <span class="input-addon">%</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="att-max">
+                    Förjäsning max
+                    <span class="tooltip-wrap">
+                      <span class="help-icon" title="Högsta förväntade förjäsningsgrad för jäststammen.">?</span>
+                      <span class="tooltip-text">Högsta förjäsningsgrad. Används för att beräkna förväntad slutgravitet (FG) och beräknad alkoholhalt (ABV).</span>
+                    </span>
+                  </label>
+                  <div class="input-group">
+                    <input type="number" inputmode="decimal" id="att-max" value="78" min="40" max="100" step="1">
+                    <span class="input-addon">%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card" id="yeast-desc-card" style="display:none">
+              <p class="section-label">Jästbeskrivning</p>
+              <div id="yeast-desc-text" style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5;"></div>
             </div>
           </div>
         </div>
@@ -454,96 +593,46 @@
         </div>
       </section>
 
-      <!-- ===== 7. RECEPTINFO & GRUNDDATA ============================= -->
+      <!-- ===== 7. ANTECKNINGAR & STARTA BRYGGDAG ============================= -->
       <section id="sec-recipe-info" class="accordion-card collapsed">
         <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Receptinfo, Stil & Noteringar</h2>
+          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> Anteckningar & Slutförande</h2>
           <div class="accordion-header-actions">
-            <div style="display:flex; gap:8px">
-              <button class="btn btn-ghost btn-sm" id="tab-btn-preset-recipes"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3m-3.5-6.5l-2 2m-7 7l-2 2m0-11l2 2m7 7l2 2"/></svg> Exempelrecept</button>
-              <button class="btn btn-secondary btn-sm" id="tab-btn-scale-recipe"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 16l3-8 3 8a3 3 0 0 1-6 0zM2 16l3-8 3 8a3 3 0 0 1-6 0zM12 3v18M3 7h18"/></svg> Skala recept</button>
-            </div>
+            <span class="accordion-badge" id="badge-recipe-info">Redo att brygga</span>
             <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </div>
 
         <div class="accordion-content">
-          <div class="card-grid-2">
-            <div class="card">
-              <p class="section-label">Ölstil</p>
-              <div class="form-group">
-                <label class="form-label" for="recipe-style">BJCP-stil</label>
-                <select id="recipe-style">
-                  <option value="">— Välj stil —</option>
-                </select>
-              </div>
-            </div>
-            <div class="card">
-              <p class="section-label">Anteckningar</p>
-              <div class="form-group">
-                <label class="form-label" for="recipe-notes">Receptnoteringar</label>
-                <textarea id="recipe-notes" placeholder="Fritext om receptet, inspirationer, anpassningar..."></textarea>
-              </div>
+          <div class="card" style="margin-bottom:16px">
+            <p class="section-label">Receptnoteringar & Minnesanteckningar</p>
+            <div class="form-group">
+              <textarea id="recipe-notes" rows="4" placeholder="Fritext om receptet, inspirationer, vattengivor, provsmakningsmål eller processanpassningar..."></textarea>
             </div>
           </div>
 
-          <div class="card-grid-3">
-            <div class="card">
-              <p class="section-label">Volymer</p>
-              <div class="form-group" style="margin-bottom:10px">
-                <label class="form-label" for="batch-volume">Bryggvolym (Jäskärl)</label>
-                <div class="input-group">
-                  <input type="number" inputmode="decimal" id="batch-volume" value="20" min="1" max="1000" step="0.5">
-                  <span class="input-addon">L</span>
-                </div>
-                <span class="form-hint">Volym öl i fermentorn</span>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="boil-volume">Kokvolym (Pre-boil)</label>
-                <div class="input-group">
-                  <input type="number" inputmode="decimal" id="boil-volume" value="25" min="1" max="1000" step="0.5">
-                  <span class="input-addon">L</span>
-                </div>
-                <span class="form-hint">Beräknas från utrustning</span>
+          <!-- CTA Banner: Redo att brygga -->
+          <div class="ready-to-brew-card">
+            <div class="ready-to-brew-header">
+              <div class="ready-icon">🍺</div>
+              <div class="ready-text">
+                <h3>Receptet är klart – Dags att brygga!</h3>
+                <p>Starta det interaktiva bryggdagsläget med integrerade timers, aktiva humlelarm och steg-för-steg-guide, eller skriv ut ett komplett bryggprotokoll.</p>
               </div>
             </div>
-
-            <div class="card">
-              <p class="section-label">Kok & Effektivitet</p>
-              <div class="form-group" style="margin-bottom:10px">
-                <label class="form-label" for="boil-time">Koktid</label>
-                <div class="input-group">
-                  <input type="number" inputmode="decimal" id="boil-time" value="60" min="0" max="240" step="5">
-                  <span class="input-addon">min</span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="efficiency">Bryggeffektivitet</label>
-                <div class="input-group">
-                  <input type="number" inputmode="decimal" id="efficiency" value="75" min="10" max="100" step="1">
-                  <span class="input-addon">%</span>
-                </div>
-                <span class="form-hint">Mäskeffektivitet för bryggningen</span>
-              </div>
-            </div>
-
-            <div class="card">
-              <p class="section-label">Förjäsningsgrad</p>
-              <div class="form-group" style="margin-bottom:10px">
-                <label class="form-label">Förjäsning min</label>
-                <div class="input-group">
-                  <input type="number" inputmode="decimal" id="att-min" value="72" min="40" max="100" step="1">
-                  <span class="input-addon">%</span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Förjäsning max</label>
-                <div class="input-group">
-                  <input type="number" inputmode="decimal" id="att-max" value="78" min="40" max="100" step="1">
-                  <span class="input-addon">%</span>
-                </div>
-                <span class="form-hint">Förväntad förjäsningsgrad</span>
-              </div>
+            <div class="ready-to-brew-actions">
+              <button class="btn btn-hero-brewday" id="cta-btn-start-brewday" title="Starta interaktivt bryggdagsläge">
+                <span class="quick-icon">🍺</span> Starta Bryggdagsläget →
+              </button>
+              <button class="btn btn-secondary btn-sm" id="cta-btn-print" title="Skriv ut bryggprotokoll">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Skriv ut protokoll
+              </button>
+              <button class="btn btn-ghost btn-sm" id="tab-btn-preset-recipes" title="Välj bland färdiga mallar">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3m-3.5-6.5l-2 2m-7 7l-2 2m0-11l2 2m7 7l2 2"/></svg> Mallar
+              </button>
+              <button class="btn btn-ghost btn-sm" id="tab-btn-scale-recipe" title="Skala om malt- och humlegivor">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 16l3-8 3 8a3 3 0 0 1-6 0zM2 16l3-8 3 8a3 3 0 0 1-6 0zM12 3v18M3 7h18"/></svg> Skala recept
+              </button>
             </div>
           </div>
         </div>
@@ -600,7 +689,13 @@
       <hr class="divider">
 
       <div class="stat-row">
-        <span class="stat-label">Bitterhet/Malt-kvot (BU:GU)</span>
+        <span class="stat-label">
+          Bitterhet/Malt (BU:GU)
+          <span class="tooltip-wrap tooltip-left">
+            <span class="help-icon" title="BU:GU visar balansen mellan beska (IBU) och sötma (GU). <0.5 är maltig, 0.5–0.7 balanserad, >0.8 bitter.">?</span>
+            <span class="tooltip-text">Balans mellan beska (IBU) och sötma (GU). &lt;0.5 är maltfokuserad, 0.5–0.7 balanserad och &gt;0.8 utpräglat bitter/humledriven.</span>
+          </span>
+        </span>
         <div class="stat-value" id="sb-bugu">—</div>
       </div>
       <div class="stat-row">
@@ -619,22 +714,40 @@
         <div class="stat-value" id="sb-eq-name" style="font-size:0.75rem; font-weight:600">Standard 30L</div>
       </div>
       <div class="stat-row">
-        <span class="stat-label">Mäskvatten</span>
+        <span class="stat-label">
+          Mäskvatten
+          <span class="tooltip-wrap tooltip-left">
+            <span class="help-icon" title="Mäskvattenvolym = total maltvikt × mäskkvot.">?</span>
+            <span class="tooltip-text">Vattenvolym som tillsätts i mäskkärlet vid inmäskning (standard ca 3.0 L/kg malt).</span>
+          </span>
+        </span>
         <div class="stat-value" id="sb-mash-water">— L</div>
       </div>
       <div class="stat-row">
-        <span class="stat-label">Lakvatten</span>
+        <span class="stat-label">
+          Lakvatten
+          <span class="tooltip-wrap tooltip-left">
+            <span class="help-icon" title="Lakvattenvolym = totalt vattenbehov − mäskvatten.">?</span>
+            <span class="tooltip-text">Vatten som värms till ~76–78°C för att skölja ut resterande sockerarter ur maltbädden.</span>
+          </span>
+        </span>
         <div class="stat-value" id="sb-sparge-water">— L</div>
       </div>
       <div class="stat-row">
-        <span class="stat-label">Totalt vatten</span>
+        <span class="stat-label">
+          Totalt vatten
+          <span class="tooltip-wrap tooltip-left">
+            <span class="help-icon" title="Totalt vattenbehov = kokvolym + maltabsorption.">?</span>
+            <span class="tooltip-text">Totalt vattenbehov för hela bryggningen, inklusive mäskvatten, lakvatten och maltabsorption.</span>
+          </span>
+        </span>
         <div class="stat-value" id="sb-total-water" style="color:var(--accent-gold); font-weight:700">— L</div>
       </div>
     </div>
 
     <div class="style-match-card" id="style-match-section">
       <div class="style-match-title"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Stilmatchning</div>
-      <div class="style-name-display" id="style-match-name">Välj en stil i Recept-fliken</div>
+      <div class="style-name-display" id="style-match-name">Välj en stil i Grunddata-sektionen</div>
       <div id="style-bars-container"></div>
     </div>
   </aside>
