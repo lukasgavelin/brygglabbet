@@ -2021,6 +2021,92 @@ body.mobile-mode #mobile-stats-fab {
   color: var(--text-secondary);
 }
 
+/* Mobile Ready To Brew Card (Screen 5) */
+.mobile-ready-card {
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(168, 93, 0, 0.14) 100%);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  margin-top: 6px;
+}
+.mobile-ready-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mobile-ready-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 6px rgba(168, 93, 0, 0.3));
+}
+.mobile-ready-title h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 3px 0;
+  color: var(--text-primary);
+}
+.mobile-ready-title p {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+.mobile-ready-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mobile-btn-hero {
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 0.98rem;
+  padding: 13px 16px;
+  border-radius: var(--radius);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(168, 93, 0, 0.35);
+  cursor: pointer;
+  width: 100%;
+}
+.mobile-btn-hero:active {
+  transform: scale(0.98);
+}
+.mobile-ready-subactions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Mobile Equipment Loss Grid */
+.mobile-loss-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+.mobile-loss-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mobile-loss-item label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
 /* ---------------------------------------------------------
    Brew Day Mode (Bryggdags-läge 2-Column Cooking View)
    --------------------------------------------------------- */

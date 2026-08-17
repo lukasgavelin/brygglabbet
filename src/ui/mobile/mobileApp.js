@@ -129,6 +129,15 @@ function syncMobileInputValues() {
   setInp('mobile-recipe-style', State.recipe.styleId);
   setInp('mobile-recipe-notes', State.recipe.notes);
 
+  // Equipment presets & losses
+  if (State.equipment) {
+    setInp('mobile-equipment-preset', State.equipment.id);
+    setInp('mobile-eq-boiloff', State.equipment.boilOffRate);
+    setInp('mobile-eq-kettle-loss', State.equipment.kettleLoss);
+    setInp('mobile-eq-grain-abs', State.equipment.grainAbsorption);
+    setInp('mobile-eq-mash-thickness', State.equipment.mashThickness);
+  }
+
   setInp('mobile-yeast-name', State.yeast.name);
   setInp('mobile-yeast-lab', State.yeast.lab);
   setInp('mobile-yeast-type', State.yeast.type);
@@ -180,6 +189,8 @@ function setupMobileInputs(recalculateCallback) {
   if (notesTxt) {
     notesTxt.addEventListener('input', (e) => {
       State.recipe.notes = e.target.value;
+      const desktopNotes = document.getElementById('recipe-notes');
+      if (desktopNotes) desktopNotes.value = e.target.value;
     });
   }
 
@@ -188,6 +199,15 @@ function setupMobileInputs(recalculateCallback) {
     openPresetRecipesModal(recalculateCallback);
   });
   document.getElementById('mobile-btn-scale-recipe')?.addEventListener('click', () => {
+    openModal('modal-scale-recipe');
+  });
+
+  // Screen 5 CTA buttons
+  document.getElementById('mobile-btn-start-brewday')?.addEventListener('click', () => {
+    toggleBrewdayView(recalculateCallback);
+  });
+  document.getElementById('mobile-btn-print-brewday')?.addEventListener('click', triggerPrint);
+  document.getElementById('mobile-btn-scale-brewday')?.addEventListener('click', () => {
     openModal('modal-scale-recipe');
   });
 
@@ -247,6 +267,37 @@ function setupMobileEquipmentInputs(recalculateCallback) {
       }
     });
   }
+
+  // Equipment loss steppers
+  document.querySelectorAll('.mobile-loss-item .stepper-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const field = btn.dataset.eqLoss;
+      const dir = parseFloat(btn.dataset.dir);
+      if (State.equipment && State.equipment[field] !== undefined) {
+        State.equipment[field] = Math.max(0, Math.round((State.equipment[field] + dir) * 100) / 100);
+        recalculateCallback();
+      }
+    });
+  });
+
+  const eqInputs = [
+    { id: 'mobile-eq-boiloff', key: 'boilOffRate' },
+    { id: 'mobile-eq-kettle-loss', key: 'kettleLoss' },
+    { id: 'mobile-eq-grain-abs', key: 'grainAbsorption' },
+    { id: 'mobile-eq-mash-thickness', key: 'mashThickness' },
+  ];
+
+  eqInputs.forEach(({ id, key }) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', (e) => {
+        if (State.equipment) {
+          State.equipment[key] = parseFloat(e.target.value) || 0;
+          recalculateCallback();
+        }
+      });
+    }
+  });
 }
 
 function setupMobileWaterInputs(recalculateCallback) {
