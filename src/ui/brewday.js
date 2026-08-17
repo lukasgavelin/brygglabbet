@@ -2,7 +2,8 @@
  * Dedicated Brew Day Mode Module (Bryggdags-läge).
  * Modern wizard-style cooking app layout:
  * - Persistent/Toggled Ingredients on the left.
- * - Interactive vertical stepper on the right showing previous, active, and next steps.
+ * - Interactive vertical stepper on the right showing previous, active, and next steps ("Gör så här").
+ * - Mobile-first responsive layout with sticky bottom navigation and tab retention.
  * - Integrated background timers, sound/vibration feedback, and smooth auto-scrolling.
  */
 
@@ -27,6 +28,7 @@ let isTimerRunning = false;
 
 let currentStepIndex = 0;
 let isBrewdayOpen = false;
+let activeMobileTab = 'steps'; // 'steps' | 'ingredients'
 
 // UI Persistence state
 const checkedItems = new Set();
@@ -66,12 +68,14 @@ export function toggleBrewdayView(recalculateCallback) {
 
     renderBrewdayContent(recalculateCallback);
     showToast('🍺 Välkommen till Bryggdagsläget!', 'info');
-    
-    // Smooth scroll to active card initially
+
+    // Smooth scroll to active card initially if on steps tab
     setTimeout(() => {
-      const activeCard = document.querySelector('.brewday-step-card.brewday-step-active');
-      if (activeCard) {
-        activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (activeMobileTab === 'steps') {
+        const activeCard = document.querySelector('.brewday-step-card.brewday-step-active');
+        if (activeCard) {
+          activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }
     }, 150);
   } else {
@@ -107,67 +111,73 @@ function formatSeconds(totalSecs) {
  */
 function playAlarmNotification() {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    let time = ctx.currentTime;
-    
-    // Play 3 pulsing electronic beeps
-    for (let i = 0; i < 3; i++) {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, time); // A5 note
-      
-      gain.gain.setValueAtTime(0, time);
-      gain.gain.linearRampToValueAtTime(0.4, time + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.4);
-      
-      osc.start(time);
-      osc.stop(time + 0.4);
-      
-      time += 0.5; // space beeps out
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const ctx = new AudioCtx();
+      let time = ctx.currentTime;
+
+      // Play 3 pulsing electronic beeps
+      for (let i = 0; i < 3; i++) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, time); // A5 note
+
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(0.4, time + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.4);
+
+        osc.start(time);
+        osc.stop(time + 0.4);
+
+        time += 0.5; // space beeps out
+      }
     }
   } catch (err) {
-    console.warn('AudioContext failed:', err);
+    console.warn('AudioContext notification error:', err);
   }
 
   // Device vibration pattern (Vibrate 300ms, Pause 100ms, repeat)
-  if (navigator.vibrate) {
+  if (typeof navigator !== 'undefined' && navigator.vibrate) {
     navigator.vibrate([300, 100, 300, 100, 300]);
   }
 }
 
 /**
- * Updates a small background timer indicator in the header bar if a timer is running.
+ * Updates small background timer indicators in header and mobile bars.
  */
 function updateHeaderTimerIndicator() {
-  const container = document.getElementById('brewday-header-timer-container');
-  if (!container) return;
+  const containers = document.querySelectorAll('.brewday-timer-indicator-slot');
+  if (!containers || containers.length === 0) return;
 
+  let htmlContent = '';
   if (isTimerRunning && timerSecondsRemaining > 0) {
-    container.innerHTML = `
+    htmlContent = `
       <div class="brewday-header-timer" title="En timer räknar ner i bakgrunden">
         <span class="timer-pulse-dot running"></span>
-        <span>Aktiv timer: <strong>${formatSeconds(timerSecondsRemaining)}</strong></span>
+        <span>Aktiv: <strong>${formatSeconds(timerSecondsRemaining)}</strong></span>
       </div>
     `;
   } else if (timerSecondsRemaining === 0 && activeTimerTargetId && !isTimerRunning) {
-    container.innerHTML = `
-      <div class="brewday-header-timer" style="border-color: #10b981; color: #10b981;">
-        <span class="timer-pulse-dot" style="background: #10b981; box-shadow: none;"></span>
+    htmlContent = `
+      <div class="brewday-header-timer completed" title="Timern har löpt ut!">
+        <span class="timer-pulse-dot completed"></span>
         <span><strong>⏰ Timer klar!</strong></span>
       </div>
     `;
-  } else {
-    container.innerHTML = '';
   }
+
+  containers.forEach((c) => {
+    c.innerHTML = htmlContent;
+  });
 }
 
 /**
- * Renders the 2-column Brew Day view with step wizard.
+ * Renders the responsive Brew Day cooking wizard view.
  * @param {Function} recalculateCallback - Recalculate callback
  */
 export function renderBrewdayContent(recalculateCallback) {
@@ -212,7 +222,7 @@ export function renderBrewdayContent(recalculateCallback) {
 
       return `
         <p>Värm <strong>${waterVols.mashWater.toFixed(1)} L</strong> mäskvatten till ca <strong>${((State.mash[0]?.temp || 67) + 4).toFixed(1)}°C</strong> (strike-temperatur).</p>
-        <p>Förbered också <strong>${waterVols.spargeWater.toFixed(1)} L</strong> lakvatten och värm till ~76-78°C.</p>
+        <p>Förbered också <strong>${waterVols.spargeWater.toFixed(1)} L</strong> lakvatten och värm till ~76–78°C.</p>
         ${saltsList ? `
           <p style="margin-top:12px; margin-bottom:6px;"><strong>Bryggsalter:</strong></p>
           <ul class="brewday-step-inner-checklist">
@@ -271,7 +281,7 @@ export function renderBrewdayContent(recalculateCallback) {
     title: '💧 Lakning & Vörtinsamling',
     render: () => {
       return `
-        <p>Laka långsamt genom malten med <strong>${waterVols.spargeWater.toFixed(1)} L</strong> vatten vid ~76-78°C.</p>
+        <p>Laka långsamt genom malten med <strong>${waterVols.spargeWater.toFixed(1)} L</strong> vatten vid ~76–78°C.</p>
         <p>Samla upp totalt cirka <strong>${State.recipe.boilVolume || 25} L</strong> vört i kokkärlet före kok startar.</p>
         <div style="margin-top:16px;">
           <label class="brewday-done-check">
@@ -343,7 +353,7 @@ export function renderBrewdayContent(recalculateCallback) {
       }).join('');
 
       return `
-        <p>Kyl vörten så snabbt som möjligt till jästemperatur (ca <strong>18-20°C</strong>).</p>
+        <p>Kyl vörten så snabbt som möjligt till jästemperatur (ca <strong>18–20°C</strong>).</p>
         <p>Överför vörten till ett desinficerat jäskärl, lufta vörten kraftigt för att tillföra syre, och tillsätt jästen: <strong>${escHtml(State.yeast?.name || 'Ej angiven jäst')}</strong>.</p>
         <p>Placera jäskärlet i ett utrymme med temperatur på <strong>${State.yeast?.tempMin || 18}–${State.yeast?.tempMax || 22}°C</strong>.</p>
         ${dryHopsHtml ? `
@@ -405,7 +415,7 @@ export function renderBrewdayContent(recalculateCallback) {
       statusClass = 'brewday-step-completed';
     }
 
-    // Only render full content for the active step, previous step, and next step to avoid clutter
+    // Only render full content for active, previous and next step
     const isVisible = idx === currentStepIndex || idx === currentStepIndex - 1 || idx === currentStepIndex + 1;
     const bodyContent = isVisible
       ? step.render()
@@ -425,32 +435,43 @@ export function renderBrewdayContent(recalculateCallback) {
   const totalMaltKg = (State.fermentables || []).reduce((s, f) => s + (f.amount || 0), 0);
   const totalHopsG = (State.hops || []).reduce((s, h) => s + (h.amount || 0), 0);
 
+  // Determine grid mode class for responsive tab switching
+  const gridModeClass = `show-${activeMobileTab}`;
+
   container.innerHTML = `
+    <!-- Top Header Bar -->
     <div class="brewday-header-bar">
-      <div>
-        <h2 class="brewday-title">🍺 BRYGGDAG: ${escHtml(State.recipe?.name || 'Namnlöst recept')}</h2>
-        <div class="brewday-subtitle">
-          <span>Target OG: <strong>${formatSG(ogRes.sg)}</strong> (${ogRes.plato.toFixed(1)}°P)</span> • 
-          <span>Target FG: <strong>${formatSG(fg_sg)}</strong> (${fg_plato.toFixed(1)}°P)</span> • 
-          <span>Target Beska: <strong>${ibuRes.total.toFixed(0)} IBU</strong></span> • 
-          <span>Target Färg: <strong>${ebcRes.ebc.toFixed(0)} EBC</strong></span> • 
-          <span>Est. ABV: <strong>${abv.toFixed(1)}%</strong></span>
-        </div>
-      </div>
-      <!-- Timer indicator container -->
-      <div id="brewday-header-timer-container"></div>
-      <div style="display:flex; gap:10px; align-items:center;">
+      <div class="brewday-header-top-row">
         <button class="btn btn-secondary btn-sm" id="btn-close-brewday-header" title="Avsluta bryggdag och återgå till receptet">
-          📝 Tillbaka till receptet
+          ← Recept
         </button>
-        <div class="brewday-tab-switch">
-          <button class="btn btn-sm btn-primary brewday-mobile-tab active" data-btab="ingredients">🌾 Ingredienser</button>
-          <button class="btn btn-sm btn-secondary brewday-mobile-tab" data-btab="steps">⏱️ Brygguiden</button>
+        <h2 class="brewday-title">🍺 BRYGGDAG: ${escHtml(State.recipe?.name || 'Namnlöst recept')}</h2>
+        <div class="brewday-timer-indicator-slot"></div>
+      </div>
+
+      <!-- Quick Metrics Strip -->
+      <div class="brewday-subtitle-chips">
+        <span class="chip">OG: <strong>${formatSG(ogRes.sg)}</strong></span>
+        <span class="chip">FG: <strong>${formatSG(fg_sg)}</strong></span>
+        <span class="chip">IBU: <strong>${ibuRes.total.toFixed(0)}</strong></span>
+        <span class="chip">EBC: <strong>${ebcRes.ebc.toFixed(0)}</strong></span>
+        <span class="chip">ABV: <strong>${abv.toFixed(1)}%</strong></span>
+      </div>
+
+      <!-- Segmented Tab Switcher (Mobile Cooking Layout) -->
+      <div class="brewday-tab-switch-wrap">
+        <div class="brewday-segmented-control">
+          <button class="brewday-seg-btn ${activeMobileTab === 'steps' ? 'active' : ''}" data-btab="steps">
+            ⏱️ Gör så här <span class="badge-step-count">Steg ${currentStepIndex + 1}/${totalSteps}</span>
+          </button>
+          <button class="brewday-seg-btn ${activeMobileTab === 'ingredients' ? 'active' : ''}" data-btab="ingredients">
+            🌾 Ingredienser
+          </button>
         </div>
       </div>
     </div>
 
-    <div class="brewday-grid">
+    <div class="brewday-grid ${gridModeClass}">
       <!-- LEFT COLUMN: INGREDIENTS CHECKLIST (PERSISTENT ON DESKTOP, TABBED ON MOBILE) -->
       <div class="brewday-col brewday-col-left" id="bpanel-ingredients">
         <div class="brewday-card">
@@ -533,9 +554,14 @@ export function renderBrewdayContent(recalculateCallback) {
             </div>
           </div>
         </div>
+
+        <!-- Quick Switch Button on mobile when reviewing ingredients -->
+        <button class="btn btn-primary btn-block mobile-only-btn" id="btn-switch-to-steps-bottom" style="margin-top:10px; width:100%; justify-content:center; padding:12px;">
+          ⏱️ Gå till Bryggstegen (Gör så här) →
+        </button>
       </div>
 
-      <!-- RIGHT COLUMN: INTERACTIVE STEPS WIZARD -->
+      <!-- RIGHT COLUMN: INTERACTIVE STEPS WIZARD ("GÖR SÅ HÄR") -->
       <div class="brewday-col brewday-col-right" id="bpanel-steps">
         <div class="brewday-progress-container" title="Bryggdagens framsteg: ${progressPercent}%">
           <div class="brewday-progress-bar" style="width: ${progressPercent}%;"></div>
@@ -545,11 +571,12 @@ export function renderBrewdayContent(recalculateCallback) {
           ${stepsHtml}
         </div>
 
+        <!-- Sticky Navigation Bar for Step Wizard -->
         <div class="brewday-wizard-nav">
           <button class="btn btn-secondary" id="btn-wizard-prev" ${currentStepIndex === 0 ? 'disabled' : ''}>
             ⬅️ Föregående
           </button>
-          <div style="font-size: 0.9rem; font-weight: bold; color: var(--text-secondary);">
+          <div class="brewday-step-counter-text">
             Steg ${currentStepIndex + 1} av ${totalSteps}
           </div>
           ${currentStepIndex === totalSteps - 1
@@ -576,7 +603,7 @@ export function renderBrewdayContent(recalculateCallback) {
       if (!isNaN(idx) && idx !== currentStepIndex) {
         currentStepIndex = idx;
         renderBrewdayContent(recalculateCallback);
-        
+
         // Smooth scroll to center the active card
         setTimeout(() => {
           const activeCard = document.querySelector('.brewday-step-card.brewday-step-active');
@@ -639,6 +666,26 @@ export function renderBrewdayContent(recalculateCallback) {
     }
   });
 
+  // Quick switch button in ingredients
+  document.getElementById('btn-switch-to-steps-bottom')?.addEventListener('click', () => {
+    activeMobileTab = 'steps';
+    const grid = document.querySelector('.brewday-grid');
+    if (grid) {
+      grid.classList.remove('show-ingredients');
+      grid.classList.add('show-steps');
+    }
+    document.querySelectorAll('.brewday-seg-btn').forEach((b) => {
+      if (b.dataset.btab === 'steps') b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    setTimeout(() => {
+      const activeCard = document.querySelector('.brewday-step-card.brewday-step-active');
+      if (activeCard) {
+        activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 50);
+  });
+
   // Close & Finish Brewday buttons
   document.getElementById('btn-close-brewday-header')?.addEventListener('click', () => {
     toggleBrewdayView(recalculateCallback);
@@ -676,7 +723,7 @@ export function renderBrewdayContent(recalculateCallback) {
 function setupTimerControls() {
   document.querySelectorAll('.btn-start-timer').forEach((btn) => {
     const targetId = btn.dataset.target;
-    
+
     btn.addEventListener('click', () => {
       const targetEl = document.getElementById(targetId);
       if (!targetEl) return;
@@ -737,13 +784,13 @@ function setupTimerControls() {
               }
             });
           }
-          
+
           if (timerSecondsRemaining <= 0) {
             clearInterval(activeTimer);
             activeTimer = null;
             isTimerRunning = false;
             timerSecondsRemaining = 0;
-            
+
             const currentTargetEl = document.getElementById(activeTimerTargetId);
             if (currentTargetEl) {
               currentTargetEl.textContent = '00:00';
@@ -751,7 +798,7 @@ function setupTimerControls() {
             btn.classList.remove('running');
             btn.innerHTML = '✅ Klart!';
             btn.classList.replace('btn-warning', 'btn-success');
-            
+
             playAlarmNotification();
             showToast('⏰ Timern har löpt ut!', 'success');
             updateHeaderTimerIndicator();
@@ -823,30 +870,26 @@ function setupTimerControls() {
 }
 
 /**
- * Handles toggling mobile tabs (Ingredients vs Brewday).
+ * Handles toggling mobile segmented tabs (Ingredienser vs Gör så här / Steg).
  */
 function setupMobileBrewdayTabs() {
-  const tabs = document.querySelectorAll('.brewday-mobile-tab');
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      const target = tab.dataset.btab;
-      tabs.forEach((t) => {
-        t.classList.remove('active', 'btn-primary');
-        t.classList.add('btn-secondary');
-      });
-      tab.classList.add('active', 'btn-primary');
-      tab.classList.remove('btn-secondary');
+  const segBtns = document.querySelectorAll('.brewday-seg-btn');
+  const grid = document.querySelector('.brewday-grid');
 
-      const colLeft = document.getElementById('bpanel-ingredients');
-      const colRight = document.getElementById('bpanel-steps');
+  segBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.btab;
+      activeMobileTab = target;
 
-      if (target === 'ingredients') {
-        if (colLeft) colLeft.style.display = 'block';
-        if (colRight) colRight.style.display = 'none';
-      } else {
-        if (colLeft) colLeft.style.display = 'none';
-        if (colRight) colRight.style.display = 'block';
-        
+      segBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (grid) {
+        grid.classList.remove('show-ingredients', 'show-steps');
+        grid.classList.add(`show-${target}`);
+      }
+
+      if (target === 'steps') {
         // When switching to steps, smooth scroll to the active card immediately
         setTimeout(() => {
           const activeCard = document.querySelector('.brewday-step-card.brewday-step-active');
