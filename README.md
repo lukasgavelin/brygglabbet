@@ -2,7 +2,7 @@
 
 **Brygglabbet** är en modern, snabb och intuitiv webbapplikation för att skapa ölrecept, beräkna bryggkalkyler och genomföra bryggdagen med interaktiv guidning. Appen är helt anpassad för svenska och europeiska bryggstandarder (EBC, °Plato, IBU, liter, gram/kg).
 
-Appen kombinerar ett **receptbyggarflöde i 7 logiska steg** med ett **interaktivt bryggdagsläge**, inbyggda timers med Web Audio-ljudsignaler, aktiva humlelarm, stöd för **BeerXML 1.0** samt utskriftsklara bryggprotokoll.
+Appen kombinerar ett **receptbyggarflöde i 7 logiska steg** med ett **interaktivt bryggdagsläge**, inbyggda timers med Web Audio-ljudsignaler, **Screen Wake Lock API** (håller skärmen vaken), **Web Notifications** (systemnotiser vid humlegivor), fullständig **Workbox PWA precaching** (100 % driftsäker offline), stöd för **BeerXML 1.0** samt utskriftsklara bryggprotokoll.
 
 ---
 
@@ -19,10 +19,12 @@ Appen kombinerar ett **receptbyggarflöde i 7 logiska steg** med ett **interakti
 
 ### 2. ⏱️ Interaktivt Bryggdagsläge (Wizard & Timers)
 - **Steg-för-steg-guidning**: Från förberedelser, inmäskning, lakning, kok, kylning till jäsning och slutförande.
+- **Screen Wake Lock API**: Håller automatiskt telefonens och surfplattans skärm tänd under bryggningen och timern så att du slipper låsa upp med kladdiga vörtfingrar. Återansluter automatiskt vid appväxling via `visibilitychange`.
+- **Monoton Timestamp-timer**: Räknar mot reell tidstämpel (`Date.now() + remainingMs`). Förhindrar tidsavdrift och fördröjningar när mobilen vilar eller webbläsarfliken körs i bakgrunden.
+- **Tröskelstyrda Humlelarm & Web Notifications**: Koktimern övervakar humleschemat i realtid med tröskelkontroll (`<= targetSecs`). Aviserar med Web Audio-larmsignal, haptisk vibration, visuell puls och **systemnotiser** (`Notification API`) även när skärmen är låst eller minimerad.
 - **Exakt strike-temperatur**: Beräknar inmäskningstemperatur baserat på maltens temperatur och mäskkvot.
 - **Syra- och saltöversikt**: Visar exakta givor av bryggsalter och syra (ml) i mäsk- och lakvatten.
 - **Vörtkontroll före kok**: Logga förkoksgravitet och volym med direkt förslag på åtgärder vid avvikelser (koka längre, späd med vatten eller tillsätt DME/socker).
-- **Aktiva Humlelarm**: Koktimern övervakar humleschemat i realtid och aviserar automatiskt vid varje giva med Web Audio-larmsignal, toast-notis och pulserande visuell markering.
 - **Automatisk Stegkvittering**: Moment bockas i automatiskt när timers når `00:00` med pulserande guidning till nästa steg.
 - **Faktisk Effektivitetsberäkning**: Mata in uppmätt OG och volym i jäskärlet och uppdatera utrustningsprofilen med ett klick.
 - **Spara som Batch**: Direktknapp för att spara bryggningen till "Mina bryggningar".
@@ -44,19 +46,20 @@ Appen kombinerar ett **receptbyggarflöde i 7 logiska steg** med ett **interakti
 - **Inmäskning & Infusion**: Strike-temperatur och kokande vattenvolym för temperatursteg.
 
 ### 5. ⚖️ Receptskalning & Mallar
-- **Receptskalare**: Skala om alla malter (kg) och humlegivor (g) automatiskt vid byte av batchstorlek eller bryggverkseffektivitet.
+- **Receptskalare**: Skala om alla malter (kg), humlegivor (g), vattenvolym (L), kokvolym (L) och bryggsalter (g) proportionellt vid byte av batchstorlek eller bryggverkseffektivitet.
 - **Färdiga Receptmallar**: Kom igång direkt med recept för *Tjeckisk Pilsner*, *Gyllene Pale Ale*, *West Coast IPA*, *Dry Irish Stout*, *Hefeweizen* och *Belgisk Saison*.
 
-### 6. 🔄 Import, Export & Utskrift
-- **BeerXML 1.0**: Fullständig tvåvägsimport och export med stöd för kolsyrenivåer, whirlpool-temperatur och torrhumlingsdagar.
-- **JSON**: Spara och ladda recept och batcher i Brygglabbets eget format.
+### 6. 🔄 Import, Export & Säkerhetskopiering
+- **Fullständig Backup (JSON)**: Exportera hela ditt bryggarkiv – **alla sparade recept**, **alla genomförda batcher** och aktivt recept – i en samlad JSON-fil med ett klick. Återställ lika enkelt via importdialogen.
+- **Persistent Autosave**: Autosave sparar löpande i `safeStorage` (localStorage med quota-skydd). Påbörjade recept överlever om fliken stängs, webbläsaren kraschar eller datorn startas om (återställning upp till 24h).
+- **BeerXML 1.0**: Fullständig tvåvägsimport och export med stöd för kolsyrenivåer, whirlpool-temperatur och torrhumlingsdagar. Vid import bevaras befintliga utrustnings- och vattenprofiler om BeerXML-filen saknar dessa taggar.
 - **Lokal historik (Undo/Redo)**: Fullständig historikstack med tangentbordsgenvägar (`Ctrl+Z`, `Ctrl+Shift+Z` / `Cmd+Z`, `Cmd+Shift+Z`).
 - **Utskriftsprotokoll**: Optimerad `@media print`-layout för fysiska bryggprotokoll med mätfält och checklistor.
 
-### 7. 📱 Parallellt Mobil-UI med Full Paritet
+### 7. 📱 Parallellt Mobil-UI & Skottsäker Offline PWA
 - Fullt responsivt gränssnitt med en skräddarsydd mobilvy (`mobileApp.js`), touch-vänliga steppers och bottenmeny.
 - Komplett paritet med desktop: mäsk-pH, syrajustering, whirlpool-temperatur, torrhumlingstid, jässcheman och Mina bryggningar.
-- Smarta CSS-tooltips med mörk bärnstensbakgrund (`#221a14`), hög kontrast och `aria-label`-stöd.
+- **Vite PWA & Workbox Precaching**: Automatisk precaching av alla hashade JavaScript- och CSS-bundles vid produktionsbygge. Appen startar 100 % tillförlitligt i källare och garage utan mobiltäckning.
 
 ---
 
@@ -80,37 +83,34 @@ Appen kombinerar ett **receptbyggarflöde i 7 logiska steg** med ett **interakti
 brygglabbet/
 ├── index.html                   # Semantisk HTML5-struktur, modaler & desktop/mobilcontainrar
 ├── style.css                    # Amber/Gold Design System, CSS variabler och responsiv layout
-├── vite.config.js               # Vite bundler & Vitest testkonfiguration
+├── vite.config.js               # Vite bundler, VitePWA precaching & Vitest testkonfiguration
 ├── package.json                 # Skript och projektberoenden
 ├── .nvmrc                       # Node.js 20 miljödeklaration
 ├── docs/
-│   └── ARCHITECTURE.md          # Detaljerad teknisk arkitektur- och formeldokumentation
+│   ├── ARCHITECTURE.md          # Detaljerad teknisk arkitektur- och formeldokumentation
+│   └── RADDNINGSPAKET.md        # Detaljerat räddningspaket och premortem-reparationsplan
 ├── public/                      # Statiska tillgångar för Cloudflare Pages
 │   ├── _redirects               # SPA-fallback routing
-│   └── _headers                 # Säkerhets- och cachingheaders
+│   ├── _headers                 # Säkerhets- och cachingheaders
+│   ├── favicon.svg              # SVG app-ikon
+│   └── manifest.webmanifest     # PWA manifestdeklaration
 ├── src/
 │   ├── main.js                  # App bootstrap, händelseorkestrering & kortkommandon
-│   ├── state.js                 # Central state manager, historikstack & reaktiv synkronisering
+│   ├── state.js                 # Central state manager, historikstack & profilbevarande normalisering
 │   ├── constants.js             # Bryggkonstanter och formelmultiplikatorer
 │   ├── types.js                 # JSDoc typdefinitioner
 │   ├── core/
-│   │   ├── calculations.js      # computeRecipeMetrics & rena beräkningsfunktioner
+│   │   ├── calculations.js      # computeRecipeMetrics & rena beräkningsfunktioner (inkl. vatten/saltskalning)
 │   │   ├── brewtools.js         # Verktygsfunktioner (kolsyra, refraktivitet, hydrometer, syra, inmäskning)
 │   │   ├── batches.js           # Batchhantering, jässcheman, mätningar & .ics kalenderexport
 │   │   ├── beerxml.js           # BeerXML 1.0 parser & serializer med kolsyra och givmetadata
+│   │   ├── wakelock.js          # Screen Wake Lock API manager (håller skärmen vaken vid bryggning)
+│   │   ├── storage.js           # safeStorage & safeSessionStorage med kvotskydd
 │   │   ├── data.js              # Databasexportör
-│   │   └── data/                # Statiska databaser
-│   │       ├── malts.js         # 40+ maltsorter och sockerarter
-│   │       ├── hops.js          # 45+ humlesorter
-│   │       ├── yeasts.js        # 26 jäststammar
-│   │       ├── styles.js        # 32 BJCP 2021 ölstilar
-│   │       ├── equipment.js     # Utrustningsprofiler
-│   │       ├── water.js         # Vattenkällor & målprofiler
-│   │       ├── mash.js          # Mäskscheman
-│   │       └── preset-recipes.js# Kompletta exempelrecept
+│   │   └── data/                # Statiska databaser (malter, humle, jäst, stilar, profiler, mäskscheman)
 │   └── ui/
 │       ├── batches.js           # Mina bryggningar (historik, tidslinje, logg, flaskning & betyg)
-│       ├── brewday.js           # Bryggdagsläge, humlelarm, timers & logg
+│       ├── brewday.js           # Bryggdagsläge, monoton timestamp-timer, humlelarm, Wake Lock & systemnotiser
 │       ├── tools.js             # Bryggverktygspanel (kolsyra, refraktometer, hydrometer, jäst, strike)
 │       ├── equipment.js         # Utrustningsparametrar & vattenkrav
 │       ├── fermentables.js      # Malttabell & färgbidrag
@@ -118,7 +118,7 @@ brygglabbet/
 │       ├── yeast.js             # Jästval, dämpning & jässchemaprofiler
 │       ├── mash.js              # Mäsksteg & infusionsvolymer
 │       ├── water.js             # Vattenkemi, salter, mäsk-pH & syrajustering
-│       ├── recipes.js           # Receptlagring, skalning & JSON
+│       ├── recipes.js           # Receptlagring, full workspace backup, persistent autosave & import/export
 │       ├── sidebar.js           # Sidopanel med realtidsnyckeltal & EBC-platta
 │       ├── styleMatch.js        # BJCP stilmatchningsgrafer
 │       ├── print.js             # Utskriftsprotokollsgenerator
@@ -127,10 +127,8 @@ brygglabbet/
 │       ├── stepper.js           # Touch-steppers
 │       ├── toast.js             # Toast-notifikationer
 │       ├── icons.js             # SVG-ikoner
-│       └── mobile/              # Parallellt Mobil-UI
-│           ├── mobileApp.js     # Mobil router & initiering
-│           ├── mobileNav.js     # Mobil bottenmeny
-│           └── mobileCards.js   # Mobilanpassade kort
+│       ├── errorBoundary.js     # Global crash recovery & error boundary
+│       └── mobile/              # Parallellt Mobil-UI (router, bottenmeny, mobilkort)
 └── tests/
     ├── calculations.test.js     # 28 tester för brygg- och kemiformler
     ├── brewtools.test.js        # 45 tester för verktygs- och syraformler
@@ -138,10 +136,12 @@ brygglabbet/
     ├── data.test.js             # 10 tester för databasens integritet
     ├── beerxml.test.js          # 4 tester för BeerXML-konvertering
     ├── mash.test.js             # 3 tester för mäskscheman
-    ├── recipes.test.js          # 2 tester för receptskalning och validering
+    ├── recipes.test.js          # 2 tester för receptmallar och validering
     ├── state.test.js            # 3 tester för state mutation och historik
     ├── integration.test.js      # 2 end-to-end integrationstester
-    └── ui-smoke.test.js         # 8 rök- och integrationsfälttester (desktop + mobil)
+    ├── storage-resilience.test.js # 13 tester för persistens, kvotskydd och PWA-filer
+    ├── rescue-fixes.test.js     # 4 tester för vatten/saltskalning, BeerXML-skydd, Wake Lock & full backup
+    └── ui-smoke.test.js         # 9 rök- och integrationsfälttester (desktop + mobil)
 ```
 
 ---
@@ -162,10 +162,16 @@ npm run dev
 ```bash
 npm test
 ```
+*Kör samtliga 134 tester över 12 testfiler.*
 
-### 4. Bygg för produktion
+### 4. Bygg för produktion (inkl. PWA Workbox bundles)
 ```bash
 npm run build
+```
+
+### 5. Kör linter
+```bash
+npm run lint
 ```
 
 ---
@@ -186,4 +192,5 @@ Projektet är konfigurerat för automatisk CI/CD-lansering via **Cloudflare Page
 
 ## 📖 Ytterligare Dokumentation
 
-För djupgående information om matematiska härledningar, BeerXML-specifikationen och tillståndshantering, se [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) – Detaljerad teknisk arkitektur, formeldokumentation och datamodeller.
+- [docs/RADDNINGSPAKET.md](docs/RADDNINGSPAKET.md) – Detaljerat räddningspaket och premortem-reparationsplan med sprintplan och tekniska åtgärder.
