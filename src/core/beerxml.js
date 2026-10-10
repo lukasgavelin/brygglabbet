@@ -34,8 +34,23 @@ export function exportBeerXML(state) {
     .map((h) => {
       const amountKg = (Number(h.amount) || 0) / 1000;
       let use = 'Boil';
-      if (h.use === 'torrhumle' || h.use === 'dry-hop') use = 'Dry Hop';
-      else if (h.use === 'whirlpool') use = 'Aroma';
+      let timeVal = Number(h.time || 0);
+      const hopNotes = [];
+
+      if (h.use === 'torrhumle' || h.use === 'dry-hop') {
+        use = 'Dry Hop';
+        timeVal = Number(h.dryHopDays !== undefined ? h.dryHopDays : (h.time || 3));
+        if (h.dryHopDay !== undefined) {
+          hopNotes.push(`Tillsätt dag: ${h.dryHopDay}`);
+        }
+      } else if (h.use === 'whirlpool') {
+        use = 'Aroma';
+        if (h.whirlpoolTemp !== undefined) {
+          hopNotes.push(`Whirlpool Temp: ${h.whirlpoolTemp}°C`);
+        }
+      }
+
+      const notesXml = hopNotes.length > 0 ? `\n        <NOTES>${escHtml(hopNotes.join(', '))}</NOTES>` : '';
 
       return `
       <HOP>
@@ -44,8 +59,8 @@ export function exportBeerXML(state) {
         <ALPHA>${Number(h.alpha || 5).toFixed(1)}</ALPHA>
         <AMOUNT>${amountKg.toFixed(4)}</AMOUNT>
         <USE>${use}</USE>
-        <TIME>${Number(h.time || 0).toFixed(0)}</TIME>
-        <FORM>${h.form === 'kottar' ? 'Leaf' : 'Pellet'}</FORM>
+        <TIME>${timeVal.toFixed(0)}</TIME>
+        <FORM>${h.form === 'kottar' ? 'Leaf' : 'Pellet'}</FORM>${notesXml}
       </HOP>`;
     })
     .join('');
@@ -87,7 +102,7 @@ export function exportBeerXML(state) {
     <BOIL_SIZE>${boilVol.toFixed(1)}</BOIL_SIZE>
     <BOIL_TIME>${boilTime.toFixed(0)}</BOIL_TIME>
     <EFFICIENCY>${efficiency.toFixed(1)}</EFFICIENCY>
-    <NOTES>${escHtml(r.notes || '')}</NOTES>
+    <NOTES>${escHtml(r.notes || '')}</NOTES>${r.carbonationVols ? `\n    <CARBONATION>${Number(r.carbonationVols).toFixed(2)}</CARBONATION>` : ''}
     <FERMENTABLES>${fermentablesXml}
     </FERMENTABLES>
     <HOPS>${hopsXml}
@@ -134,6 +149,7 @@ export function importBeerXML(xmlString) {
   const boilTime = getNum(recipeNode, 'BOIL_TIME', 60);
   const efficiency = getNum(recipeNode, 'EFFICIENCY', 75);
   const notes = getText(recipeNode, 'NOTES', '');
+  const carbonationVols = getNum(recipeNode, 'CARBONATION', 0);
 
   const fermentables = Array.from(recipeNode.getElementsByTagName('FERMENTABLE')).map((fNode, i) => {
     const fName = getText(fNode, 'NAME', `Malt ${i + 1}`);
@@ -159,6 +175,7 @@ export function importBeerXML(xmlString) {
     const time = getNum(hNode, 'TIME', 60);
     const useRaw = getText(hNode, 'USE', '').toLowerCase();
     const formRaw = getText(hNode, 'FORM', '').toLowerCase();
+    const hNotes = getText(hNode, 'NOTES', '');
 
     let use = 'kok';
     if (useRaw.includes('dry') || useRaw.includes('torr')) use = 'torrhumle';
@@ -166,6 +183,12 @@ export function importBeerXML(xmlString) {
 
     let form = 'pellets';
     if (formRaw.includes('leaf') || formRaw.includes('kott')) form = 'kottar';
+
+    const wpMatch = hNotes.match(/Whirlpool Temp:\s*(\d+)/i);
+    const wpTemp = wpMatch ? parseInt(wpMatch[1], 10) : 80;
+    const dhMatch = hNotes.match(/Tillsätt dag:\s*(\d+)/i);
+    const dhDay = dhMatch ? parseInt(dhMatch[1], 10) : 7;
+    const dryHopDays = time > 60 ? Math.round(time / (24 * 60)) : (Math.round(time) || 3);
 
     return {
       id: i + 1,
@@ -175,6 +198,8 @@ export function importBeerXML(xmlString) {
       time: Math.round(time),
       use,
       form,
+      ...(use === 'whirlpool' ? { whirlpoolTemp: wpTemp } : {}),
+      ...(use === 'torrhumle' ? { dryHopDay: dhDay, dryHopDays } : {}),
     };
   });
 
@@ -218,6 +243,7 @@ export function importBeerXML(xmlString) {
       boilTime,
       efficiency,
       notes,
+      ...(carbonationVols > 0 ? { carbonationVols } : {}),
     },
     fermentables,
     hops,

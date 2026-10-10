@@ -56,6 +56,32 @@ describe('BeerXML Import & Export Module', () => {
     expect(importedState.hops[1].use).toBe('torrhumle');
   });
 
+  it('roundtrips carbonation, whirlpool temp, and dry hop days correctly', () => {
+    const stateWithExtras = {
+      ...sampleState,
+      recipe: {
+        ...sampleState.recipe,
+        carbonationVols: 2.5,
+      },
+      hops: [
+        { id: 1, name: 'Simcoe', amount: 40, alpha: 13, time: 20, use: 'whirlpool', whirlpoolTemp: 80, form: 'pellets' },
+        { id: 2, name: 'Amarillo', amount: 60, alpha: 9, time: 0, use: 'torrhumle', dryHopDay: 5, dryHopDays: 4, form: 'pellets' },
+      ],
+    };
+    const xml = exportBeerXML(stateWithExtras);
+    expect(xml).toContain('<CARBONATION>2.50</CARBONATION>');
+    expect(xml).toContain('Whirlpool Temp: 80°C');
+    expect(xml).toContain('Tillsätt dag: 5');
+
+    const imported = importBeerXML(xml);
+    expect(imported.recipe.carbonationVols).toBe(2.5);
+    expect(imported.hops[0].use).toBe('whirlpool');
+    expect(imported.hops[0].whirlpoolTemp).toBe(80);
+    expect(imported.hops[1].use).toBe('torrhumle');
+    expect(imported.hops[1].dryHopDay).toBe(5);
+    expect(imported.hops[1].dryHopDays).toBe(4);
+  });
+
   it('throws error when importing invalid BeerXML', () => {
     expect(() => importBeerXML('<INVALID>xml</INVALID>')).toThrow();
   });

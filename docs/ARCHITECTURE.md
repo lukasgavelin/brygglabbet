@@ -34,8 +34,10 @@ brygglabbet/
 │   ├── types.js                 # JSDoc typdefinitioner för recept, ingredienser och utrustning
 │   ├── constants.js             # Formelmultiplikatorer, enhetsomvandlingar och standardvärden
 │   ├── core/
-│   │   ├── calculations.js      # Rena beräkningsmotorer (OG, FG, ABV, IBU, EBC, Vatten, Kemi)
-│   │   ├── beerxml.js           # BeerXML 1.0 parser och serializer
+│   │   ├── calculations.js      # computeRecipeMetrics & rena beräkningsmotorer (OG, FG, ABV, IBU, EBC, pH, Vatten)
+│   │   ├── brewtools.js         # Verktygsberäkningar (kolsyra, refraktometer, hydrometer, jäst, strike, syra)
+│   │   ├── batches.js           # Batch-CRUD, jässchema, tidslinje & .ics-export
+│   │   ├── beerxml.js           # BeerXML 1.0 parser och serializer med kolsyra & givmetadata
 │   │   ├── data.js              # Databas-exporteringshubb
 │   │   └── data/                # Statiska databaser för ingredienser och profiler
 │   │       ├── malts.js         # 40+ malter och sockerarter med EBC och potentiellt utbyte
@@ -47,13 +49,15 @@ brygglabbet/
 │   │       ├── mash.js          # Standardmässcheman (Enkelsteg, Multi-steg, Dekoktion)
 │   │       └── preset-recipes.js# Kompletta exempelreceptmallar
 │   └── ui/
+│       ├── batches.js           # Mina bryggningar (historik, tidslinje, logg, flaskning & betyg)
 │       ├── brewday.js           # Interaktivt bryggdagsläge, aktiva humlelarm & timers
+│       ├── tools.js             # Bryggverktygspanel (kolsyra, refraktometer, hydrometer, jäst, strike)
 │       ├── equipment.js         # Utrustningsprofilsvy & förlustparametrar
 │       ├── fermentables.js      # Maltlista, tillsätt/ta bort, färgbidrag
-│       ├── hops.js              # Humleschema, användningsområden (kok, whirlpool, torrhumle)
-│       ├── yeast.js             # Jästval, dämpningsintervall & temperaturkontroll
+│       ├── hops.js              # Humleschema, whirlpool-temp & torrhumling
+│       ├── yeast.js             # Jästval, dämpningsintervall & jässchemaprofil
 │       ├── mash.js              # Mäskstegsredigerare & mäskschemaväljare
-│       ├── water.js             # Vattenprofilsjustering, salttillsatser, pH & RA
+│       ├── water.js             # Vattenprofilsjustering, salttillsatser, mäsk-pH & syra
 │       ├── recipes.js           # Receptsparning, import/export, receptskalning
 │       ├── sidebar.js           # Desktop-sidopanel med live-beräkningar och EBC-platta
 │       ├── styleMatch.js        # BJCP stilmatchningsgrafer och toleransindikatorer
@@ -63,18 +67,21 @@ brygglabbet/
 │       ├── stepper.js           # Touch-vänliga inkrement/dekrement-knappar
 │       ├── toast.js             # Animerade toast-notifikationer
 │       ├── icons.js             # SVG-ikonsamling
-│       └── mobile/              # Parallellt mobiloptimerat gränssnitt
+│       └── mobile/              # Parallellt mobiloptimerat gränssnitt med full paritet
 │           ├── mobileApp.js     # Mobilvy-initiering & skärmorkestrering
 │           ├── mobileNav.js     # Mobil bottenmeny & header-synk
 │           └── mobileCards.js   # Mobilanpassade kort och summeringar
 └── tests/
     ├── calculations.test.js     # Tester för alla bryggformler och kemiberäkningar
+    ├── brewtools.test.js        # Tester för verktygskalkyler och syraformler
+    ├── batches.test.js          # Tester för batcher, scheman och .ics-export
     ├── data.test.js             # Integritetstest för unika ID:n och fält i databaserna
     ├── beerxml.test.js          # Tester för BeerXML-import och export
     ├── mash.test.js             # Tester för mäskvatten och tidsberäkningar
     ├── recipes.test.js          # Tester för receptvalidering och skalningsalgoritm
     ├── state.test.js            # Tester för state-uppdateringar och historikstack
-    └── integration.test.js      # Integrationsflödestester för receptberäkning
+    ├── integration.test.js      # Integrationsflödestester för receptberäkning
+    └── ui-smoke.test.js         # Rök- och integrationsfälttester (desktop + mobil)
 ```
 
 ---
@@ -92,24 +99,27 @@ const State = {
     boilVolume: 25.5,      // Beräknad pre-boil volym (L)
     boilTime: 60,          // Total koktid (min)
     efficiency: 75,        // Mäskeffektivitet (%)
-    notes: ""              // Receptanteckningar och brygglogg
+    notes: "",             // Receptanteckningar
+    carbonationVols: 2.5,  // Önskad kolsyrenivå (volymer CO2)
+    fermentation: { profile: "auto", coldCrash: false }
   },
   fermentables: [
-    { id: "pilsner-malt", name: "Pilsnermalt", amount: 4.5, potential: 1.037, ebc: 3.5, type: "grain" }
+    { id: "pilsner-malt", name: "Pilsnermalt", amount: 4.5, potential: 1.037, ebc: 3.5, type: "base" }
   ],
   hops: [
-    { id: "citra", name: "Citra", amount: 30, alpha: 12.5, time: 15, use: "kok", type: "pellet" }
+    { id: "citra", name: "Citra", amount: 30, alpha: 12.5, time: 15, use: "kok", form: "pellets" }
   ],
   yeast: {
-    id: "us-05", name: "SafAle US-05", attMin: 78, attMax: 82, tempMin: 18, tempMax: 28
+    id: "us-05", name: "SafAle US-05", attMin: 78, attMax: 82, tempMin: 18, tempMax: 28, type: "ale"
   },
   mash: [
-    { name: "Försockring", temp: 66, time: 60, type: "Infusion" }
+    { id: 1, name: "Försockring", temp: 66, time: 60, type: "Infusion" }
   ],
   water: {
-    base: { id: "stockholm", name: "Stockholm", ca: 30, mg: 4, na: 10, cl: 15, so4: 35, hco3: 70 },
-    target: { id: "hoppy", name: "Humlig IPA", ca: 100, mg: 15, na: 15, cl: 50, so4: 200, hco3: 0 },
-    salts: { gypsum: 4.2, calciumChloride: 1.5, epsom: 2.0, tableSalt: 0, bakingSoda: 0, chalk: 0 }
+    base: { name: "Stockholm", ca: 30, mg: 4, na: 10, cl: 15, so4: 35, hco3: 70 },
+    salts: { gypsum: 4.2, calciumChloride: 1.5, epsomSalt: 2.0, tableSalt: 0, bakingSoda: 0, chalk: 0 },
+    volume: 25,
+    acid: { enabled: false, targetPH: 5.4, type: "lactic", strength: 80, treatSparge: true }
   },
   equipment: {
     name: "Standard 30L",
@@ -118,8 +128,48 @@ const State = {
     boilOffRate: 3.0,      // L/h
     kettleLoss: 2.0,       // L
     grainAbsorption: 0.96, // L/kg krossad malt
-    mashThickness: 3.0     // L/kg malt
+    mashRatio: 3.0,        // L/kg malt
+    grainTemp: 20          // °C
   }
+};
+```
+
+### Datamodell för Batcher (`brygglabbet_batches`)
+Batcher sparas som en separat samling i `localStorage`:
+```javascript
+const Batch = {
+  id: "batch-1718000000000",
+  createdAt: "2026-10-10T12:00:00Z",
+  brewDate: "2026-10-10",
+  recipeName: "Kust-IPA",
+  recipeSnapshot: { ...State },
+  measured: {
+    preboilSG: 1.048,
+    preboilVol: 26,
+    og: 1.062,
+    fermenterVol: 20,
+    mashPH: 5.35
+  },
+  readings: [
+    { id: "rd-1", date: "2026-10-15", sg: 1.018, brix: 8.2, tempC: 20, note: "God doft" }
+  ],
+  fg: 1.012,
+  abv: 6.6,
+  attenuation: 80.6,
+  efficiency: 76.5,
+  bottling: {
+    date: "2026-10-24",
+    method: "flaska",
+    sugarType: "strösocker",
+    sugarG: 130,
+    vols: 2.5
+  },
+  fermentationPlan: [
+    { name: "Primärjäsning", tempC: 19, days: 12, startDate: "2026-10-10" }
+  ],
+  status: "jäser", // "jäser" | "konditioneras" | "klar"
+  tastingNotes: "Frisk citrusarom och balanserad beska.",
+  rating: 5
 };
 ```
 
@@ -130,7 +180,10 @@ const State = {
 
 ## 4. Beräkningsmodeller & Algoritmer
 
-Samtliga matematiska modeller i `src/core/calculations.js` är standardiserade och testade:
+Samtliga matematiska modeller i `src/core/calculations.js` och `src/core/brewtools.js` är standardiserade och testade:
+
+### 4.0 Gemensam Beräkningspipeline (`computeRecipeMetrics`)
+För att garantera 100 % paritet mellan samtliga vyer (desktop-editor, mobilläge, bryggdag, batchhistorik och utskriftsprotokoll) körs alla receptberäkningar genom en samlad, ren pipeline: `computeRecipeMetrics(State)`. Den returnerar ett enhetligt `metrics`-objekt med `og`, `fg`, `abv`, `ibu`, `ibuPerHop`, `ebc`, `ebcPerFermentable`, `volumes`, `mashPH`, `waterRequirements` m.m.
 
 ### 4.1 Stammvörtstyrka (OG) & Slutgravitet (FG)
 - **Gravitetsenheter (GU)**:
@@ -143,13 +196,16 @@ Samtliga matematiska modeller i `src/core/calculations.js` är standardiserade o
 - **Alkoholhalt (ABV)**:
   $$\text{ABV} = (\text{OG} - \text{FG}) \times 131.25$$
 
-### 4.2 Bitterhet (IBU via Glenn Tinseth)
-- **Bitytnyttjande ($U$)**:
+### 4.2 Bitterhet (Tinseth med kokgravitet & Malowicki-whirlpool)
+- **Kokgravitet ($\text{SG}_{\text{boil}}$)**:
+  Tinseths bitytnyttjande beräknas mot vörtens densitet under koket snarare än slut-OG:
   $$U(t, \text{SG}_{\text{boil}}) = \left(1.65 \times 0.000125^{(\text{SG}_{\text{boil}} - 1)}\right) \times \left(\frac{1 - e^{-0.04 \times t}}{4.15}\right)$$
   - *Pelletjustering*: $+10\%$ utbyte jämfört med hela kottar.
-  - *Whirlpool / Hop Stand*: Utnyttjande baserat på temperatur och kontakttid (typiskt 5–10% vid $85^\circ\text{C}$).
+  - *Whirlpool / Hop Stand*: Temperaturberoende isomeriseringsfaktor enligt Malowicki & Shellhammer (2005):
+    $$\text{tempFactor}(T) = \frac{k(T)}{k(100^\circ\text{C})}$$
+    vilket motsvarar ca $50\%$ utbyte vid $85^\circ\text{C}$ och minimal isomerisering under $70^\circ\text{C}$.
 - **IBU per giva**:
-  $$\text{IBU} = \frac{\text{Mängd (g)} \times (\text{Alfasyra } \% / 100) \times U \times 1000}{\text{Batchvolym (L)}}$$
+  $$\text{IBU} = \frac{\text{Mängd (g)} \times (\text{Alfasyra } \% / 100) \times U \times \text{tempFactor} \times 1000}{\text{Batchvolym (L)}}$$
 
 ### 4.3 Färg (EBC via Dan Morey)
 - **Malt Color Units (MCU)**:
@@ -167,11 +223,19 @@ Samtliga matematiska modeller i `src/core/calculations.js` är standardiserade o
 - **Lakvattenvolym**:
   $$V_{\text{sparge}} = V_{\text{total}} - V_{\text{mash}}$$
 
-### 4.5 Vattenkemi & Residualalkalinitet (RA)
-- **Jonbidrag (ppm / mg/L)**: Beräknas utifrån molekylvikter för $\text{CaSO}_4$, $\text{CaCl}_2$, $\text{MgSO}_4$, $\text{NaCl}$, $\text{NaHCO}_3$ och $\text{CaCO}_3$ fördelat över total vattenvolym.
+### 4.5 Vattenkemi, Mäsk-pH & Syra (`calculations.js` & `brewtools.js`)
+- **Jonbidrag (ppm / mg/L)**: Beräknas utifrån molekylvikter för $\text{CaSO}_4$, $\text{CaCl}_2$, $\text{MgSO}_4$, $\text{NaCl}$, $\text{NaHCO}_3$ och $\text{CaCO}_3$ per behandlad vattenvolym (`water.volume`).
 - **Residualalkalinitet (RA)**:
   $$\text{RA} = \text{Alkalinitet} - \left(\frac{\text{Ca}^{2+}}{3.5}\right) - \left(\frac{\text{Mg}^{2+}}{7}\right)$$
-- **Sulfat:Klorid-kvot**: Indikerar humle- vs maltdominerad smakprofil.
+- **Mäsk-pH**: Beräknas via laddningsbalans per malttyp (basmalt, karamellmalt, mörkrostat och syramalt) kombinerat med vattnets residualalkalinitet.
+- **Syradosering (`acidAddition` & `spargeAcid`)**: Exakt invers beräkning av milliekvivalenter syra som krävs för att nå mål-pH, med stöd för 80%/88% mjölksyra och 10%/75% fosforsyra samt surmaltsekvivalent. Behandling av lakvatten neutraliserar bikarbonat till säkert lak-pH (< 5.8).
+
+### 4.6 Bryggverktyg (`src/core/brewtools.js`)
+- **Kolsyra**: Primingsocker i gram (strösocker, druvsocker, DME) baserat på serveringstemperatur och målvolymer $\text{CO}_2$; mottryck i fat baserat på Henrys lag.
+- **Refraktometer**: Terrills kubiska korrigeringsformel för jäst vört med SG- och Brix-stöd.
+- **Hydrometer**: Temperaturkorrigering för hydrometrar med kalibreringstemperatur $20^\circ\text{C}$.
+- **Inmäskning (`strikeTemp`) & Infusion (`infusionVolume`)**: Termodynamiska värmebalansformler för mäskning och temperatursteg.
+- **Jästkalkylator (`pitchRate`)**: Beräknar cellbehov per miljoner celler/ml/°P, förkulturvolym och antal torrjästpåsar.
 
 ---
 
@@ -220,14 +284,17 @@ Tester körs med **Vitest**:
 npm test
 ```
 
-### Testmoduler:
-1. `tests/calculations.test.js` – 28 tester för OG, FG, ABV, IBU (Tinseth), EBC (Morey), vattenkalkyler och kemi.
-2. `tests/data.test.js` – 10 tester för databasens integritet, unika ID:n och giltiga numeriska intervall.
-3. `tests/beerxml.test.js` – 3 tester för import/export av BeerXML-recept.
-4. `tests/mash.test.js` – 3 tester för mäskscheman och infusionsberäkningar.
-5. `tests/recipes.test.js` – 2 tester för receptvalidering och skalningsalgoritm.
-6. `tests/state.test.js` – 3 tester för state mutation, prenumerationer och historik.
-7. `tests/integration.test.js` – 2 end-to-end integrationstester för kompletta receptflöden.
+### Testmoduler (115 tester i 10 testfiler):
+1. `tests/calculations.test.js` – 28 tester för OG, FG, ABV, IBU (Tinseth & Malowicki), EBC (Morey), vattenkalkyler och kemi.
+2. `tests/brewtools.test.js` – 45 tester för kolsyra (flaskor & fat), refraktometer (Terrill), hydrometer 20°C, pitch rate, strike-temp, infusion och syradosering.
+3. `tests/batches.test.js` – 11 tester för batch-CRUD, jässcheman, tidslinjer, mätningar, flaskning, påminnelser och RFC 5545 .ics kalenderexport.
+4. `tests/data.test.js` – 10 tester för databasens integritet, unika ID:n och giltiga numeriska intervall.
+5. `tests/beerxml.test.js` – 4 tester för import/export av BeerXML-recept med kolsyra och givmetadata.
+6. `tests/mash.test.js` – 3 tester för mäskscheman och infusionsberäkningar.
+7. `tests/recipes.test.js` – 2 tester för receptvalidering och skalningsalgoritm.
+8. `tests/state.test.js` – 3 tester för state mutation, prenumerationer och historik.
+9. `tests/integration.test.js` – 2 end-to-end integrationstester för kompletta receptflöden.
+10. `tests/ui-smoke.test.js` – 8 integrations- och fälttester (verktygsmodal, mäsk-pH/syra, bryggdagsläge, utskrift, torrhumling/jässchema, Mina bryggningar och mobilparitet).
 
 ---
 
