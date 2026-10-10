@@ -163,6 +163,103 @@ describe('UI smoke: bryggverktyg & mäsk-pH', () => {
     expect(printContainer.textContent).not.toContain('NaN');
   });
 
+  it('hanterar jässchema och torrhumlingsinmatning i receptet', async () => {
+    const { State } = await import('../src/state.js');
+    const { renderHopsTable } = await import('../src/ui/hops.js');
+    const { recalculate } = await import('../src/ui/sidebar.js');
+    renderHopsTable(recalculate);
+
+    // Torrhumlingsfält i humletabellen
+    const dryHopRow = Array.from(document.querySelectorAll('#hops-body tr')).find((tr) =>
+      tr.querySelector('[data-field="use"]')?.value === 'torrhumle'
+    );
+    expect(dryHopRow).toBeDefined();
+    const dayInput = dryHopRow.querySelector('[data-field="dryHopDay"]');
+    const daysInput = dryHopRow.querySelector('[data-field="dryHopDays"]');
+    expect(dayInput).toBeDefined();
+    expect(daysInput).toBeDefined();
+    dayInput.value = '5';
+    dayInput.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(State.hops.find((h) => h.use === 'torrhumle').dryHopDay).toBe(5);
+
+    // Jässchema i jästsektionen
+    const fermProfile = document.getElementById('ferm-profile');
+    const fermColdCrash = document.getElementById('ferm-coldcrash');
+    const fermSummary = document.getElementById('ferm-schedule-summary');
+    expect(fermProfile).toBeDefined();
+    expect(fermColdCrash).toBeDefined();
+    expect(fermSummary).toBeDefined();
+
+    fermProfile.value = 'lager';
+    fermProfile.dispatchEvent(new Event('change', { bubbles: true }));
+    fermColdCrash.checked = true;
+    fermColdCrash.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(fermSummary.textContent).toContain('Diacetyl');
+    expect(fermSummary.textContent).toContain('Kallagring');
+    expect(fermSummary.textContent).toContain('Kallkrasch');
+    expect(fermSummary.textContent).not.toContain('NaN');
+  });
+
+  it('öppnar Mina bryggningar och hanterar batch, mätningar, buteljering och betyg', async () => {
+    const batchesView = document.getElementById('batches-view');
+    expect(batchesView).toBeDefined();
+
+    // Öppna Mina bryggningar
+    document.getElementById('btn-batches').click();
+    expect(batchesView.classList.contains('hidden')).toBe(false);
+
+    // Skapa batch från aktuellt recept
+    const createBtn = document.getElementById('btn-create-batch-current') || document.getElementById('btn-create-first-batch');
+    expect(createBtn).toBeDefined();
+    createBtn.click();
+
+    // Ska öppna detaljvyn direkt
+    expect(document.querySelector('.batch-detail-title')).toBeDefined();
+    expect(batchesView.textContent).toContain('Planerade vs Faktiska Värden');
+    expect(batchesView.textContent).toContain('Jässchema & Tidslinje');
+
+    // Lägg till en gravitetsmätning
+    const rdVal = document.getElementById('rd-val');
+    rdVal.value = '1.012';
+    rdVal.dispatchEvent(new Event('input', { bubbles: true }));
+    document.getElementById('btn-add-reading').click();
+
+    expect(batchesView.textContent).toContain('1.012');
+    expect(batchesView.textContent).not.toContain('NaN');
+
+    // Testa buteljeringssektionen
+    const btlVols = document.getElementById('btl-vols');
+    btlVols.value = '2.5';
+    btlVols.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(document.getElementById('btl-sugar-result').textContent).toContain('Beräknad sockergiva');
+    document.getElementById('btn-save-bottling').click();
+
+    // Sätt betyg och smaknoteringar
+    const star5 = document.querySelector('.batch-star[data-star="5"]');
+    expect(star5).toBeDefined();
+    star5.click();
+    expect(document.getElementById('star-score-text').textContent).toContain('5 av 5');
+
+    const tastingArea = document.getElementById('batch-tasting-notes');
+    tastingArea.value = 'Fantastisk arom, krispig beska och fin skumkrona!';
+    document.getElementById('btn-save-tasting').click();
+
+    // Gå tillbaka till listan
+    document.getElementById('btn-back-to-list').click();
+    expect(document.querySelector('.batches-grid')).toBeDefined();
+    expect(batchesView.textContent).toContain('West Coast IPA');
+
+    // Stäng Mina bryggningar
+    document.getElementById('btn-close-batches').click();
+    expect(batchesView.classList.contains('hidden')).toBe(true);
+
+    // Receptets brygg-badge ska nu synas
+    const brewBadge = document.getElementById('recipe-brew-badge');
+    expect(brewBadge.classList.contains('hidden')).toBe(false);
+    expect(brewBadge.textContent).toContain('Bryggd 1 gång');
+  });
+
   it('inga renderfel loggades (desktop + mobil)', () => {
     expect(renderErrors).toEqual([]);
   });

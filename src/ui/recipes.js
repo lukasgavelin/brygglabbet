@@ -18,6 +18,8 @@ import { syncEquipmentToUI } from './equipment.js';
 import { renderMobileFermentablesCards, renderMobileHopsCards } from './mobile/mobileCards.js';
 import { setupInputSteppers } from './stepper.js';
 import { exportBeerXML, importBeerXML } from '../core/beerxml.js';
+import { getBatches, getBatchesForRecipe, importBatches } from '../core/batches.js';
+import { updateRecipeBrewCountBadge } from './batches.js';
 
 const LOCAL_STORAGE_KEY = 'brygglabbet_recipes';
 const FALLBACK_STORAGE_KEY = 'brew_recipes';
@@ -78,11 +80,16 @@ export function openRecipeModal(recalculateCallback) {
             )
           : '—';
 
+      const brewCount = getBatchesForRecipe(name).length;
+      const brewBadgeHtml = brewCount > 0
+        ? `<span class="badge-tag" style="margin-left:6px; background:var(--accent-muted); color:var(--accent); font-weight:600; font-size:0.75rem;">Bryggd ${brewCount} ${brewCount === 1 ? 'gång' : 'gånger'}</span>`
+        : '';
+
       const div = document.createElement('div');
       div.className = 'recipe-list-item';
       div.innerHTML = `
         <div style="flex:1; cursor:pointer">
-          <div class="recipe-name">${escHtml(name)}</div>
+          <div class="recipe-name">${escHtml(name)}${brewBadgeHtml}</div>
           <div class="recipe-meta">${r.recipe?.batchVolume || '?'}L · OG ${og} · ${r.fermentables?.length || 0} maltsorter · ${r.hops?.length || 0} humlegivor</div>
         </div>
         <div class="recipe-list-actions">
@@ -297,6 +304,7 @@ export function syncUIFromState(recalculateCallback) {
   renderMobileHopsCards(recalculateCallback);
   setupInputSteppers(recalculateCallback);
   updateAccordionBadges();
+  updateRecipeBrewCountBadge();
   if (typeof recalculateCallback === 'function') {
     recalculateCallback();
   }
@@ -380,6 +388,7 @@ export function exportJSON() {
     _version: 1,
     exportDate: new Date().toISOString(),
     ...State,
+    batches: getBatches(),
   };
   const data = JSON.stringify(exportPayload, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
@@ -389,7 +398,7 @@ export function exportJSON() {
   a.download = `${name.replace(/[^a-z0-9åäö]/gi, '_')}.json`;
   a.click();
   URL.revokeObjectURL(url);
-  showToast('📤 Recept exporterat som JSON', 'success');
+  showToast('📤 Recept och batcher exporterade som JSON', 'success');
 }
 
 export function exportBeerXMLFile() {
@@ -436,6 +445,11 @@ export function importJSON(e, recalculateCallback) {
           return;
         }
 
+        if (Array.isArray(data.batches) && data.batches.length > 0) {
+          importBatches(data.batches);
+          delete data.batches;
+        }
+
         delete data._version;
         delete data.exportDate;
         Object.assign(State, data);
@@ -449,7 +463,7 @@ export function importJSON(e, recalculateCallback) {
         setNextId(maxId);
 
         syncUIFromState(recalculateCallback);
-        showToast(`📥 Recept importerat: ${State.recipe.name || 'Okänt'}`, 'success');
+        showToast(`📥 Recept och eventuella batcher importerade: ${State.recipe.name || 'Okänt'}`, 'success');
       }
     } catch (err) {
       console.error(err);

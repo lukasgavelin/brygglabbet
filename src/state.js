@@ -35,6 +35,11 @@ export function createInitialState() {
       efficiency: 75,
       notes: '',
       carbonationVols: null, // null = föreslå utifrån ölstil
+      fermentation: {
+        profile: 'auto',
+        coldCrash: false,
+        customStages: [],
+      },
     },
     equipment: {
       id: 'custom_30l',

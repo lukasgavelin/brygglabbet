@@ -69,6 +69,61 @@ export function setupYeastTab(recalculateCallback) {
   document.getElementById('yeast-notes')?.addEventListener('input', (e) => {
     State.yeast.notes = e.target.value;
   });
+
+  const onFermChange = () => {
+    State.recipe.fermentation = State.recipe.fermentation || { profile: 'auto', coldCrash: false };
+    const pEl = document.getElementById('ferm-profile');
+    const cEl = document.getElementById('ferm-coldcrash');
+    if (pEl) State.recipe.fermentation.profile = pEl.value;
+    if (cEl) State.recipe.fermentation.coldCrash = cEl.checked;
+    renderFermentationSummary();
+    recalculateCallback();
+  };
+
+  document.getElementById('ferm-profile')?.addEventListener('change', onFermChange);
+  document.getElementById('ferm-coldcrash')?.addEventListener('change', onFermChange);
+}
+
+export function renderFermentationSummary() {
+  const summaryEl = document.getElementById('ferm-schedule-summary');
+  if (!summaryEl) return;
+
+  const ferm = State.recipe.fermentation || { profile: 'auto', coldCrash: false };
+  const effectiveType = ferm.profile && ferm.profile !== 'auto' ? ferm.profile : (State.yeast?.type || 'ale');
+  const coldCrash = Boolean(ferm.coldCrash);
+
+  let stagesStr = '';
+  let totalDays = 0;
+  if (effectiveType === 'lager') {
+    stagesStr = '1. Primärjäsning (11°C, 10 dgr) → 2. Diacetylvila (17°C, 4 dgr) → 3. Kallagring (3°C, 14 dgr)';
+    totalDays = 28;
+  } else if (effectiveType === 'kveik') {
+    stagesStr = '1. Primärjäsning (33°C, 4 dgr)';
+    totalDays = 4;
+  } else if (effectiveType === 'wheat') {
+    stagesStr = '1. Primärjäsning (20°C, 10 dgr)';
+    totalDays = 10;
+  } else {
+    stagesStr = '1. Primärjäsning (19°C, 12 dgr)';
+    totalDays = 12;
+  }
+
+  if (coldCrash) {
+    stagesStr += ' → Kallkrasch (3°C, 2 dgr)';
+    totalDays += 2;
+  }
+
+  const dryHops = (State.hops || []).filter((h) => h.use === 'torrhumle' || h.use === 'torr');
+  let dryHopNote = '';
+  if (dryHops.length > 0) {
+    const list = dryHops.map((h) => `${h.amount} g ${h.name} (dag ${h.dryHopDay ?? 7} i ${h.dryHopDays ?? 3} dgr)`).join(', ');
+    dryHopNote = `<div style="margin-top:4px;">🌿 <strong>Torrhumling:</strong> ${list}</div>`;
+  }
+
+  summaryEl.innerHTML = `
+    <div>⏱️ <strong>Jässchema:</strong> ${stagesStr} (totalt ca <strong>${totalDays} dagar</strong>).</div>
+    ${dryHopNote}
+  `;
 }
 
 export function syncYeastToUI() {
@@ -94,6 +149,13 @@ export function syncYeastToUI() {
   const recipeAttMax = document.getElementById('att-max');
   if (recipeAttMin) recipeAttMin.value = State.yeast.attMin || 72;
   if (recipeAttMax) recipeAttMax.value = State.yeast.attMax || 78;
+
+  State.recipe.fermentation = State.recipe.fermentation || { profile: 'auto', coldCrash: false };
+  const pEl = document.getElementById('ferm-profile');
+  const cEl = document.getElementById('ferm-coldcrash');
+  if (pEl) pEl.value = State.recipe.fermentation.profile || 'auto';
+  if (cEl) cEl.checked = Boolean(State.recipe.fermentation.coldCrash);
+  renderFermentationSummary();
 }
 
 export function populateYeastSelector() {

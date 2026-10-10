@@ -21,8 +21,12 @@
     <span class="logo-icon"><svg class="svg-icon svg-icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M10 6h4M12 6v4l-4.5 7.5A1.2 1.2 0 0 0 8.5 19.3h7a1.2 1.2 0 0 0 1-1.8L12 10V6"/><path d="M9.5 16c1.5-.7 3.5 1 5 0"/></svg></span>
     <h1>Brygglabbet</h1>
   </div>
-  <input type="text" id="recipe-name-input" placeholder="Receptnamn..." value="Mitt nya öl" autocomplete="off">
+  <div style="display:flex; align-items:center; gap:8px;">
+    <input type="text" id="recipe-name-input" placeholder="Receptnamn..." value="Mitt nya öl" autocomplete="off">
+    <span id="recipe-brew-badge" class="badge-tag hidden" style="cursor:pointer; background:var(--accent-muted); color:var(--accent); font-weight:600; padding:4px 8px; font-size:0.78rem;" title="Klicka för att se sparade bryggningar av detta recept">Bryggd 0 ggr</span>
+  </div>
   <div class="header-actions">
+    <button class="btn btn-secondary btn-sm" id="btn-batches" title="Visa alla bryggningar (batcher)"><span class="quick-icon">📒</span> Mina bryggningar</button>
     <button class="btn btn-secondary btn-sm" id="btn-toggle-brewday" title="Växla till Bryggdagsläget"><span class="quick-icon">🍺</span> Bryggdag</button>
     <button class="btn btn-secondary btn-sm" id="btn-presets" title="Välj bland färdiga exempelrecept"><span class="quick-icon">📋</span> Exempelrecept</button>
     <button class="btn btn-primary btn-sm" id="btn-save" title="Spara recept"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Spara</button>
@@ -31,7 +35,8 @@
     <div class="header-menu-wrap">
       <button class="btn btn-ghost btn-sm" id="btn-header-menu" title="Fler verktyg & funktioner" aria-label="Meny">⚙️ Meny ▾</button>
       <div class="header-dropdown" id="header-dropdown-menu">
-        <div class="dropdown-header">Recept-hantering</div>
+        <div class="dropdown-header">Recept &amp; Bryggningar</div>
+        <button id="btn-batches-menu" class="dropdown-item">📒 Mina bryggningar</button>
         <button id="btn-new" class="dropdown-item">📄 Nytt recept</button>
         <button id="btn-open" class="dropdown-item">📁 Öppna sparat recept</button>
         <button id="btn-export" class="dropdown-item">📥 Exportera (JSON)</button>
@@ -469,6 +474,29 @@
               <p class="section-label">Jästbeskrivning</p>
               <div id="yeast-desc-text" style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5;"></div>
             </div>
+
+            <!-- Jässchema & Temperaturstyrning -->
+            <div class="card" id="card-fermentation-schedule" style="margin-top:14px">
+              <p class="section-label">⏱️ Jässchema &amp; Temperaturstyrning</p>
+              <div class="card-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="ferm-profile">Jäsprofil</label>
+                  <select id="ferm-profile">
+                    <option value="auto">Automatiskt (utifrån jästtyp)</option>
+                    <option value="ale">Standard Ale (18–20°C, 12 dagar)</option>
+                    <option value="lager">Standard Lager (11°C, diacetyl 17°C, lagering 3°C)</option>
+                    <option value="kveik">Kveik (30–35°C, 4 dagar)</option>
+                    <option value="wheat">Veteöl (18–22°C, 10 dagar)</option>
+                  </select>
+                </div>
+                <div class="form-group" style="display:flex; flex-direction:column; justify-content:center;">
+                  <label class="tool-check" style="margin-top:20px">
+                    <input type="checkbox" id="ferm-coldcrash"> Kallkrascha (2 dagar vid 3°C)
+                  </label>
+                </div>
+              </div>
+              <div id="ferm-schedule-summary" style="margin-top:10px; font-size:0.85rem; color:var(--text-secondary); background:var(--bg-secondary); border-radius:var(--radius-sm); padding:10px 12px; border:1px solid var(--border);"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -669,6 +697,9 @@
             <div class="ready-to-brew-actions">
               <button class="btn btn-hero-brewday" id="cta-btn-start-brewday" title="Starta interaktivt bryggdagsläge">
                 <span class="quick-icon">🍺</span> Starta Bryggdagsläget →
+              </button>
+              <button class="btn btn-secondary btn-sm" id="cta-btn-view-batches" title="Visa sparade bryggningar av detta recept">
+                <span class="quick-icon">📒</span> Mina bryggningar (<span id="recipe-brew-count">0</span>)
               </button>
               <button class="btn btn-secondary btn-sm" id="cta-btn-print" title="Skriv ut bryggprotokoll">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Skriv ut protokoll
@@ -1212,6 +1243,9 @@
 
 <!-- ===================== BREWDAY VIEW ======================== -->
 <div id="brewday-view" class="hidden"></div>
+
+<!-- ===================== BATCHES VIEW (MINA BRYGGNINGAR) ====== -->
+<div id="batches-view" class="hidden"></div>
 
 <!-- ===================== MODALER ========================= -->
 

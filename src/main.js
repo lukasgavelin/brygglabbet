@@ -39,6 +39,7 @@ import { setupPrintHandler, triggerPrint } from './ui/print.js';
 import { debounce } from './ui/utils.js';
 import { setupInputSteppers } from './ui/stepper.js';
 import { setupToolsModal } from './ui/tools.js';
+import { setupBatchesView } from './ui/batches.js';
 import { showToast } from './ui/toast.js';
 
 const debouncedRecalculate = debounce(recalculate, 150);
@@ -66,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupPrintHandler();
   setupToolsModal(debouncedRecalculate);
+  setupBatchesView(recalculate);
   const restored = checkAndRestoreSession(recalculate);
   if (!restored) {
     loadDefaultRecipe(recalculate);

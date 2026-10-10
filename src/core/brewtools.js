@@ -240,7 +240,8 @@ export function actualEfficiency(fermentables, measuredOG, volumeL) {
   let grainPotential = 0;
   let sugarExtract = 0;
   list.forEach((f) => {
-    const pts = num(f.amount) * (num(f.yield) / 100) * GU_PER_KG_SUCROSE;
+    const yld = num(f.yield !== undefined && f.yield !== null ? f.yield : f.yieldPct);
+    const pts = num(f.amount) * (yld / 100) * GU_PER_KG_SUCROSE;
     if (f.type === 'sugar') sugarExtract += pts;
     else grainPotential += pts;
   });

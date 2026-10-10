@@ -28,6 +28,7 @@ import {
 } from '../core/brewtools.js';
 import { openToolsModal } from './tools.js';
 import { showToast, escHtml } from './toast.js';
+import { createBatch } from '../core/batches.js';
 
 // Timer & Navigation state
 let activeTimer = null;
@@ -708,9 +709,14 @@ export function renderBrewdayContent(recalculateCallback) {
           <label class="form-label" for="bd-notes">Bryggdagsnoteringar (anteckna avvikelser, flöde, doft etc.)</label>
           <textarea id="bd-notes" rows="4" placeholder="Hur gick bryggningen?">${escHtml(brewSession.brewNotes)}</textarea>
         </div>
-        <button class="btn btn-primary" id="btn-save-brewlog" style="margin-top:12px; width: 100%; justify-content: center;">
-          💾 Spara bryggnoteringar i receptet
-        </button>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
+          <button class="btn btn-success" id="btn-save-as-batch" style="background:#10b981; color:#fff; border:none; padding:10px 14px; font-weight:bold; justify-content:center;">
+            📒 Spara som ny batch i Mina bryggningar
+          </button>
+          <button class="btn btn-secondary" id="btn-save-brewlog" style="justify-content:center;">
+            💾 Spara noteringar i receptet
+          </button>
+        </div>
       `;
     }
   });
@@ -1067,10 +1073,26 @@ export function renderBrewdayContent(recalculateCallback) {
   document.getElementById('btn-wizard-finish')?.addEventListener('click', () => {
     if (brewSession.measuredOG || brewSession.measuredPH || brewSession.brewNotes || brewSession.measuredPreboilGravity) {
       recordBrewLog();
+      createBatch({
+        recipeSnapshot: State,
+        measured: brewSession,
+        notes: brewSession.brewNotes,
+      });
     }
 
     showToast('🎉 Bryggdagen är slutförd! Återgår till receptet.', 'success');
     toggleBrewdayView(recalculateCallback);
+  });
+
+  // Save as Batch in Mina bryggningar
+  document.getElementById('btn-save-as-batch')?.addEventListener('click', () => {
+    recordBrewLog();
+    const batch = createBatch({
+      recipeSnapshot: State,
+      measured: brewSession,
+      notes: brewSession.brewNotes,
+    });
+    showToast(`🎉 Batchen "${batch.recipeName}" sparades i Mina bryggningar!`, 'success');
   });
 
   // Save brewlog notes
