@@ -9,7 +9,16 @@ import { STYLES } from '../core/data.js';
 import {
   computeRecipeMetrics,
   formatSG,
+  calculateWaterProfile,
 } from '../core/calculations.js';
+import {
+  strikeTemp,
+  acidAddition,
+  spargeAcid,
+  ACIDS,
+  pitchRate,
+  yeastProfile,
+} from '../core/brewtools.js';
 
 export function setupPrintHandler() {
   window.addEventListener('beforeprint', preparePrintView);
@@ -82,19 +91,35 @@ function preparePrintView() {
     const hopsHtml = sortedHops.map((h) => {
       let useStr = '';
       if (h.use === 'kok') useStr = `${h.time || 0} min`;
-      else if (h.use === 'whirlpool') useStr = 'Whirlpool';
+      else if (h.use === 'whirlpool') {
+        const wpTemp = h.whirlpoolTemp ? ` @ ${h.whirlpoolTemp}°C` : '';
+        const wpTime = h.time ? `, ${h.time} min` : '';
+        useStr = `Whirlpool${wpTemp}${wpTime}`;
+      }
       else useStr = 'Torrhumle';
       return `<li><strong>${h.amount || 0} g</strong> ${escapeHtml(h.name)} (${useStr})</li>`;
     }).join('') || '<li>Inga humlegivor tillagda</li>';
 
     // 3. Yeast
+    const yeastProf = yeastProfile(yeast);
+    const pitch = pitchRate({
+      og: ogRes.sg,
+      volumeL: recipe.batchVolume || 20,
+      type: yeastProf.type,
+      form: yeastProf.form,
+      packSizeG: yeastProf.packSizeG,
+    });
+    const yeastPitchStr = yeastProf.form === 'dry'
+      ? `${pitch.packs} st påse${pitch.packs > 1 ? 'ar' : ''} (${pitch.grams} g torrjäst)`
+      : `${pitch.packs} st förpackning${pitch.packs > 1 ? 'ar' : ''} / förkultur (~${pitch.cellsNeededB} mdr celler)`;
+
     let yeastHtml = '';
     if (yeast.name) {
       yeastHtml = `<li><strong>${escapeHtml(yeast.name)}</strong> (${escapeHtml(yeast.lab || '')})`;
       if (yeast.tempMin && yeast.tempMax) {
-        yeastHtml += `<br>Rek. temp: ${yeast.tempMin}–${yeast.tempMax}°C`;
+        yeastHtml += `<br>Jästemperatur: ${yeast.tempMin}–${yeast.tempMax}°C`;
       }
-      yeastHtml += '</li>';
+      yeastHtml += `<br>Rek. giva: ${yeastPitchStr}</li>`;
     } else {
       yeastHtml = '<li>Ingen jäst vald</li>';
     }
@@ -114,8 +139,49 @@ function preparePrintView() {
         return `<li><strong>${Number(val).toFixed(1)} g</strong> ${translation[salt] || salt}</li>`;
       }).join('');
 
+    // 4b. Mash & Sparge Acid
+    let acidPrintItems = '';
+    if (water.acid?.enabled) {
+      const waterResult = calculateWaterProfile(water.base || {}, water.salts || {}, water.volume || 25);
+      const mashAcid = acidAddition({
+        waterProfile: waterResult,
+        fermentables,
+        mashRatio: State.equipment?.mashRatio || 3.0,
+        targetPH: water.acid.targetPH ?? 5.4,
+        acid: water.acid.type || 'lactic',
+        strengthPct: water.acid.strength ?? 80,
+      });
+      const spargeL = vols.spargeWater || 0;
+      const spargeAcidRes = (water.acid.treatSparge && spargeL > 0)
+        ? spargeAcid({
+            hco3: waterResult.hco3,
+            spargeL,
+            targetPH: 5.7,
+            acid: water.acid.type || 'lactic',
+            strengthPct: water.acid.strength ?? 80,
+          })
+        : { ml: 0 };
+
+      const acidLabel = `${ACIDS[water.acid.type]?.label || 'Mjölksyra'} ${water.acid.strength ?? 80}%`;
+      const lines = [];
+      if (mashAcid.ml > 0) {
+        lines.push(`<li><strong>${mashAcid.ml.toFixed(1)} ml ${escapeHtml(acidLabel)}</strong> i mäskvattnet (mål-pH ${water.acid.targetPH})</li>`);
+      }
+      if (spargeAcidRes.ml > 0) {
+        lines.push(`<li><strong>${spargeAcidRes.ml.toFixed(1)} ml ${escapeHtml(acidLabel)}</strong> i lakvattnet (pH ≈ 5,7)</li>`);
+      }
+      acidPrintItems = lines.join('');
+    }
+
     // 5. Strike Water Temp Calculation
-    const strikeTemp = ((mash[0]?.temp || 67) + 4).toFixed(1);
+    const grainTemp = State.equipment?.grainTemp ?? 18;
+    const mashRatio = State.equipment?.mashRatio || 3.0;
+    const strikeTempC = strikeTemp({
+      mashTempC: mash[0]?.temp || 67,
+      grainTempC: grainTemp,
+      ratioLPerKg: mashRatio,
+      tunLossC: 0,
+    }).toFixed(1);
 
     // 6. Mash Steps
     let mashStepsHtml = '';
@@ -213,11 +279,12 @@ function preparePrintView() {
             </ul>
           </div>
           
-          ${saltsList ? `
+          ${saltsList || acidPrintItems ? `
           <div class="print-section">
             <h3>💧 Vattenbehandling</h3>
             <ul class="print-list">
               ${saltsList}
+              ${acidPrintItems}
             </ul>
           </div>
           ` : ''}
@@ -231,7 +298,7 @@ function preparePrintView() {
             <ol class="print-steps-list">
               <li>
                 <strong>Mäskning</strong>
-                <p>Värm <strong>${vols.mashWater.toFixed(1)} L</strong> vatten till ca <strong>${strikeTemp}°C</strong> (strike-temperatur).</p>
+                <p>Värm <strong>${vols.mashWater.toFixed(1)} L</strong> vatten till ca <strong>${strikeTempC}°C</strong> (strike-temperatur vid ${grainTemp}°C malt).</p>
                 <p>Mäska in malten och utför följande steg:</p>
                 <ul class="print-substeps">
                   ${mashStepsHtml}
@@ -272,8 +339,10 @@ function preparePrintView() {
             <div class="print-notes-grid">
               <div class="notes-field"><span>Mäsk-pH:</span><div class="notes-line"></div></div>
               <div class="notes-field"><span>Pre-boil SG:</span><div class="notes-line"></div></div>
+              <div class="notes-field"><span>Pre-boil Volym (L):</span><div class="notes-line"></div></div>
               <div class="notes-field"><span>Uppmätt OG:</span><div class="notes-line"></div></div>
-              <div class="notes-field"><span>Slutvolym (L):</span><div class="notes-line"></div></div>
+              <div class="notes-field"><span>Volym i jäskärl (L):</span><div class="notes-line"></div></div>
+              <div class="notes-field"><span>Faktisk eff. (%):</span><div class="notes-line"></div></div>
               <div class="notes-field"><span>Uppmätt FG:</span><div class="notes-line"></div></div>
               <div class="notes-field"><span>Flaskningsdatum:</span><div class="notes-line"></div></div>
             </div>

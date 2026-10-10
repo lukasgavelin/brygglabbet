@@ -70,6 +70,99 @@ describe('UI smoke: bryggverktyg & mäsk-pH', () => {
     expect(result).not.toContain('NaN');
   });
 
+  it('öppnar bryggdagsläget och verifierar inmäskningstemperatur, syra, förkok och effektivitet', async () => {
+    const { State } = await import('../src/state.js');
+    const { closeModal } = await import('../src/ui/modals.js');
+
+    // Öppna bryggdagsläget
+    document.getElementById('btn-toggle-brewday').click();
+    const brewdayView = document.getElementById('brewday-view');
+    expect(brewdayView.classList.contains('hidden')).toBe(false);
+
+    // Steg 1: Kontrollera strike-temp och syragivor
+    const step1Body = brewdayView.querySelector('.brewday-step-card[data-step-idx="0"]');
+    expect(step1Body.textContent).toContain('strike-temperatur');
+    expect(step1Body.textContent).not.toContain('NaN');
+    expect(step1Body.textContent).toContain('ml');
+
+    // Klicka på steget Lakning & Vörtkontroll före kok (steg-kort)
+    const cards = brewdayView.querySelectorAll('.brewday-step-card');
+    const preboilCard = Array.from(cards).find((c) => c.textContent.includes('Vörtkontroll före kok'));
+    expect(preboilCard).toBeDefined();
+    preboilCard.click();
+
+    // Testa inmatning av förkoksgravitet och volym
+    const preboilGrav = document.getElementById('bd-preboil-grav');
+    const preboilVol = document.getElementById('bd-preboil-vol');
+    expect(preboilGrav).toBeDefined();
+    preboilGrav.value = '1.040';
+    preboilGrav.dispatchEvent(new Event('input', { bubbles: true }));
+    preboilVol.value = '25';
+    preboilVol.dispatchEvent(new Event('input', { bubbles: true }));
+
+    const preboilResult = document.getElementById('bd-preboil-result');
+    expect(preboilResult.textContent).toContain('Förväntat OG');
+    expect(preboilResult.textContent).not.toContain('NaN');
+
+    // Klicka på Kylning & Jäst
+    const yeastCard = Array.from(cards).find((c) => c.textContent.includes('Kylning & Jästtillsats'));
+    expect(yeastCard).toBeDefined();
+    yeastCard.click();
+    const activeYeastCard = document.querySelector('.brewday-step-card.brewday-step-active');
+    expect(activeYeastCard).toBeDefined();
+    expect(activeYeastCard.textContent).toContain('Beräknad jästmängd');
+    expect(activeYeastCard.textContent).toContain('påse');
+
+    // Testa att öppna jästverktyget via knappen i steget
+    const openYeastBtn = document.getElementById('btn-open-yeast-tool-step');
+    expect(openYeastBtn).toBeDefined();
+    openYeastBtn.click();
+    expect(document.getElementById('modal-tools').classList.contains('hidden')).toBe(false);
+    expect(document.querySelector('.tools-tab[data-tool="yeast"]').classList.contains('active')).toBe(true);
+    closeModal('modal-tools');
+
+    // Klicka på Brygglogg & Slutförande
+    const logCard = Array.from(document.querySelectorAll('.brewday-step-card')).find((c) => c.textContent.includes('Brygglogg'));
+    expect(logCard).toBeDefined();
+    logCard.click();
+
+    // Mata in uppmätt OG och volym i jäskärlet
+    const ogInput = document.getElementById('bd-measured-og');
+    const volInput = document.getElementById('bd-measured-vol');
+    ogInput.value = '1.060';
+    ogInput.dispatchEvent(new Event('input', { bubbles: true }));
+    volInput.value = '20';
+    volInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+    const effResult = document.getElementById('bd-eff-result');
+    expect(effResult.textContent).toContain('Faktisk brygghuseffektivitet');
+    expect(effResult.textContent).not.toContain('NaN');
+
+    // Klicka på uppdatera utrustningsprofil
+    const updateEffBtn = document.getElementById('btn-update-profile-eff');
+    expect(updateEffBtn).toBeDefined();
+    updateEffBtn.click();
+    expect(State.equipment.efficiency).toBeGreaterThan(0);
+
+    // Återgå till receptet
+    document.getElementById('btn-close-brewday-header').click();
+    expect(brewdayView.classList.contains('hidden')).toBe(true);
+  });
+
+  it('genererar utskriftsvy utan fel', async () => {
+    const { State } = await import('../src/state.js');
+    State.hops.push({ id: 'hop-wp', name: 'Mosaic', amount: 30, alpha: 12, use: 'whirlpool', whirlpoolTemp: 85, time: 20 });
+    // Simulera beforeprint
+    window.dispatchEvent(new Event('beforeprint'));
+    const printContainer = document.getElementById('print-container');
+    expect(printContainer).toBeDefined();
+    expect(printContainer.textContent).toContain('Mäskning');
+    expect(printContainer.textContent).toContain('strike-temperatur');
+    expect(printContainer.textContent).toContain('Whirlpool');
+    expect(printContainer.textContent).toContain('Pre-boil Volym');
+    expect(printContainer.textContent).not.toContain('NaN');
+  });
+
   it('inga renderfel loggades (desktop + mobil)', () => {
     expect(renderErrors).toEqual([]);
   });

@@ -11,7 +11,22 @@ import { State } from '../state.js';
 import {
   computeRecipeMetrics,
   formatSG,
+  calculateWaterProfile,
 } from '../core/calculations.js';
+import {
+  strikeTemp,
+  infusionVolume,
+  pitchRate,
+  yeastProfile,
+  actualEfficiency,
+  brixToSG,
+  hydrometerTempCorrection,
+  preboilCorrection,
+  acidAddition,
+  spargeAcid,
+  ACIDS,
+} from '../core/brewtools.js';
+import { openToolsModal } from './tools.js';
 import { showToast, escHtml } from './toast.js';
 
 // Timer & Navigation state
@@ -24,12 +39,46 @@ let currentStepIndex = 0;
 let isBrewdayOpen = false;
 let activeMobileTab = 'steps'; // 'steps' | 'ingredients'
 
-// UI Persistence state
-const checkedItems = new Set();
+// UI Persistence & Brew Session state
+const SESSION_STORAGE_KEY = 'brygglabbet_brew_session';
+
+function getInitialSession() {
+  return {
+    preboilMode: 'sg', // 'sg' | 'brix'
+    measuredPreboilGravity: '',
+    sampleTempC: 20,
+    measuredPreboilVol: '',
+    measuredOG: '',
+    measuredFermenterVol: '',
+    measuredPH: '',
+    brewNotes: '',
+    checkedItems: [],
+  };
+}
+
+const brewSession = (() => {
+  try {
+    const raw = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(SESSION_STORAGE_KEY) : null;
+    if (raw) return { ...getInitialSession(), ...JSON.parse(raw) };
+  } catch {
+    // Ignore storage read errors
+  }
+  return getInitialSession();
+})();
+
+const checkedItems = new Set(brewSession.checkedItems || []);
 const triggeredHopAlerts = new Set();
-let measuredOG = '';
-let measuredPH = '';
-let brewNotes = '';
+
+function persistBrewSession() {
+  try {
+    brewSession.checkedItems = Array.from(checkedItems);
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(brewSession));
+    }
+  } catch {
+    // Ignore storage write errors
+  }
+}
 
 /**
  * Toggles the main view between Recipe Editor and Brew Day Mode.
@@ -171,6 +220,130 @@ function updateHeaderTimerIndicator() {
 }
 
 /**
+ * Calculates and updates the pre-boil status and guidance box in-place.
+ * @param {object} metrics - Computed recipe metrics
+ */
+function renderPreboilResult(metrics) {
+  const container = document.getElementById('bd-preboil-result');
+  if (!container) return;
+
+  const gravStr = brewSession.measuredPreboilGravity;
+  if (!gravStr) {
+    container.innerHTML = `
+      <div class="tool-hint" style="margin-top:10px; color:var(--text-secondary); font-size:0.83rem;">
+        Mata in uppmätt gravitet (SG eller Brix) och volym för att få förutsägelse av slutligt OG samt ev. korrigeringsförslag (koktid, socker eller spädning).
+      </div>
+    `;
+    return;
+  }
+
+  const numVal = parseFloat(String(gravStr).replace(',', '.'));
+  if (!Number.isFinite(numVal) || numVal <= 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const rawSG = brewSession.preboilMode === 'brix' ? brixToSG(numVal) : numVal;
+  if (rawSG < 1.0) {
+    container.innerHTML = '<div class="tool-hint" style="margin-top:8px; color:var(--warning);">Ogiltig förkoksgravitet (måste vara minst 1.000).</div>';
+    return;
+  }
+
+  const tempNum = Number.isFinite(Number(brewSession.sampleTempC)) ? Number(brewSession.sampleTempC) : 20;
+  const correctedSG = hydrometerTempCorrection(rawSG, tempNum, 20);
+  const volNum = parseFloat(String(brewSession.measuredPreboilVol).replace(',', '.')) || metrics.preboilVolume;
+
+  const corr = preboilCorrection({
+    measuredSG: correctedSG,
+    measuredVolL: volNum,
+    targetOG: metrics.og,
+    boilTimeMin: State.recipe.boilTime || 60,
+    boilOffRateLph: State.equipment?.boilOffRate || 3.0,
+    toleranceGU: 2,
+  });
+
+  const tempNote = tempNum !== 20 ? ` (tempkorrigerad från ${tempNum}°C till 20°C: <strong>${formatSG(correctedSG)}</strong>)` : '';
+  let statusHtml = '';
+
+  if (corr.status === 'ok') {
+    statusHtml = `
+      <div style="margin-top:12px; padding:12px; background:rgba(16, 185, 129, 0.12); border:1px solid rgba(16, 185, 129, 0.35); border-radius:var(--radius);">
+        <div style="font-weight:700; color:#10b981; margin-bottom:4px;">✅ Perfekt på spåret!</div>
+        <div style="font-size:0.88rem;">Förväntat OG vid kokslut: <strong>${formatSG(corr.predictedOG)}</strong> (Mål: ${formatSG(metrics.og)})${tempNote}.</div>
+        <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:2px;">Förväntad vörtvolym efter kok: ca ${corr.postBoilVolL.toFixed(1)} L.</div>
+      </div>
+    `;
+  } else if (corr.status === 'low') {
+    statusHtml = `
+      <div style="margin-top:12px; padding:12px; background:rgba(245, 158, 11, 0.12); border:1px solid rgba(245, 158, 11, 0.35); border-radius:var(--radius);">
+        <div style="font-weight:700; color:#f59e0b; margin-bottom:4px;">⚠️ Beräknat OG är lägre än målet</div>
+        <div style="font-size:0.88rem;">Förväntat OG: <strong>${formatSG(corr.predictedOG)}</strong> (Mål: ${formatSG(metrics.og)})${tempNote}.</div>
+        <div style="margin-top:8px; font-size:0.85rem;"><strong>Åtgärdsförslag för att nå målet:</strong></div>
+        <ul style="margin:6px 0 0 16px; padding:0; font-size:0.84rem; display:flex; flex-direction:column; gap:4px;">
+          ${corr.extendBoilMin > 0 ? `<li><strong>Koka ${corr.extendBoilMin} min längre</strong> (totalt ${(State.recipe.boilTime || 60) + corr.extendBoilMin} min koktid, ger ca ${corr.volumeAfterExtendedBoilL.toFixed(1)} L vört).</li>` : ''}
+          <li><strong>Tillsätt ${corr.sugarG} g strösocker</strong> (eller <strong>${corr.dmeG} g DME</strong>) under koket.</li>
+        </ul>
+      </div>
+    `;
+  } else if (corr.status === 'high') {
+    statusHtml = `
+      <div style="margin-top:12px; padding:12px; background:rgba(59, 130, 246, 0.12); border:1px solid rgba(59, 130, 246, 0.35); border-radius:var(--radius);">
+        <div style="font-weight:700; color:#3b82f6; margin-bottom:4px;">ℹ️ Beräknat OG är högre än målet</div>
+        <div style="font-size:0.88rem;">Förväntat OG: <strong>${formatSG(corr.predictedOG)}</strong> (Mål: ${formatSG(metrics.og)})${tempNote}.</div>
+        <div style="margin-top:8px; font-size:0.85rem;"><strong>Åtgärdsförslag:</strong></div>
+        <div style="font-size:0.84rem; margin-top:4px;">
+          ${corr.diluteL > 0 ? `Späd vörten med <strong>${corr.diluteL.toFixed(1)} L vatten</strong> före eller under koket för att träffa målvolym och gravitet.` : 'Ingen spädning krävs.'}
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = statusHtml;
+}
+
+/**
+ * Calculates and updates actual brewhouse efficiency box in-place.
+ * @param {object} metrics - Computed recipe metrics
+ * @param {Function} recalculateCallback - State recalculate callback
+ */
+function renderEfficiencyResult(metrics, recalculateCallback) {
+  const container = document.getElementById('bd-eff-result');
+  if (!container) return;
+
+  const ogNum = parseFloat(String(brewSession.measuredOG).replace(',', '.'));
+  const volNum = parseFloat(String(brewSession.measuredFermenterVol).replace(',', '.')) || metrics.batchVolume;
+
+  if (ogNum > 1 && volNum > 0) {
+    const eff = actualEfficiency(State.fermentables, ogNum, volNum);
+    if (eff > 0) {
+      container.innerHTML = `
+        <div class="brewday-eff-box" style="margin-top:14px; padding:12px 14px; background:var(--bg-secondary); border-radius:var(--radius); border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div>
+            <div style="font-size:0.82rem; color:var(--text-secondary);">Faktisk brygghuseffektivitet:</div>
+            <div style="font-size:1.25rem; font-weight:800; color:var(--accent);">${eff.toFixed(1)}%</div>
+            <div style="font-size:0.78rem; color:var(--text-secondary);">Planerad i utrustningsprofil: ${metrics.efficiency}%</div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-update-profile-eff">
+            ⚙️ Sätt profil till ${eff.toFixed(1)}%
+          </button>
+        </div>
+      `;
+
+      document.getElementById('btn-update-profile-eff')?.addEventListener('click', () => {
+        State.equipment.efficiency = eff;
+        State.recipe.efficiency = eff;
+        recalculateCallback();
+        renderEfficiencyResult(computeRecipeMetrics(State), recalculateCallback);
+        showToast(`Utrustningsprofil och recept uppdaterades till ${eff.toFixed(1)}% effektivitet!`, 'success');
+      });
+      return;
+    }
+  }
+
+  container.innerHTML = '';
+}
+
+/**
  * Renders the responsive Brew Day cooking wizard view.
  * @param {Function} recalculateCallback - Recalculate callback
  */
@@ -187,6 +360,84 @@ export function renderBrewdayContent(recalculateCallback) {
   const ibuRes = { total: metrics.ibu, perHop: metrics.ibuPerHop };
   const ebcRes = { ebc: metrics.ebc };
 
+  // Calculate strike temperature and acid additions
+  const mashTemp = State.mash && State.mash.length > 0 ? State.mash[0].temp : 67;
+  const grainTemp = State.equipment?.grainTemp ?? 18;
+  const mashRatio = State.equipment?.mashRatio || 3.0;
+  const calculatedStrikeTemp = strikeTemp({
+    mashTempC: mashTemp,
+    grainTempC: grainTemp,
+    ratioLPerKg: mashRatio,
+    tunLossC: 0,
+  });
+
+  const acidConfig = State.water?.acid || {};
+  let mashAcid = { ml: 0 };
+  let spargeAcidRes = { ml: 0 };
+  let acidLabel = '';
+  if (acidConfig.enabled) {
+    const waterResult = calculateWaterProfile(
+      State.water?.base || {},
+      State.water?.salts || {},
+      State.water?.volume || 25
+    );
+    mashAcid = acidAddition({
+      waterProfile: waterResult,
+      fermentables: State.fermentables,
+      mashRatio,
+      targetPH: acidConfig.targetPH ?? 5.4,
+      acid: acidConfig.type || 'lactic',
+      strengthPct: acidConfig.strength ?? 80,
+    });
+    const spargeL = waterVols.spargeWater || 0;
+    if (acidConfig.treatSparge && spargeL > 0) {
+      spargeAcidRes = spargeAcid({
+        hco3: waterResult.hco3,
+        spargeL,
+        targetPH: 5.7,
+        acid: acidConfig.type || 'lactic',
+        strengthPct: acidConfig.strength ?? 80,
+      });
+    }
+    acidLabel = `${ACIDS[acidConfig.type]?.label || 'Mjölksyra'} ${acidConfig.strength ?? 80} %`;
+  }
+
+  const totalGrainKg = (State.fermentables || [])
+    .filter((f) => f.type !== 'sugar')
+    .reduce((s, f) => s + (f.amount || 0), 0);
+
+  const yeastProf = yeastProfile(State.yeast);
+  const pitch = pitchRate({
+    og: metrics.og,
+    volumeL: metrics.batchVolume,
+    type: yeastProf.type,
+    form: yeastProf.form,
+    packSizeG: yeastProf.packSizeG,
+  });
+
+  const saltTranslation = {
+    gypsum: 'Gips (CaSO₄)',
+    calciumChloride: 'Kalciumklorid (CaCl₂)',
+    epsomSalt: 'Epsomsalt (MgSO₄)',
+    tableSalt: 'Bordssalt (NaCl)',
+    chalk: 'Krita (CaCO₃)',
+    bakingSoda: 'Bikarbonat (NaHCO₃)',
+  };
+
+  const saltsList = Object.entries(State.water?.salts || {})
+    .filter(([_, val]) => Number(val) > 0)
+    .map(([salt, val]) => {
+      const saltId = `step-salt-${salt}`;
+      return `<li><label><input type="checkbox" id="${saltId}" ${checkedItems.has(saltId) ? 'checked' : ''}> <span>Mät upp <strong>${Number(val).toFixed(1)} g</strong> ${saltTranslation[salt] || salt}</span></label></li>`;
+    }).join('');
+
+  const leftSaltsList = Object.entries(State.water?.salts || {})
+    .filter(([_, val]) => Number(val) > 0)
+    .map(([salt, val]) => {
+      const saltId = `left-salt-${salt}`;
+      return `<li><label><input type="checkbox" id="${saltId}" ${checkedItems.has(saltId) ? 'checked' : ''}> <span>${saltTranslation[salt] || salt}: <strong>${Number(val).toFixed(1)} g</strong></span></label></li>`;
+    }).join('');
+
   // Define steps
   const steps = [];
 
@@ -194,28 +445,25 @@ export function renderBrewdayContent(recalculateCallback) {
   steps.push({
     title: '💧 Förberedelse & Vattenbehandling',
     render: () => {
-      const saltsList = Object.entries(State.water?.salts || {})
-        .filter(([_, val]) => Number(val) > 0)
-        .map(([salt, val]) => {
-          const translation = {
-            gypsum: 'Gips (CaSO₄)',
-            calciumChloride: 'Kalciumklorid (CaCl₂)',
-            epsomSalt: 'Epsomsalt (MgSO₄)',
-            tableSalt: 'Bordssalt (NaCl)',
-            chalk: 'Krita (CaCO₃)',
-            bakingSoda: 'Bikarbonat (NaHCO₃)',
-          };
-          const saltId = `step-salt-${salt}`;
-          return `<li><label><input type="checkbox" id="${saltId}" ${checkedItems.has(saltId) ? 'checked' : ''}> <span>Mät upp <strong>${Number(val).toFixed(1)} g</strong> ${translation[salt] || salt}</span></label></li>`;
-        }).join('');
+
+      const acidChecklist = [];
+      if (acidConfig.enabled) {
+        if (mashAcid.ml > 0) {
+          acidChecklist.push(`<li><label><input type="checkbox" id="step-acid-mash" ${checkedItems.has('step-acid-mash') ? 'checked' : ''}> <span>Mät upp <strong>${mashAcid.ml.toFixed(1)} ml</strong> ${acidLabel} till mäskvattnet (för mål-pH ${acidConfig.targetPH})</span></label></li>`);
+        }
+        if (spargeAcidRes.ml > 0) {
+          acidChecklist.push(`<li><label><input type="checkbox" id="step-acid-sparge" ${checkedItems.has('step-acid-sparge') ? 'checked' : ''}> <span>Mät upp <strong>${spargeAcidRes.ml.toFixed(1)} ml</strong> ${acidLabel} till lakvattnet (pH ≈ 5,7)</span></label></li>`);
+        }
+      }
 
       return `
-        <p>Värm <strong>${waterVols.mashWater.toFixed(1)} L</strong> mäskvatten till ca <strong>${((State.mash[0]?.temp || 67) + 4).toFixed(1)}°C</strong> (strike-temperatur).</p>
+        <p>Värm <strong>${waterVols.mashWater.toFixed(1)} L</strong> mäskvatten till <strong>${calculatedStrikeTemp.toFixed(1)}°C</strong> (strike-temperatur vid ${grainTemp}°C malt och mäskförhållande ${mashRatio.toFixed(1)} L/kg).</p>
         <p>Förbered också <strong>${waterVols.spargeWater.toFixed(1)} L</strong> lakvatten och värm till ~76–78°C.</p>
-        ${saltsList ? `
-          <p style="margin-top:12px; margin-bottom:6px;"><strong>Bryggsalter:</strong></p>
+        ${saltsList || acidChecklist.length > 0 ? `
+          <p style="margin-top:12px; margin-bottom:6px;"><strong>Vattenbehandling (salter & syra):</strong></p>
           <ul class="brewday-step-inner-checklist">
             ${saltsList}
+            ${acidChecklist.join('')}
           </ul>
         ` : ''}
         <div style="margin-top:16px;">
@@ -240,8 +488,28 @@ export function renderBrewdayContent(recalculateCallback) {
         const startBtnText = isCurrentActiveTimer && isTimerRunning ? '⏸️ Pausa' : (isCurrentActiveTimer && timerSecondsRemaining > 0 ? '▶ Fortsätt' : '▶ Starta');
         const startBtnClass = isCurrentActiveTimer && isTimerRunning ? 'btn-warning running' : 'btn-primary';
 
+        let infusionNotice = '';
+        if (idx > 0) {
+          const prevStep = mashSchedule[idx - 1];
+          if (m.temp > prevStep.temp) {
+            const infVol = infusionVolume({
+              currentTempC: prevStep.temp,
+              targetTempC: m.temp,
+              grainKg: totalGrainKg,
+              mashWaterL: waterVols.mashWater,
+              infusionTempC: 100,
+            });
+            infusionNotice = `
+              <div class="brewday-infusion-hint" style="margin-top:10px; margin-bottom:12px; padding:10px 12px; background:var(--bg-secondary); border-left:3px solid var(--accent); border-radius:var(--radius-sm); font-size:0.86rem;">
+                💡 <strong>Temperatursteg (${prevStep.temp}°C → ${m.temp}°C):</strong> Tillsätt ca <strong>${infVol.toFixed(1)} L</strong> kokande vatten (100°C) under omrörning (eller värm direkt med bryggverkets element).
+              </div>
+            `;
+          }
+        }
+
         return `
           <p>Blanda i (mäska in) all krossad malt under omrörning. Håll sedan mäsken vid <strong>${m.temp}°C</strong> i <strong>${m.time} min</strong> (${m.type || 'Infusion'}).</p>
+          ${infusionNotice}
           <div class="brewday-timer-block">
             <div class="brewday-timer-header"><strong>Timer:</strong> ${escHtml(m.name)}</div>
             <div class="brewday-timer-controls">
@@ -265,13 +533,44 @@ export function renderBrewdayContent(recalculateCallback) {
     });
   });
 
-  // Step N+1: Lautering & Sparging
+  // Step N+1: Lautering & Sparging / Pre-boil
   steps.push({
-    title: '💧 Lakning & Vörtinsamling',
+    title: '💧 Lakning & Vörtkontroll före kok',
     render: () => {
+      const mode = brewSession.preboilMode || 'sg';
+      const gravPlaceholder = mode === 'sg' ? formatSG(metrics.preboilSG) : metrics.preboilPlato.toFixed(1);
+      const isBrix = mode === 'brix';
+
       return `
         <p>Laka långsamt genom malten med <strong>${waterVols.spargeWater.toFixed(1)} L</strong> vatten vid ~76–78°C.</p>
-        <p>Samla upp totalt cirka <strong>${State.recipe.boilVolume || 25} L</strong> vört i kokkärlet före kok startar.</p>
+        <p>Planerat före kok: <strong>${metrics.preboilVolume.toFixed(1)} L</strong> vört vid <strong>${formatSG(metrics.preboilSG)}</strong> (${metrics.preboilPlato.toFixed(1)} °P).</p>
+
+        <div style="margin-top:14px; padding:14px; background:var(--bg-secondary); border-radius:var(--radius); border:1px solid var(--border);">
+          <div style="font-weight:700; font-size:0.92rem; margin-bottom:8px;">📊 Mätning före kok (gravitet & volym)</div>
+          <div class="card-grid-3">
+            <div class="form-group">
+              <label class="form-label" for="bd-preboil-mode">Enhet</label>
+              <select id="bd-preboil-mode" style="width:100%;">
+                <option value="sg" ${!isBrix ? 'selected' : ''}>SG (Hydrometer)</option>
+                <option value="brix" ${isBrix ? 'selected' : ''}>°Brix (Refraktometer)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="bd-preboil-grav">${isBrix ? 'Uppmätt °Brix' : 'Uppmätt SG'}</label>
+              <input type="number" inputmode="decimal" id="bd-preboil-grav" placeholder="t.ex. ${gravPlaceholder}" step="${isBrix ? '0.1' : '0.001'}" value="${escHtml(brewSession.measuredPreboilGravity)}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="bd-preboil-temp">Provtemp (°C)</label>
+              <input type="number" inputmode="decimal" id="bd-preboil-temp" placeholder="20" step="1" value="${brewSession.sampleTempC ?? 20}">
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:8px;">
+            <label class="form-label" for="bd-preboil-vol">Uppmätt volym i kokkärlet (L)</label>
+            <input type="number" inputmode="decimal" id="bd-preboil-vol" placeholder="t.ex. ${metrics.preboilVolume.toFixed(1)}" step="0.5" value="${escHtml(brewSession.measuredPreboilVol)}">
+          </div>
+          <div id="bd-preboil-result"></div>
+        </div>
+
         <div style="margin-top:16px;">
           <label class="brewday-done-check">
             <input type="checkbox" id="step-sparge-ready" ${checkedItems.has('step-sparge-ready') ? 'checked' : ''}> 
@@ -296,8 +595,13 @@ export function renderBrewdayContent(recalculateCallback) {
       const hopListHtml = boilHops.map((h, i) => {
         const checkId = `step-boil-hop-${i}`;
         let useStr = '';
-        if (h.use === 'kok') useStr = `vid ${h.time} min kvar`;
-        else useStr = `vid whirlpool / kokslut`;
+        if (h.use === 'kok') {
+          useStr = `vid ${h.time} min kvar`;
+        } else {
+          const wpTemp = h.whirlpoolTemp || 85;
+          const wpTime = h.time || 15;
+          useStr = `vid whirlpool (${wpTemp}°C, ${wpTime} min)`;
+        }
         return `<li><label><input type="checkbox" id="${checkId}" ${checkedItems.has(checkId) ? 'checked' : ''}> <span>Tillsätt <strong>${h.amount} g ${escHtml(h.name)}</strong> (${useStr})</span></label></li>`;
       }).join('');
 
@@ -341,9 +645,19 @@ export function renderBrewdayContent(recalculateCallback) {
         return `<li><label><input type="checkbox" id="${checkId}" ${checkedItems.has(checkId) ? 'checked' : ''}> <span>Mät upp <strong>${h.amount} g ${escHtml(h.name)}</strong> för torrhumling under jäsningen</span></label></li>`;
       }).join('');
 
+      const pitchText = yeastProf.form === 'dry'
+        ? `Beräknad jästmängd: <strong>${pitch.packs} st påse${pitch.packs > 1 ? 'ar' : ''}</strong> (${pitch.grams} g torrjäst, ~${pitch.cellsNeededB} mdr celler).`
+        : `Beräknat cellbehov: <strong>~${pitch.cellsNeededB} mdr celler</strong> (${pitch.packs} st färsk förpackning${pitch.packs > 1 ? 'ar' : ''} eller förkultur).`;
+
       return `
         <p>Kyl vörten så snabbt som möjligt till jästemperatur (ca <strong>18–20°C</strong>).</p>
         <p>Överför vörten till ett desinficerat jäskärl, lufta vörten kraftigt för att tillföra syre, och tillsätt jästen: <strong>${escHtml(State.yeast?.name || 'Ej angiven jäst')}</strong>.</p>
+        <div style="margin:10px 0; padding:10px 12px; background:var(--bg-secondary); border-radius:var(--radius-sm); font-size:0.86rem;">
+          <div>🧫 ${pitchText}</div>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-open-yeast-tool-step" style="margin-top:8px;">
+            🧫 Öppna Jäst- & Förkulturverktyg
+          </button>
+        </div>
         <p>Placera jäskärlet i ett utrymme med temperatur på <strong>${State.yeast?.tempMin || 18}–${State.yeast?.tempMax || 22}°C</strong>.</p>
         ${dryHopsHtml ? `
           <p style="margin-top:14px; margin-bottom:6px;"><strong>Kommande torrhumling:</strong></p>
@@ -366,24 +680,33 @@ export function renderBrewdayContent(recalculateCallback) {
     title: '💾 Brygglogg & Slutförande',
     render: () => {
       return `
-        <p>Fyll i bryggdagens faktiska mätningar för att spara dem i receptet:</p>
+        <p>Fyll i bryggdagens faktiska mätningar för att spara dem i receptet och beräkna faktisk effektivitet:</p>
         <div class="card-grid-2" style="margin-top:12px">
           <div class="form-group">
             <label class="form-label" for="bd-measured-og">Faktiskt OG (Original Gravity)</label>
             <div class="input-group">
-              <input type="number" inputmode="decimal" id="bd-measured-og" placeholder="t.ex. 1.055" step="0.001" value="${measuredOG}">
+              <input type="number" inputmode="decimal" id="bd-measured-og" placeholder="t.ex. ${formatSG(metrics.og)}" step="0.001" value="${escHtml(brewSession.measuredOG)}">
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="bd-measured-ph">Faktiskt Mäsk-pH</label>
+            <label class="form-label" for="bd-measured-vol">Volym i jäskärlet (L)</label>
             <div class="input-group">
-              <input type="number" inputmode="decimal" id="bd-measured-ph" placeholder="t.ex. 5.30" step="0.01" value="${measuredPH}">
+              <input type="number" inputmode="decimal" id="bd-measured-vol" placeholder="t.ex. ${metrics.batchVolume.toFixed(1)}" step="0.5" value="${escHtml(brewSession.measuredFermenterVol)}">
             </div>
           </div>
         </div>
+        <div class="card-grid-2" style="margin-top:10px">
+          <div class="form-group">
+            <label class="form-label" for="bd-measured-ph">Faktiskt Mäsk-pH</label>
+            <div class="input-group">
+              <input type="number" inputmode="decimal" id="bd-measured-ph" placeholder="t.ex. 5.30" step="0.01" value="${escHtml(brewSession.measuredPH)}">
+            </div>
+          </div>
+        </div>
+        <div id="bd-eff-result"></div>
         <div class="form-group" style="margin-top:12px">
           <label class="form-label" for="bd-notes">Bryggdagsnoteringar (anteckna avvikelser, flöde, doft etc.)</label>
-          <textarea id="bd-notes" rows="4" placeholder="Hur gick bryggningen?">${escHtml(brewNotes)}</textarea>
+          <textarea id="bd-notes" rows="4" placeholder="Hur gick bryggningen?">${escHtml(brewSession.brewNotes)}</textarea>
         </div>
         <button class="btn btn-primary" id="btn-save-brewlog" style="margin-top:12px; width: 100%; justify-content: center;">
           💾 Spara bryggnoteringar i receptet
@@ -479,15 +802,19 @@ export function renderBrewdayContent(recalculateCallback) {
               <strong>${waterVols.totalWater.toFixed(1)} L</strong>
             </div>
           </div>
-          <p class="section-label" style="margin-top:10px; font-weight: bold; font-size: 0.82rem;">Bryggsalter (Totalt):</p>
-          <ul class="brewday-checklist">
-            <li><label><input type="checkbox" id="left-salt-gypsum" ${checkedItems.has('left-salt-gypsum') ? 'checked' : ''}> <span>Gips (CaSO₄): <strong>${State.water?.salts?.gypsum || 0} g</strong></span></label></li>
-            <li><label><input type="checkbox" id="left-salt-calciumChloride" ${checkedItems.has('left-salt-calciumChloride') ? 'checked' : ''}> <span>Kalciumklorid (CaCl₂): <strong>${State.water?.salts?.calciumChloride || 0} g</strong></span></label></li>
-            <li><label><input type="checkbox" id="left-salt-epsomSalt" ${checkedItems.has('left-salt-epsomSalt') ? 'checked' : ''}> <span>Epsomsalt (MgSO₄): <strong>${State.water?.salts?.epsomSalt || 0} g</strong></span></label></li>
-            <li><label><input type="checkbox" id="left-salt-tableSalt" ${checkedItems.has('left-salt-tableSalt') ? 'checked' : ''}> <span>Bordssalt (NaCl): <strong>${State.water?.salts?.tableSalt || 0} g</strong></span></label></li>
-            <li><label><input type="checkbox" id="left-salt-chalk" ${checkedItems.has('left-salt-chalk') ? 'checked' : ''}> <span>Krita (CaCO₃): <strong>${State.water?.salts?.chalk || 0} g</strong></span></label></li>
-            <li><label><input type="checkbox" id="left-salt-bakingSoda" ${checkedItems.has('left-salt-bakingSoda') ? 'checked' : ''}> <span>Bikarbonat (NaHCO₃): <strong>${State.water?.salts?.bakingSoda || 0} g</strong></span></label></li>
-          </ul>
+          ${leftSaltsList ? `
+            <p class="section-label" style="margin-top:10px; font-weight: bold; font-size: 0.82rem;">Bryggsalter (Totalt):</p>
+            <ul class="brewday-checklist">
+              ${leftSaltsList}
+            </ul>
+          ` : ''}
+          ${acidConfig.enabled && (mashAcid.ml > 0 || spargeAcidRes.ml > 0) ? `
+            <p class="section-label" style="margin-top:10px; font-weight: bold; font-size: 0.82rem;">Syrajustering:</p>
+            <ul class="brewday-checklist">
+              ${mashAcid.ml > 0 ? `<li><label><input type="checkbox" id="left-acid-mash" ${checkedItems.has('left-acid-mash') ? 'checked' : ''}> <span>Mäskvatten: <strong>${mashAcid.ml.toFixed(1)} ml</strong> ${acidLabel}</span></label></li>` : ''}
+              ${spargeAcidRes.ml > 0 ? `<li><label><input type="checkbox" id="left-acid-sparge" ${checkedItems.has('left-acid-sparge') ? 'checked' : ''}> <span>Lakvatten: <strong>${spargeAcidRes.ml.toFixed(1)} ml</strong> ${acidLabel}</span></label></li>` : ''}
+            </ul>
+          ` : ''}
         </div>
 
         <div class="brewday-card">
@@ -520,7 +847,11 @@ export function renderBrewdayContent(recalculateCallback) {
                         const id = `left-hop-${i}`;
                         let useStr = '';
                         if (h.use === 'kok') useStr = `${h.time} min`;
-                        else if (h.use === 'whirlpool') useStr = 'Whirlpool';
+                        else if (h.use === 'whirlpool') {
+                          const wpTemp = h.whirlpoolTemp || 85;
+                          const wpTime = h.time || 15;
+                          useStr = `Whirlpool (${wpTemp}°C, ${wpTime} min)`;
+                        }
                         else useStr = 'Torrhumle';
                         return `<li><label><input type="checkbox" id="${id}" ${checkedItems.has(id) ? 'checked' : ''}> <span><strong>${h.amount} g</strong> – ${escHtml(h.name)} (${h.alpha}% α) @ ${useStr}</span></label></li>`;
                       }
@@ -541,7 +872,14 @@ export function renderBrewdayContent(recalculateCallback) {
               <span>Jästemperatur:</span>
               <strong>${State.yeast?.tempMin || 18}°C – ${State.yeast?.tempMax || 22}°C</strong>
             </div>
+            <div class="brewday-stat-item">
+              <span>Rek. giva:</span>
+              <strong>${pitch.packs} st påse${pitch.packs > 1 ? 'ar' : ''} (${yeastProf.form === 'dry' ? `${pitch.grams} g` : 'flytande'})</strong>
+            </div>
           </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-open-yeast-tool-panel" style="margin-top:10px; width:100%; justify-content:center;">
+            🧫 Jäst- & Förkulturverktyg
+          </button>
         </div>
 
         <!-- Quick Switch Button on mobile when reviewing ingredients -->
@@ -613,20 +951,48 @@ export function renderBrewdayContent(recalculateCallback) {
         } else {
           checkedItems.delete(cb.id);
         }
+        persistBrewSession();
       }
     });
   });
 
-  // Track logging input fields
-  document.getElementById('bd-measured-og')?.addEventListener('input', (e) => {
-    measuredOG = e.target.value;
+  // Track pre-boil input fields and live calculations
+  const onPreboilInput = () => {
+    brewSession.preboilMode = document.getElementById('bd-preboil-mode')?.value || 'sg';
+    brewSession.measuredPreboilGravity = document.getElementById('bd-preboil-grav')?.value || '';
+    brewSession.sampleTempC = Number(document.getElementById('bd-preboil-temp')?.value) || 20;
+    brewSession.measuredPreboilVol = document.getElementById('bd-preboil-vol')?.value || '';
+    persistBrewSession();
+    renderPreboilResult(metrics);
+  };
+  document.getElementById('bd-preboil-mode')?.addEventListener('change', () => {
+    brewSession.preboilMode = document.getElementById('bd-preboil-mode')?.value || 'sg';
+    persistBrewSession();
+    renderBrewdayContent(recalculateCallback);
   });
-  document.getElementById('bd-measured-ph')?.addEventListener('input', (e) => {
-    measuredPH = e.target.value;
-  });
-  document.getElementById('bd-notes')?.addEventListener('input', (e) => {
-    brewNotes = e.target.value;
-  });
+  document.getElementById('bd-preboil-grav')?.addEventListener('input', onPreboilInput);
+  document.getElementById('bd-preboil-temp')?.addEventListener('input', onPreboilInput);
+  document.getElementById('bd-preboil-vol')?.addEventListener('input', onPreboilInput);
+  renderPreboilResult(metrics);
+
+  // Track logging input fields and live actual efficiency
+  const onLogInput = () => {
+    brewSession.measuredOG = document.getElementById('bd-measured-og')?.value || '';
+    brewSession.measuredFermenterVol = document.getElementById('bd-measured-vol')?.value || '';
+    brewSession.measuredPH = document.getElementById('bd-measured-ph')?.value || '';
+    brewSession.brewNotes = document.getElementById('bd-notes')?.value || '';
+    persistBrewSession();
+    renderEfficiencyResult(metrics, recalculateCallback);
+  };
+  document.getElementById('bd-measured-og')?.addEventListener('input', onLogInput);
+  document.getElementById('bd-measured-vol')?.addEventListener('input', onLogInput);
+  document.getElementById('bd-measured-ph')?.addEventListener('input', onLogInput);
+  document.getElementById('bd-notes')?.addEventListener('input', onLogInput);
+  renderEfficiencyResult(metrics, recalculateCallback);
+
+  // Tools modal trigger buttons
+  document.getElementById('btn-open-yeast-tool-step')?.addEventListener('click', () => openToolsModal('yeast'));
+  document.getElementById('btn-open-yeast-tool-panel')?.addEventListener('click', () => openToolsModal('yeast'));
 
   // Wizard Nav buttons
   document.getElementById('btn-wizard-prev')?.addEventListener('click', () => {
@@ -680,14 +1046,27 @@ export function renderBrewdayContent(recalculateCallback) {
     toggleBrewdayView(recalculateCallback);
   });
 
-  document.getElementById('btn-wizard-finish')?.addEventListener('click', () => {
-    if (measuredOG || measuredPH || brewNotes) {
-      let logMsg = `Bryggdag genomförd ${new Date().toLocaleDateString('sv-SE')}:`;
-      if (measuredOG) logMsg += ` Uppmätt OG = ${measuredOG}.`;
-      if (measuredPH) logMsg += ` Faktiskt pH = ${measuredPH}.`;
-      if (brewNotes) logMsg += `\n${brewNotes}`;
+  function recordBrewLog() {
+    let logMsg = `Bryggdag genomförd ${new Date().toLocaleDateString('sv-SE')}:`;
+    if (brewSession.measuredOG) logMsg += ` Uppmätt OG = ${brewSession.measuredOG}.`;
+    if (brewSession.measuredFermenterVol) logMsg += ` Volym i jäskärl = ${brewSession.measuredFermenterVol} L.`;
+    const ogNum = parseFloat(String(brewSession.measuredOG).replace(',', '.'));
+    const volNum = parseFloat(String(brewSession.measuredFermenterVol).replace(',', '.')) || metrics.batchVolume;
+    if (ogNum > 1 && volNum > 0) {
+      const eff = actualEfficiency(State.fermentables, ogNum, volNum);
+      if (eff > 0) logMsg += ` Faktisk effektivitet = ${eff.toFixed(1)}%.`;
+    }
+    if (brewSession.measuredPH) logMsg += ` Faktiskt pH = ${brewSession.measuredPH}.`;
+    if (brewSession.measuredPreboilGravity) logMsg += ` Förkoksgravitet = ${brewSession.measuredPreboilGravity} (${(brewSession.preboilMode || 'sg').toUpperCase()}).`;
+    if (brewSession.brewNotes) logMsg += `\n${brewSession.brewNotes}`;
 
-      State.recipe.notes = State.recipe.notes ? `${State.recipe.notes}\n\n${logMsg}` : logMsg;
+    State.recipe.notes = State.recipe.notes ? `${State.recipe.notes}\n\n${logMsg}` : logMsg;
+    persistBrewSession();
+  }
+
+  document.getElementById('btn-wizard-finish')?.addEventListener('click', () => {
+    if (brewSession.measuredOG || brewSession.measuredPH || brewSession.brewNotes || brewSession.measuredPreboilGravity) {
+      recordBrewLog();
     }
 
     showToast('🎉 Bryggdagen är slutförd! Återgår till receptet.', 'success');
@@ -696,12 +1075,7 @@ export function renderBrewdayContent(recalculateCallback) {
 
   // Save brewlog notes
   document.getElementById('btn-save-brewlog')?.addEventListener('click', () => {
-    let logMsg = `Bryggdag genomförd ${new Date().toLocaleDateString('sv-SE')}:`;
-    if (measuredOG) logMsg += ` Uppmätt OG = ${measuredOG}.`;
-    if (measuredPH) logMsg += ` Faktiskt pH = ${measuredPH}.`;
-    if (brewNotes) logMsg += `\n${brewNotes}`;
-
-    State.recipe.notes = State.recipe.notes ? `${State.recipe.notes}\n\n${logMsg}` : logMsg;
+    recordBrewLog();
     showToast('💾 Bryggdagsnoteringar sparade i receptet!', 'success');
   });
 }
