@@ -3,7 +3,7 @@
  */
 
 import { State, generateId } from '../state.js';
-import { calculateOG, calculateEBC, ebcToColor } from '../core/calculations.js';
+import { computeRecipeMetrics, ebcToColor } from '../core/calculations.js';
 import { escHtml } from './toast.js';
 
 export function renderFermentablesTable(recalculateCallback) {
@@ -22,12 +22,9 @@ export function renderFermentablesTable(recalculateCallback) {
   table.style.display = '';
   empty.style.display = 'none';
 
-  const ogResult = calculateOG(
-    State.fermentables,
-    State.recipe.batchVolume,
-    State.recipe.efficiency
-  );
-  const ebcResult = calculateEBC(State.fermentables, State.recipe.batchVolume);
+  const metrics = computeRecipeMetrics(State);
+  const ogResult = { guPerFermentable: metrics.guPerFermentable };
+  const ebcResult = { perFermentable: metrics.ebcPerFermentable };
   const totalKg = State.fermentables.reduce((s, f) => s + (f.amount || 0), 0);
 
   tbody.innerHTML = '';

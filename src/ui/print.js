@@ -7,14 +7,8 @@
 import { State } from '../state.js';
 import { STYLES } from '../core/data.js';
 import {
-  calculateOG,
-  calculateFG,
-  calculateABV,
-  calculateIBU,
-  calculateEBC,
+  computeRecipeMetrics,
   formatSG,
-  calculateWaterVolumes,
-  sgToPlato,
 } from '../core/calculations.js';
 
 export function setupPrintHandler() {
@@ -43,16 +37,16 @@ function preparePrintView() {
     const yeast = State.yeast || {};
     const mash = State.mash || [];
     const water = State.water || {};
-    const equipment = State.equipment || {};
 
     // Core Calculations
-    const ogRes = calculateOG(fermentables, recipe.batchVolume || 20, recipe.efficiency || 75);
-    const fg_sg = calculateFG(ogRes.sg, ((yeast.attMin || 72) + (yeast.attMax || 78)) / 2);
-    const fg_plato = sgToPlato(fg_sg);
-    const abv = calculateABV(ogRes.sg, fg_sg);
-    const ibuRes = calculateIBU(hops, ogRes.sg, recipe.batchVolume || 20);
-    const ebcRes = calculateEBC(fermentables, recipe.batchVolume || 20);
-    const vols = calculateWaterVolumes(equipment, fermentables, recipe.boilTime || 60);
+    const metrics = computeRecipeMetrics(State);
+    const ogRes = { sg: metrics.og, plato: metrics.plato };
+    const fg_sg = metrics.fg;
+    const fg_plato = metrics.fgPlato;
+    const abv = metrics.abv;
+    const ibuRes = { total: metrics.ibu, perHop: metrics.ibuPerHop };
+    const ebcRes = { ebc: metrics.ebc };
+    const vols = metrics.volumes;
 
     const style = STYLES.find((s) => s.id === recipe.styleId);
     const styleName = style ? `${style.id} – ${style.name}` : 'Ej angiven ölstil';

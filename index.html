@@ -38,7 +38,8 @@
         <button id="btn-export-beerxml" class="dropdown-item">🍺 Exportera (BeerXML)</button>
         <button id="btn-import" class="dropdown-item">📤 Importera recept</button>
         <div class="dropdown-divider"></div>
-        <div class="dropdown-header">Verktyg & Hjälp</div>
+        <div class="dropdown-header">Verktyg &amp; Hjälp</div>
+        <button id="btn-tools" class="dropdown-item">🧰 Bryggverktyg</button>
         <button id="btn-print" class="dropdown-item">🖨️ Skriv ut bryggprotokoll</button>
         <button id="btn-undo" class="dropdown-item">↩️ Ångra (Ctrl+Z)</button>
         <button id="btn-redo" class="dropdown-item">↪️ Gör om (Ctrl+Y)</button>
@@ -590,6 +591,51 @@
               <div><span style="font-size:0.75rem; color:var(--text-muted)">Cl / SO₄</span><div id="w-res-ratio" style="font-weight:700; color:var(--accent-bright)">1.0 (Balanserad)</div></div>
             </div>
           </div>
+
+          <!-- Mäsk-pH & syra -->
+          <div class="card" id="card-mash-ph" style="margin-top:14px">
+            <p class="section-label" style="margin-bottom:8px">Mäsk-pH &amp; syra</p>
+            <div class="ph-summary">
+              <div>
+                <span class="tool-hint">Uppskattat mäsk-pH (rumstemp.)</span>
+                <div class="ph-big" id="w-ph-value">—</div>
+                <div class="tool-hint" id="w-ph-label"></div>
+              </div>
+              <div>
+                <span class="tool-hint">Restalkalinitet (RA)</span>
+                <div style="font-weight:700" id="w-ra-value">—</div>
+                <div class="tool-hint" id="w-ra-label"></div>
+              </div>
+            </div>
+            <label class="tool-check" style="margin:10px 0">
+              <input type="checkbox" id="acid-enabled"> Justera pH med syra
+            </label>
+            <div id="acid-controls" class="hidden">
+              <div class="card-grid-3">
+                <div class="form-group">
+                  <label class="form-label" for="acid-target-ph">Mål-pH</label>
+                  <input type="number" inputmode="decimal" id="acid-target-ph" value="5.4" min="5.0" max="5.8" step="0.05">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="acid-type">Syra</label>
+                  <select id="acid-type">
+                    <option value="lactic:80">Mjölksyra 80 %</option>
+                    <option value="lactic:88">Mjölksyra 88 %</option>
+                    <option value="phosphoric:10">Fosforsyra 10 %</option>
+                    <option value="phosphoric:75">Fosforsyra 75 %</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="acid-treat-sparge">Lakvatten</label>
+                  <label class="tool-check"><input type="checkbox" id="acid-treat-sparge" checked> Syra även lakvattnet</label>
+                </div>
+              </div>
+              <div class="tool-result" id="acid-result"></div>
+            </div>
+            <p class="tool-hint" style="margin-top:8px">
+              Uppskattning baserad på maltens färg och typ samt vattnets restalkalinitet. Mät gärna med pH-mätare ca 15 min in i mäskningen och justera.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -780,6 +826,7 @@
     <div class="mobile-menu-header">Huvudverktyg</div>
     <button class="mobile-menu-item" id="mobile-menu-brewday" style="font-weight:bold; color:var(--accent-bright);"><span class="quick-icon">🍺</span> Bryggdagsläge</button>
     <button class="mobile-menu-item" id="mobile-menu-print"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Skriv ut bryggprotokoll</button>
+    <button class="mobile-menu-item" id="mobile-menu-tools"><span class="quick-icon">🧰</span> Bryggverktyg</button>
     <hr class="mobile-menu-divider">
     <div class="mobile-menu-header">Recept-hantering</div>
     <button class="mobile-menu-item" id="mobile-menu-new"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 1-2 2v16a2 2 0 0 1 2 2h12a2 2 0 0 1 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Nytt recept</button>
@@ -1302,6 +1349,24 @@
         </p>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modal: Bryggverktyg -->
+<div class="modal-overlay hidden" id="modal-tools">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h3 class="modal-title">🧰 Bryggverktyg</h3>
+      <button class="modal-close" data-close="modal-tools">✕</button>
+    </div>
+    <div class="tools-tabs" id="tools-tabs" role="tablist">
+      <button class="tools-tab active" data-tool="carb" role="tab">Kolsyra</button>
+      <button class="tools-tab" data-tool="refrac" role="tab">Refraktometer</button>
+      <button class="tools-tab" data-tool="hydro" role="tab">Hydrometer</button>
+      <button class="tools-tab" data-tool="yeast" role="tab">Jäst</button>
+      <button class="tools-tab" data-tool="strike" role="tab">Inmäskning</button>
+    </div>
+    <div class="modal-body" id="tools-body" style="padding:12px 0"></div>
   </div>
 </div>
 

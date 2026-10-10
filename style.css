@@ -2917,3 +2917,120 @@ body.mobile-mode #mobile-stats-fab {
   0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
   100% { transform: scale(1.04); box-shadow: 0 0 16px 4px rgba(16, 185, 129, 0.6); }
 }
+
+/* =========================================================
+   BRYGGVERKTYG & MÄSK-pH
+   ========================================================= */
+
+.tools-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 10px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.tools-tab {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tools-tab:hover { color: var(--text-primary); border-color: var(--accent); }
+
+.tools-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.tool-result {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-top: 8px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.tool-result:empty { display: none; }
+
+.tool-result-main {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent-bright);
+  margin-bottom: 2px;
+}
+
+.tool-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.tool-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 6px 0 10px;
+}
+
+.tool-chip {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.tool-chip.active {
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+
+.tool-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.tool-check input { width: auto; }
+
+.ph-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.ph-big {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent-bright);
+}
+
+#modal-tools .modal { max-height: 90vh; overflow-y: auto; }
+
+.hop-wp-temp {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.hop-wp-temp input { min-width: 0; }
+
+.hop-wp-temp span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

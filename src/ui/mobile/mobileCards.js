@@ -4,7 +4,7 @@
  */
 
 import { State } from '../../state.js';
-import { calculateOG, calculateEBC, calculateIBU, ebcToColor } from '../../core/calculations.js';
+import { computeRecipeMetrics, ebcToColor } from '../../core/calculations.js';
 import { escHtml } from '../toast.js';
 
 export function renderMobileFermentablesCards(recalculateCallback) {
@@ -21,12 +21,9 @@ export function renderMobileFermentablesCards(recalculateCallback) {
   container.style.display = 'flex';
   if (empty) empty.style.display = 'none';
 
-  const ogResult = calculateOG(
-    State.fermentables,
-    State.recipe.batchVolume,
-    State.recipe.efficiency
-  );
-  const ebcResult = calculateEBC(State.fermentables, State.recipe.batchVolume);
+  const metrics = computeRecipeMetrics(State);
+  const ogResult = { guPerFermentable: metrics.guPerFermentable };
+  const ebcResult = { perFermentable: metrics.ebcPerFermentable };
   const totalKg = State.fermentables.reduce((s, f) => s + (f.amount || 0), 0);
 
   container.innerHTML = '';
@@ -135,12 +132,8 @@ export function renderMobileHopsCards(recalculateCallback) {
   container.style.display = 'flex';
   if (empty) empty.style.display = 'none';
 
-  const ogResult = calculateOG(
-    State.fermentables,
-    State.recipe.batchVolume,
-    State.recipe.efficiency
-  );
-  const ibuResult = calculateIBU(State.hops, ogResult.sg, State.recipe.batchVolume);
+  const metrics = computeRecipeMetrics(State);
+  const ibuResult = { total: metrics.ibu, perHop: metrics.ibuPerHop };
 
   container.innerHTML = '';
 

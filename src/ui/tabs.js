@@ -3,7 +3,7 @@
  */
 
 import { State } from '../state.js';
-import { calculateEBC, calculateIBU, calculateOG } from '../core/calculations.js';
+import { computeRecipeMetrics } from '../core/calculations.js';
 import { STYLES } from '../core/data.js';
 
 export function setupTabNavigation() {
@@ -82,11 +82,11 @@ export function updateAccordionBadges() {
   }
 
   // 2. Fermentables badge
+  const metrics = computeRecipeMetrics(State);
   const totalMaltKg = (State.fermentables || []).reduce((s, f) => s + (f.amount || 0), 0);
-  const ebcResult = calculateEBC(State.fermentables || [], batchVol);
   const badgeFerm = document.getElementById('badge-fermentables');
   if (badgeFerm) {
-    badgeFerm.textContent = `${totalMaltKg.toFixed(2)} kg | ${ebcResult.ebc.toFixed(0)} EBC`;
+    badgeFerm.textContent = `${totalMaltKg.toFixed(2)} kg | ${metrics.ebc.toFixed(0)} EBC`;
   }
 
   // 3. Mash badge
@@ -100,8 +100,7 @@ export function updateAccordionBadges() {
   }
 
   // 4. Hops badge
-  const ogResult = calculateOG(State.fermentables || [], batchVol, eff);
-  const ibuResult = calculateIBU(State.hops || [], ogResult.sg, batchVol);
+  const ibuResult = { total: metrics.ibu };
   const totalHopsG = (State.hops || []).reduce((s, h) => s + (h.amount || 0), 0);
   const badgeHops = document.getElementById('badge-hops');
   if (badgeHops) {

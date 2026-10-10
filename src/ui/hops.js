@@ -3,7 +3,7 @@
  */
 
 import { State, generateId } from '../state.js';
-import { calculateOG, calculateIBU } from '../core/calculations.js';
+import { computeRecipeMetrics } from '../core/calculations.js';
 import { escHtml } from './toast.js';
 
 export function renderHopsTable(recalculateCallback) {
@@ -25,12 +25,8 @@ export function renderHopsTable(recalculateCallback) {
   table.style.display = '';
   empty.style.display = 'none';
 
-  const ogResult = calculateOG(
-    State.fermentables,
-    State.recipe.batchVolume,
-    State.recipe.efficiency
-  );
-  const ibuResult = calculateIBU(State.hops, ogResult.sg, State.recipe.batchVolume);
+  const metrics = computeRecipeMetrics(State);
+  const ibuResult = { total: metrics.ibu, perHop: metrics.ibuPerHop };
 
   tbody.innerHTML = '';
   State.hops.forEach((h, idx) => {
@@ -47,7 +43,11 @@ export function renderHopsTable(recalculateCallback) {
         <input type="number" inputmode="decimal" value="${h.alpha}" min="0" max="30" step="0.1" data-id="${h.id}" data-field="alpha">
       </td>
       <td class="col-value">
-        <input type="number" inputmode="decimal" value="${h.time}" min="0" max="300" step="5" data-id="${h.id}" data-field="time" ${h.use === 'torrhumle' ? 'disabled' : ''}>
+        <input type="number" inputmode="decimal" value="${h.time}" min="0" max="300" step="5" data-id="${h.id}" data-field="time" ${h.use === 'torrhumle' ? 'disabled' : ''} title="${h.use === 'whirlpool' ? 'Whirlpooltid (min)' : 'Koktid (min)'}">
+        ${h.use === 'whirlpool' ? `
+        <div class="hop-wp-temp" title="Whirlpooltemperatur – lägre temp ger mindre beska">
+          <input type="number" inputmode="decimal" value="${h.whirlpoolTemp ?? 80}" min="40" max="100" step="1" data-id="${h.id}" data-field="whirlpoolTemp"><span>°C</span>
+        </div>` : ''}
       </td>
       <td class="col-unit">
         <select data-id="${h.id}" data-field="form">
@@ -98,7 +98,9 @@ function onHopInputChange(e, recalculateCallback) {
   const val =
     field === 'name' || field === 'form' || field === 'use'
       ? e.target.value
-      : parseFloat(e.target.value) || 0;
+      : field === 'whirlpoolTemp'
+        ? (Number.isFinite(parseFloat(e.target.value)) ? parseFloat(e.target.value) : 80)
+        : parseFloat(e.target.value) || 0;
   h[field] = val;
 
   if (field === 'use') {

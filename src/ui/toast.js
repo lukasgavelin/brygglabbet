@@ -10,8 +10,9 @@ export { escHtml };
  * Shows a toast notification message.
  * @param {string} message - Notification text
  * @param {'info'|'success'|'error'} type - Notification type
+ * @param {number} [durationMs=3000] - How long the toast stays visible
  */
-export function showToast(message, type = 'info') {
+export function showToast(message, type = 'info', durationMs = 3000) {
   const container = document.getElementById('toast-container');
   if (!container) return;
 
@@ -25,5 +26,5 @@ export function showToast(message, type = 'info') {
     toast.style.transform = 'translateX(20px)';
     toast.style.transition = 'all 0.3s ease';
     setTimeout(() => toast.remove(), 300);
-  }, 3000);
+  }, durationMs);
 }

@@ -4,17 +4,8 @@
 
 import { State } from '../state.js';
 import {
-  calculateOG,
-  calculateFG,
-  calculateABV,
-  calculateIBU,
-  calculateEBC,
-  calculateBUGU,
-  calculateApparentAttenuation,
-  calculatePreboilGravity,
+  computeRecipeMetrics,
   calculateWaterProfile,
-  calculateWaterVolumes,
-  sgToPlato,
   formatSG,
   ebcToColor,
   ebcToLabel,
@@ -37,34 +28,10 @@ function safeRun(label, fn) {
 }
 
 export function recalculate() {
-  const ogResult = calculateOG(
-    State.fermentables,
-    State.recipe.batchVolume,
-    State.recipe.efficiency
-  );
-  const sg = ogResult.sg;
-  const plato = ogResult.plato;
-
-  const attMid = (State.yeast.attMin + State.yeast.attMax) / 2;
-  const fg_sg = calculateFG(sg, attMid);
-  const fg_plato = sgToPlato(fg_sg);
-
-  const abv = calculateABV(sg, fg_sg);
-  const ibuResult = calculateIBU(State.hops, sg, State.recipe.batchVolume);
-  const ebcResult = calculateEBC(State.fermentables, State.recipe.batchVolume);
-  const ebc = ebcResult.ebc;
-  const bugu = calculateBUGU(ibuResult.total, sg);
-  const apparentAtt = calculateApparentAttenuation(sg, fg_sg);
-
-  const preboilSG = calculatePreboilGravity(sg, State.recipe.batchVolume, State.recipe.boilVolume);
-  const preboilPlato = sgToPlato(preboilSG);
-  const evapPct =
-    State.recipe.boilVolume > 0
-      ? (
-          ((State.recipe.boilVolume - State.recipe.batchVolume) / State.recipe.boilVolume) *
-          100
-        ).toFixed(1)
-      : '0.0';
+  const m = computeRecipeMetrics(State);
+  const { og: sg, plato, fg: fg_sg, fgPlato: fg_plato, abv, ibu, ebc, bugu, volumes } = m;
+  const apparentAtt = m.apparentAttenuation;
+  const evapPct = m.evaporationPct.toFixed(1);
 
   const waterResult = calculateWaterProfile(
     State.water.base,
@@ -72,11 +39,6 @@ export function recalculate() {
     State.water.volume
   );
 
-  const volumes = calculateWaterVolumes(
-    State.equipment,
-    State.fermentables,
-    State.recipe.boilTime || 60
-  );
   State.recipe.boilVolume = volumes.boilVolume;
 
   safeRun('SidebarStats', () => updateSidebarStats({
@@ -85,13 +47,13 @@ export function recalculate() {
     fg_sg,
     fg_plato,
     abv,
-    ibu: ibuResult.total,
+    ibu,
     ebc,
     bugu,
     apparentAtt,
   }));
-  safeRun('PreboilDisplay', () => updatePreboilDisplay(preboilSG, preboilPlato, evapPct));
-  safeRun('StyleMatch', () => updateStyleMatch({ og: sg, fg: fg_sg, ibu: ibuResult.total, ebc, abv }, State.recipe.styleId));
+  safeRun('PreboilDisplay', () => updatePreboilDisplay(m.preboilSG, m.preboilPlato, evapPct));
+  safeRun('StyleMatch', () => updateStyleMatch({ og: sg, fg: fg_sg, ibu, ebc, abv }, State.recipe.styleId));
   safeRun('FermentablesTable', () => renderFermentablesTable(recalculate));
   safeRun('HopsTable', () => renderHopsTable(recalculate));
   safeRun('WaterPanel', () => renderWaterPanel(waterResult));

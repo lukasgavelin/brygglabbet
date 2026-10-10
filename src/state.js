@@ -34,6 +34,7 @@ export function createInitialState() {
       boilTime: 60,
       efficiency: 75,
       notes: '',
+      carbonationVols: null, // null = föreslå utifrån ölstil
     },
     equipment: {
       id: 'custom_30l',
@@ -45,6 +46,7 @@ export function createInitialState() {
       fermenterLoss: 1.0,
       grainAbsorption: 0.96,
       mashRatio: 3.0,
+      grainTemp: 18,
     },
     fermentables: [],
     hops: [],
@@ -70,6 +72,7 @@ export function createInitialState() {
         chalk: 0,
         bakingSoda: 0,
       },
+      acid: { enabled: false, targetPH: 5.4, type: 'lactic', strength: 80, treatSparge: true },
     },
   };
 }

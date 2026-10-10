@@ -9,14 +9,8 @@
 
 import { State } from '../state.js';
 import {
-  calculateOG,
-  calculateFG,
-  calculateABV,
-  calculateIBU,
-  calculateEBC,
+  computeRecipeMetrics,
   formatSG,
-  calculateWaterVolumes,
-  sgToPlato,
 } from '../core/calculations.js';
 import { showToast, escHtml } from './toast.js';
 
@@ -184,19 +178,14 @@ export function renderBrewdayContent(recalculateCallback) {
   const container = document.getElementById('brewday-view');
   if (!container) return;
 
-  // Correct parameters: (equipment, fermentables, boilTime)
-  const waterVols = calculateWaterVolumes(
-    State.equipment || {},
-    State.fermentables || [],
-    State.recipe.boilTime || 60
-  );
+  const metrics = computeRecipeMetrics(State);
+  const waterVols = metrics.volumes;
 
-  const ogRes = calculateOG(State.fermentables || [], State.recipe.batchVolume || 20, State.recipe.efficiency || 75);
-  const fg_sg = calculateFG(ogRes.sg, ((State.yeast?.attMin || 72) + (State.yeast?.attMax || 78)) / 2);
-  const fg_plato = sgToPlato(fg_sg);
-  const abv = calculateABV(ogRes.sg, fg_sg);
-  const ibuRes = calculateIBU(State.hops || [], ogRes.sg, State.recipe.batchVolume || 20);
-  const ebcRes = calculateEBC(State.fermentables || [], State.recipe.batchVolume || 20);
+  const ogRes = { sg: metrics.og, plato: metrics.plato };
+  const fg_sg = metrics.fg;
+  const abv = metrics.abv;
+  const ibuRes = { total: metrics.ibu, perHop: metrics.ibuPerHop };
+  const ebcRes = { ebc: metrics.ebc };
 
   // Define steps
   const steps = [];

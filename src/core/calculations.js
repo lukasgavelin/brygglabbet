@@ -15,8 +15,11 @@ import {
   TINSETH_TIME_FACTOR,
   TINSETH_TIME_DIVISOR,
   PELLET_UTILIZATION_MULTIPLIER,
-  WHIRLPOOL_IBU_FACTOR,
-  BOIL_SG_CORRECTION_FACTOR,
+  WHIRLPOOL_ARRHENIUS_A,
+  WHIRLPOOL_ARRHENIUS_EA_R,
+  WHIRLPOOL_DEFAULT_TEMP_C,
+  WHIRLPOOL_DEFAULT_MINUTES,
+  TYPICAL_BOIL_GRAVITY_FRACTION,
   MASH_PH_REFERENCE,
   ALKALINITY_HCO3_TO_CACO3,
   RA_CA_DIVISOR,
@@ -144,24 +147,73 @@ export function tinsethUtilization(og_sg, time_min) {
 }
 
 /**
- * Calculates IBUs for all hop additions.
- * @param {Array<{amount: number, alpha: number, time?: number, form?: string, use?: string}>} hops
+ * Estimates the average wort gravity during the boil (used by Tinseth).
+ * Average of pre-boil and post-boil gravity. If pre-boil gravity is unknown,
+ * a typical fraction of the OG gravity points is used.
+ * @param {number} og_sg - Post-boil gravity (OG) in SG
+ * @param {number} [preboil_sg] - Pre-boil gravity in SG
+ * @returns {number} Average boil gravity in SG
+ */
+export function estimateBoilGravity(og_sg, preboil_sg) {
+  if (!og_sg || og_sg <= 1) return 1.0;
+  if (preboil_sg && preboil_sg > 1 && preboil_sg <= og_sg) {
+    return (og_sg + preboil_sg) / 2;
+  }
+  return 1 + (og_sg - 1) * TYPICAL_BOIL_GRAVITY_FRACTION;
+}
+
+/**
+ * Relative alpha-acid isomerization rate at a given temperature compared to a
+ * rolling boil (100°C), based on Malowicki & Shellhammer (2005).
+ * ≈1.00 at 100°C, ≈0.49 at 90°C, ≈0.23 at 80°C, ≈0.10 at 70°C.
+ * @param {number} tempC - Wort temperature in °C
+ * @returns {number} Relative rate (0–~1)
+ */
+export function whirlpoolTempFactor(tempC) {
+  const t = Number(tempC);
+  if (!Number.isFinite(t) || t <= 0) return 0;
+  const kelvin = Math.min(t, 100) + 273.15;
+  return Math.min(1, WHIRLPOOL_ARRHENIUS_A * Math.exp(-WHIRLPOOL_ARRHENIUS_EA_R / kelvin));
+}
+
+/**
+ * Tinseth utilization for a whirlpool / hop stand addition.
+ * @param {number} boil_sg - Wort gravity
+ * @param {number} minutes - Contact time in whirlpool
+ * @param {number} tempC - Average whirlpool temperature
+ * @returns {number} Utilization factor
+ */
+export function whirlpoolUtilization(boil_sg, minutes, tempC) {
+  return tinsethUtilization(boil_sg, minutes) * whirlpoolTempFactor(tempC);
+}
+
+/**
+ * Calculates IBUs for all hop additions (Tinseth).
+ * @param {Array<{amount: number, alpha: number, time?: number, form?: string, use?: string, whirlpoolTemp?: number}>} hops
  * @param {number} og_sg - Original Gravity in SG
  * @param {number} volume_L - Volume in liters
+ * @param {{ boilGravity?: number }} [options] - Average boil gravity (defaults to an estimate from OG)
  * @returns {{ total: number, perHop: number[] }}
  */
-export function calculateIBU(hops, og_sg, volume_L) {
+export function calculateIBU(hops, og_sg, volume_L, options = {}) {
   if (!volume_L || volume_L <= 0) return { total: 0, perHop: [] };
-  const boilSG = 1 + (og_sg - 1) * BOIL_SG_CORRECTION_FACTOR;
+  const boilSG = options.boilGravity && options.boilGravity > 1
+    ? options.boilGravity
+    : estimateBoilGravity(og_sg);
 
   let total = 0;
   const perHop = hops.map((h) => {
     if (h.use === 'dry-hop' || h.use === 'torrhumle') return 0;
     const pelletBonus = h.form === 'pellets' ? PELLET_UTILIZATION_MULTIPLIER : 1.0;
-    const isWhirlpool = h.use === 'whirlpool';
-    const baseUtilization = tinsethUtilization(boilSG, isWhirlpool ? Math.max(h.time || 0, 15) : (h.time || 0));
-    const u = isWhirlpool ? baseUtilization * WHIRLPOOL_IBU_FACTOR : baseUtilization;
-    const ibu = (h.amount * (h.alpha / 100) * u * pelletBonus * 1000) / volume_L;
+    let u;
+    if (h.use === 'whirlpool') {
+      const minutes = Number(h.time) > 0 ? Number(h.time) : WHIRLPOOL_DEFAULT_MINUTES;
+      const temp = Number(h.whirlpoolTemp) > 0 ? Number(h.whirlpoolTemp) : WHIRLPOOL_DEFAULT_TEMP_C;
+      u = whirlpoolUtilization(boilSG, minutes, temp);
+    } else {
+      u = tinsethUtilization(boilSG, Number(h.time) || 0);
+    }
+    const ibu = ((Number(h.amount) || 0) * ((Number(h.alpha) || 0) / 100) * u * pelletBonus * 1000) / volume_L;
     total += ibu;
     return ibu;
   });
@@ -303,9 +355,58 @@ export function calculateResidualAlkalinity(profile) {
 }
 
 /**
- * Estimates mash pH using the scientific Kolbach / Troester buffering model.
- * Accounts for base malt distilled water pH, caramel/roasted malt titratable acidity,
- * water residual alkalinity (RA), and mash thickness.
+ * Distilled-water pH and buffer capacity for a single malt, estimated from its
+ * type and color. Based on published measurements by Troester (Braukaiser) and
+ * Riffe's charge-balance model:
+ *  - Base malts: pH ≈ 5.75 falling with kilning color, buffer ≈ 40 mEq/(kg·pH)
+ *  - Crystal/caramel: pH ≈ 5.22 − 0.00504·°L, buffer ≈ 50
+ *  - Roasted malts: pH ≈ 4.6–5.1, buffer ≈ 59
+ *  - Flaked adjuncts: pH ≈ 5.9, low buffer ≈ 25
+ * @param {{ ebc?: number, type?: string }} malt
+ * @returns {{ pH: number, buffer: number }}
+ */
+export function maltAcidityProfile(malt) {
+  const ebc = Math.max(0, Number(malt?.ebc) || 0);
+  const type = malt?.type || 'base';
+  if (type === 'roasted') {
+    return { pH: Math.max(4.6, 5.2 - ebc / 1500), buffer: 59 };
+  }
+  if (type === 'cara' && ebc > 10) {
+    const srm = ebc / SRM_TO_EBC_MULTIPLIER;
+    const lovibond = (srm + 0.76) / 1.3546;
+    return { pH: Math.max(4.5, 5.22 - 0.00504 * lovibond), buffer: 50 };
+  }
+  if (type === 'adjunct') {
+    return { pH: 5.9, buffer: 25 };
+  }
+  return { pH: Math.max(5.3, 5.75 - 0.012 * ebc), buffer: 40 };
+}
+
+/**
+ * Grist distilled-water pH and total buffer capacity (charge-balance mix).
+ * @param {Array<{amount: number, ebc?: number, type?: string}>} fermentables
+ * @returns {{ distilledPH: number, bufferMeqPerPH: number, grainKg: number }}
+ */
+export function gristBuffer(fermentables) {
+  let weighted = 0;
+  let buffer = 0;
+  let grainKg = 0;
+  (fermentables || []).forEach((f) => {
+    if (f.type === 'sugar') return;
+    const kg = Number(f.amount) || 0;
+    if (kg <= 0) return;
+    const p = maltAcidityProfile(f);
+    weighted += kg * p.buffer * p.pH;
+    buffer += kg * p.buffer;
+    grainKg += kg;
+  });
+  if (buffer <= 0) return { distilledPH: MASH_PH_REFERENCE, bufferMeqPerPH: 0, grainKg: 0 };
+  return { distilledPH: weighted / buffer, bufferMeqPerPH: buffer, grainKg };
+}
+
+/**
+ * Estimates mash pH with a charge-balance model (Troester / Riffe).
+ * pH = grist distilled-water pH + (water residual alkalinity in mEq) / grist buffer.
  *
  * @param {Record<string, number>} waterProfile - Ion concentrations in ppm
  * @param {Array<{amount: number, ebc: number, type?: string}>} fermentables - Grain bill
@@ -313,39 +414,15 @@ export function calculateResidualAlkalinity(profile) {
  * @returns {number} Estimated mash pH (clamped between 4.50 and 6.50)
  */
 export function estimateMashPH(waterProfile, fermentables, mashRatio = 3.0) {
-  const totalKg = (fermentables || []).reduce((sum, f) => {
-    if (f.type === 'sugar') return sum;
-    return sum + (Number(f.amount) || 0);
-  }, 0);
+  const { distilledPH, bufferMeqPerPH, grainKg } = gristBuffer(fermentables);
+  if (bufferMeqPerPH <= 0) return MASH_PH_REFERENCE;
 
-  if (totalKg <= 0) return MASH_PH_REFERENCE;
-
-  let totalGrainAcidity_mEq = 0;
-
-  fermentables.forEach((f) => {
-    if (f.type === 'sugar') return;
-    const kg = Number(f.amount) || 0;
-    const ebc = Number(f.ebc) || 4;
-
-    if (ebc > 15 && ebc <= 300) {
-      const acidityFactor = 0.08 + (ebc / 300) * 0.15;
-      totalGrainAcidity_mEq += kg * 1000 * (acidityFactor / 100);
-    } else if (ebc > 300) {
-      const acidityFactor = 0.25 + Math.min(1.0, ebc / 1400) * 0.2;
-      totalGrainAcidity_mEq += kg * 1000 * (acidityFactor / 100);
-    }
-  });
-
-  const baseMaltPH = MASH_PH_REFERENCE;
-  const grainAcidityDeltaPH = -(totalGrainAcidity_mEq / (totalKg * 45));
-  const distilledMashPH = baseMaltPH + grainAcidityDeltaPH;
-
-  const ra = calculateResidualAlkalinity(waterProfile);
-  const ra_mEqPerL = ra / 50;
   const ratio = Math.max(1.5, Number(mashRatio) || 3.0);
-  const raDeltaPH = ra_mEqPerL * 0.085 * (ratio / 3.0);
+  const mashWaterL = grainKg * ratio;
+  const raMeqPerL = calculateResidualAlkalinity(waterProfile || {}) / 50;
+  const raDeltaPH = (raMeqPerL * mashWaterL) / bufferMeqPerPH;
 
-  const estimatedPH = distilledMashPH + raDeltaPH;
+  const estimatedPH = distilledPH + raDeltaPH;
   return Math.min(6.5, Math.max(4.5, Math.round(estimatedPH * 100) / 100));
 }
 
@@ -500,6 +577,78 @@ export function scaleRecipe(state, targetBatchVolume, targetEfficiency = null) {
     },
     fermentables: scaledFermentables,
     hops: scaledHops,
+  };
+}
+
+/**
+ * Computes all derived recipe metrics from an application state in one place.
+ * Single source of truth for OG, FG, ABV, IBU, EBC, BU:GU, pre-boil values and
+ * water volumes, so that every view (sidebar, badges, tables, mobile, print,
+ * brew day) presents identical numbers.
+ *
+ * @param {object} state - Application state (see AppState in types.js)
+ * @returns {{
+ *   batchVolume: number, efficiency: number, boilTime: number,
+ *   og: number, plato: number, guPerFermentable: number[],
+ *   attenuation: number, fg: number, fgPlato: number, apparentAttenuation: number, abv: number,
+ *   ibu: number, ibuPerHop: number[], ebc: number, ebcPerFermentable: number[], bugu: number,
+ *   preboilVolume: number, preboilSG: number, preboilPlato: number, boilSG: number,
+ *   evaporationPct: number, volumes: ReturnType<typeof calculateWaterVolumes>
+ * }}
+ */
+export function computeRecipeMetrics(state) {
+  const recipe = state?.recipe || {};
+  const equipment = state?.equipment || {};
+  const fermentables = state?.fermentables || [];
+  const hops = state?.hops || [];
+  const yeast = state?.yeast || {};
+
+  const batchVolume = Number(recipe.batchVolume) || Number(equipment.batchVolume) || 20;
+  const efficiency = Number(recipe.efficiency) || Number(equipment.efficiency) || 75;
+  const boilTime = Number(recipe.boilTime) || 60;
+
+  const ogResult = calculateOG(fermentables, batchVolume, efficiency);
+  const og = ogResult.sg;
+
+  const attMin = Number(yeast.attMin ?? 72);
+  const attMax = Number(yeast.attMax ?? 78);
+  const attenuation = (attMin + attMax) / 2;
+  const fg = calculateFG(og, attenuation);
+
+  const volumes = calculateWaterVolumes(equipment, fermentables, boilTime);
+  const preboilVolume = volumes.boilVolume;
+  const preboilSG = calculatePreboilGravity(og, batchVolume, preboilVolume);
+  const boilSG = estimateBoilGravity(og, preboilSG);
+
+  const ibuResult = calculateIBU(hops, og, batchVolume, { boilGravity: boilSG });
+  const ebcResult = calculateEBC(fermentables, batchVolume);
+
+  const evaporationPct =
+    preboilVolume > 0 ? ((preboilVolume - batchVolume) / preboilVolume) * 100 : 0;
+
+  return {
+    batchVolume,
+    efficiency,
+    boilTime,
+    og,
+    plato: ogResult.plato,
+    guPerFermentable: ogResult.guPerFermentable,
+    attenuation,
+    fg,
+    fgPlato: sgToPlato(fg),
+    apparentAttenuation: calculateApparentAttenuation(og, fg),
+    abv: calculateABV(og, fg),
+    ibu: ibuResult.total,
+    ibuPerHop: ibuResult.perHop,
+    ebc: ebcResult.ebc,
+    ebcPerFermentable: ebcResult.perFermentable,
+    bugu: calculateBUGU(ibuResult.total, og),
+    preboilVolume,
+    preboilSG,
+    preboilPlato: sgToPlato(preboilSG),
+    boilSG,
+    evaporationPct,
+    volumes,
   };
 }
 

@@ -30,6 +30,7 @@ import {
   loadDefaultRecipe,
   checkAndRestoreSession,
   syncUIFromState,
+  getSavedRecipes,
 } from './ui/recipes.js';
 import { recalculate, setupMobileSidebar } from './ui/sidebar.js';
 import { initMobileApp } from './ui/mobile/mobileApp.js';
@@ -37,6 +38,8 @@ import { toggleBrewdayView } from './ui/brewday.js';
 import { setupPrintHandler, triggerPrint } from './ui/print.js';
 import { debounce } from './ui/utils.js';
 import { setupInputSteppers } from './ui/stepper.js';
+import { setupToolsModal } from './ui/tools.js';
+import { showToast } from './ui/toast.js';
 
 const debouncedRecalculate = debounce(recalculate, 150);
 
@@ -62,13 +65,36 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileApp(recalculate);
 
   setupPrintHandler();
+  setupToolsModal(debouncedRecalculate);
   const restored = checkAndRestoreSession(recalculate);
   if (!restored) {
     loadDefaultRecipe(recalculate);
   }
   setupInputSteppers(debouncedRecalculate);
   recalculate();
+  showIbuModelNoticeOnce(restored);
 });
+
+/**
+ * One-time notice: IBU values changed with the improved model (boil gravity
+ * + temperature-dependent whirlpool). Only shown to returning users.
+ * @param {boolean} restored - Whether a previous session was restored
+ */
+function showIbuModelNoticeOnce(restored) {
+  const KEY = 'brygglabbet_ibu_model_v2_notice';
+  try {
+    if (localStorage.getItem(KEY)) return;
+    localStorage.setItem(KEY, '1');
+    if (!restored && Object.keys(getSavedRecipes()).length === 0) return;
+    showToast(
+      'Ny IBU-beräkning: tar nu hänsyn till kokgravitet och whirlpooltemperatur. IBU i sparade recept kan visas 10–20 % lägre än tidigare.',
+      'info',
+      9000
+    );
+  } catch {
+    // localStorage unavailable – skip notice
+  }
+}
 
 function populateStyleSelector() {
   const sel = document.getElementById('recipe-style');

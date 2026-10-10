@@ -5,11 +5,7 @@
 
 import { State, generateId, undoState, redoState } from '../../state.js';
 import {
-  calculateOG,
-  calculateFG,
-  calculateABV,
-  calculateIBU,
-  calculateEBC,
+  computeRecipeMetrics,
   calculateWaterVolumes,
   calculateWaterProfile,
   chlorideSulfateBalance,
@@ -24,6 +20,7 @@ import { saveRecipe, newRecipe, openRecipeModal, openPresetRecipesModal, exportJ
 import { openModal, openFermentableModal, openHopModal } from '../modals.js';
 import { toggleBrewdayView } from '../brewday.js';
 import { triggerPrint } from '../print.js';
+import { openToolsModal } from '../tools.js';
 import { renderMashTable } from '../mash.js';
 import { escHtml } from '../toast.js';
 
@@ -50,19 +47,12 @@ export function initMobileApp(recalculateCallback) {
 }
 
 export function updateMobileUI(recalculateCallback) {
-  const ogResult = calculateOG(
-    State.fermentables,
-    State.recipe.batchVolume,
-    State.recipe.efficiency
-  );
-  const sg = ogResult.sg;
-
-  const attMid = (State.yeast.attMin + State.yeast.attMax) / 2;
-  const fg_sg = calculateFG(sg, attMid);
-  const abv = calculateABV(sg, fg_sg);
-  const ibuResult = calculateIBU(State.hops, sg, State.recipe.batchVolume);
-  const ebcResult = calculateEBC(State.fermentables, State.recipe.batchVolume);
-  const ebc = ebcResult.ebc;
+  const metrics = computeRecipeMetrics(State);
+  const sg = metrics.og;
+  const fg_sg = metrics.fg;
+  const abv = metrics.abv;
+  const ibuResult = { total: metrics.ibu, perHop: metrics.ibuPerHop };
+  const ebc = metrics.ebc;
 
   // 1. Update Sticky Metrics Bar
   const setVal = (id, val) => {
@@ -459,11 +449,11 @@ function updateMobileStyleMatch(og, fg, abv, ibu, ebc) {
   if (nameEl) nameEl.textContent = `${style.id} – ${style.name}`;
 
   const metrics = [
-    { label: 'OG', current: og, min: style.ogMin, max: style.ogMax, fmt: (v) => v.toFixed(3) },
-    { label: 'FG', current: fg, min: style.fgMin, max: style.fgMax, fmt: (v) => v.toFixed(3) },
-    { label: 'ABV', current: abv, min: style.abvMin, max: style.abvMax, fmt: (v) => `${v.toFixed(1)}%` },
-    { label: 'IBU', current: ibu, min: style.ibuMin, max: style.ibuMax, fmt: (v) => v.toFixed(0) },
-    { label: 'EBC', current: ebc, min: style.ebcMin, max: style.ebcMax, fmt: (v) => v.toFixed(0) },
+    { label: 'OG', current: og, min: style.og_min, max: style.og_max, fmt: (v) => v.toFixed(3) },
+    { label: 'FG', current: fg, min: style.fg_min, max: style.fg_max, fmt: (v) => v.toFixed(3) },
+    { label: 'ABV', current: abv, min: style.abv_min, max: style.abv_max, fmt: (v) => `${v.toFixed(1)}%` },
+    { label: 'IBU', current: ibu, min: style.ibu_min, max: style.ibu_max, fmt: (v) => v.toFixed(0) },
+    { label: 'EBC', current: ebc, min: style.ebc_min, max: style.ebc_max, fmt: (v) => v.toFixed(0) },
   ];
 
   container.innerHTML = metrics
@@ -546,6 +536,7 @@ function populateMobileWaterSelector() {
 function setupMobileMenuActions(recalculateCallback) {
   document.getElementById('mobile-menu-brewday')?.addEventListener('click', () => toggleBrewdayView(recalculateCallback));
   document.getElementById('mobile-menu-print')?.addEventListener('click', triggerPrint);
+  document.getElementById('mobile-menu-tools')?.addEventListener('click', () => openToolsModal());
   document.getElementById('mobile-menu-new')?.addEventListener('click', () => newRecipe(recalculateCallback));
   document.getElementById('mobile-menu-open')?.addEventListener('click', () => openRecipeModal(recalculateCallback));
   document.getElementById('mobile-menu-save')?.addEventListener('click', saveRecipe);

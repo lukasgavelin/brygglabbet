@@ -8,7 +8,9 @@ import {
   calculateResidualAlkalinity,
   estimateMashPH,
   chlorideSulfateBalance,
+  computeRecipeMetrics,
 } from '../core/calculations.js';
+import { ACIDS, acidAddition, spargeAcid } from '../core/brewtools.js';
 
 export function setupWaterTab(recalculateCallback) {
   const baseIds = [
@@ -70,6 +72,8 @@ export function setupWaterTab(recalculateCallback) {
       recalculateCallback();
     });
   });
+
+  setupAcidControls(recalculateCallback);
 }
 
 export function populateWaterProfileSelector() {
@@ -162,6 +166,7 @@ export function syncWaterToUI() {
   setVal(['w-salt-baking', 's-baking-soda', 'salt-nahco3'], s.bakingSoda);
 
   setVal(['water-total-volume', 'w-volume'], State.water.volume || 25);
+  syncAcidToUI();
 }
 
 export function renderWaterPanel(waterResult) {
@@ -204,9 +209,11 @@ export function renderWaterPanel(waterResult) {
   if (raNeedle) raNeedle.style.left = `${raPct}%`;
 
   // pH
-  const ph = estimateMashPH(waterResult, State.fermentables);
+  const mashRatio = Number(State.equipment?.mashRatio) || 3;
+  const ph = estimateMashPH(waterResult, State.fermentables, mashRatio);
   const phEl = document.getElementById('w-ph-value');
-  if (phEl) phEl.textContent = ph.toFixed(2);
+  const hasGrain = (State.fermentables || []).some((f) => f.type !== 'sugar' && Number(f.amount) > 0);
+  if (phEl) phEl.textContent = hasGrain ? ph.toFixed(2) : '—';
 
   const phLabel = document.getElementById('w-ph-label');
   if (phLabel) {
@@ -227,6 +234,8 @@ export function renderWaterPanel(waterResult) {
   }
   if (phNeedle) phNeedle.style.left = `${phPct}%`;
 
+  renderAcidResult(waterResult, mashRatio);
+
   // Cl:SO4 ratio
   const bal = chlorideSulfateBalance(waterResult);
   const ratioEl = document.getElementById('w-ratio-value') || document.getElementById('w-res-ratio');
@@ -243,4 +252,102 @@ export function renderWaterPanel(waterResult) {
     ratioFill.style.width = `${ratioPct}%`;
     ratioFill.style.background = bal.color;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Mäsk-pH & syra
+// ---------------------------------------------------------------------------
+
+const ACID_DEFAULTS = { enabled: false, targetPH: 5.4, type: 'lactic', strength: 80, treatSparge: true };
+
+/**
+ * Returns acid settings, filling in defaults for recipes saved before the feature existed.
+ * @returns {{ enabled: boolean, targetPH: number, type: 'lactic'|'phosphoric', strength: number, treatSparge: boolean }}
+ */
+export function getAcidSettings() {
+  if (!State.water) State.water = {};
+  State.water.acid = { ...ACID_DEFAULTS, ...(State.water.acid || {}) };
+  return State.water.acid;
+}
+
+function setupAcidControls(recalculateCallback) {
+  const onChange = () => {
+    const acid = getAcidSettings();
+    const [type, strength] = (document.getElementById('acid-type')?.value || 'lactic:80').split(':');
+    acid.enabled = !!document.getElementById('acid-enabled')?.checked;
+    acid.targetPH = getNumVal(['acid-target-ph'], 5.4);
+    acid.type = type;
+    acid.strength = Number(strength);
+    acid.treatSparge = !!document.getElementById('acid-treat-sparge')?.checked;
+    syncAcidToUI();
+    recalculateCallback();
+  };
+  ['acid-enabled', 'acid-type', 'acid-treat-sparge'].forEach((id) =>
+    document.getElementById(id)?.addEventListener('change', onChange)
+  );
+  document.getElementById('acid-target-ph')?.addEventListener('input', onChange);
+}
+
+function syncAcidToUI() {
+  const acid = getAcidSettings();
+  const enabledEl = document.getElementById('acid-enabled');
+  if (enabledEl) enabledEl.checked = acid.enabled;
+  const targetEl = document.getElementById('acid-target-ph');
+  if (targetEl && document.activeElement !== targetEl) targetEl.value = acid.targetPH;
+  const typeEl = document.getElementById('acid-type');
+  if (typeEl) typeEl.value = `${acid.type}:${acid.strength}`;
+  const spargeEl = document.getElementById('acid-treat-sparge');
+  if (spargeEl) spargeEl.checked = acid.treatSparge;
+  document.getElementById('acid-controls')?.classList.toggle('hidden', !acid.enabled);
+}
+
+function renderAcidResult(waterResult, mashRatio) {
+  const out = document.getElementById('acid-result');
+  if (!out) return;
+  const acid = getAcidSettings();
+  if (!acid.enabled) {
+    out.innerHTML = '';
+    return;
+  }
+  const hasGrain = (State.fermentables || []).some((f) => f.type !== 'sugar' && Number(f.amount) > 0);
+  if (!hasGrain) {
+    out.innerHTML = '<div class="tool-hint">Lägg till malt i receptet för att beräkna syramängd.</div>';
+    return;
+  }
+
+  const res = acidAddition({
+    waterProfile: waterResult,
+    fermentables: State.fermentables,
+    mashRatio,
+    targetPH: acid.targetPH,
+    acid: acid.type,
+    strengthPct: acid.strength,
+  });
+  const acidName = `${ACIDS[acid.type]?.label || 'Syra'} ${acid.strength} %`;
+
+  let html;
+  if (res.ml <= 0) {
+    html = `<div>✓ Uppskattat pH (${res.currentPH.toFixed(2)}) ligger redan på eller under målet – ingen syra behövs i mäsken.</div>`;
+  } else {
+    html = `
+      <div class="tool-result-main">${res.ml.toFixed(1)} ml ${acidName} i mäskvattnet</div>
+      <div class="tool-hint">Sänker från ca ${res.currentPH.toFixed(2)} till ${Number(acid.targetPH).toFixed(2)}.
+        Alternativ: ca ${res.acidulatedMaltG} g surmalt (${res.acidulatedMaltPct.toFixed(1)} % av maltgivan).</div>`;
+    if (res.acidulatedMaltPct > 10) {
+      html += '<div class="tool-hint" style="color:var(--warning)">⚠️ Över 10 % surmalt kan ge märkbar syrlighet – använd hellre flytande syra.</div>';
+    }
+  }
+
+  if (acid.treatSparge) {
+    const spargeL = computeRecipeMetrics(State).volumes?.spargeWater || 0;
+    if (spargeL > 0) {
+      const sp = spargeAcid({ hco3: waterResult.hco3, spargeL, acid: acid.type, strengthPct: acid.strength });
+      html += sp.ml > 0
+        ? `<div style="margin-top:6px">+ <strong>${sp.ml.toFixed(1)} ml</strong> i ${spargeL.toFixed(1)} L lakvatten (till pH ≈ 5,7, minskar garvämnen).</div>`
+        : '<div class="tool-hint" style="margin-top:6px">Lakvattnet har ingen alkalinitet att neutralisera.</div>';
+    } else {
+      html += '<div class="tool-hint" style="margin-top:6px">Ingen lakning i utrustningsprofilen (t.ex. BIAB) – lakvattensyra behövs inte.</div>';
+    }
+  }
+  out.innerHTML = html;
 }
