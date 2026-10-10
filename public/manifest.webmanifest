@@ -1,0 +1,27 @@
+{
+  "name": "Brygglabbet – Receptverktyg för hembryggare",
+  "short_name": "Brygglabbet",
+  "description": "Modernt svenskt bryggprogram för hembryggning med receptskapare, bryggdagsläge, vattenjustering och jäsningslogg.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#1a130e",
+  "background_color": "#0f0b08",
+  "lang": "sv",
+  "categories": ["utilities", "food", "lifestyle"],
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

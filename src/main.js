@@ -41,8 +41,21 @@ import { setupInputSteppers } from './ui/stepper.js';
 import { setupToolsModal } from './ui/tools.js';
 import { setupBatchesView } from './ui/batches.js';
 import { showToast } from './ui/toast.js';
+import { safeStorage, onQuotaExceeded } from './core/storage.js';
+import { initErrorBoundary } from './ui/errorBoundary.js';
+
+// Initialize global crash recovery & error boundary
+initErrorBoundary();
 
 const debouncedRecalculate = debounce(recalculate, 150);
+
+onQuotaExceeded(() => {
+  showToast(
+    '⚠️ Webbläsarens lagringsutrymme är fullt! Nya ändringar hålls temporärt i minnet. Exportera recept som JSON för att inte förlora data.',
+    'error',
+    10000
+  );
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   populateEquipmentSelector();
@@ -75,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupInputSteppers(debouncedRecalculate);
   recalculate();
   showIbuModelNoticeOnce(restored);
+  registerServiceWorker();
 });
 
 /**
@@ -85,8 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function showIbuModelNoticeOnce(restored) {
   const KEY = 'brygglabbet_ibu_model_v2_notice';
   try {
-    if (localStorage.getItem(KEY)) return;
-    localStorage.setItem(KEY, '1');
+    if (safeStorage.getItem(KEY)) return;
+    safeStorage.setItem(KEY, '1');
     if (!restored && Object.keys(getSavedRecipes()).length === 0) return;
     showToast(
       'Ny IBU-beräkning: tar nu hänsyn till kokgravitet och whirlpooltemperatur. IBU i sparade recept kan visas 10–20 % lägre än tidigare.',
@@ -94,7 +108,7 @@ function showIbuModelNoticeOnce(restored) {
       9000
     );
   } catch {
-    // localStorage unavailable – skip notice
+    // storage unavailable – skip notice
   }
 }
 
@@ -270,4 +284,36 @@ function setupHopEvents() {
     filterModalList('hop-list', e.target.value);
   });
 }
+
+/**
+ * Registers the offline PWA Service Worker in production or HTTPS environments.
+ */
+export function registerServiceWorker() {
+  if (
+    typeof window !== 'undefined' &&
+    'serviceWorker' in navigator &&
+    (import.meta.env?.PROD || window.location.protocol === 'https:')
+  ) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker
+        .register('./sw.js')
+        .then((reg) => {
+          reg.onupdatefound = () => {
+            const installing = reg.installing;
+            if (installing) {
+              installing.onstatechange = () => {
+                if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.warn('[Brygglabbet SW] Ny version installerad och redo.');
+                }
+              };
+            }
+          };
+        })
+        .catch((err) => {
+          console.warn('[Brygglabbet SW] Registrering misslyckades:', err);
+        });
+    });
+  }
+}
+
 

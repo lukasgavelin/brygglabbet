@@ -29,6 +29,7 @@ import {
 import { openToolsModal } from './tools.js';
 import { showToast, escHtml } from './toast.js';
 import { createBatch } from '../core/batches.js';
+import { safeSessionStorage } from '../core/storage.js';
 
 // Timer & Navigation state
 let activeTimer = null;
@@ -58,11 +59,9 @@ function getInitialSession() {
 }
 
 const brewSession = (() => {
-  try {
-    const raw = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(SESSION_STORAGE_KEY) : null;
-    if (raw) return { ...getInitialSession(), ...JSON.parse(raw) };
-  } catch {
-    // Ignore storage read errors
+  const parsed = safeSessionStorage.getJSON(SESSION_STORAGE_KEY, null);
+  if (parsed && typeof parsed === 'object') {
+    return { ...getInitialSession(), ...parsed };
   }
   return getInitialSession();
 })();
@@ -71,14 +70,8 @@ const checkedItems = new Set(brewSession.checkedItems || []);
 const triggeredHopAlerts = new Set();
 
 function persistBrewSession() {
-  try {
-    brewSession.checkedItems = Array.from(checkedItems);
-    if (typeof sessionStorage !== 'undefined') {
-      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(brewSession));
-    }
-  } catch {
-    // Ignore storage write errors
-  }
+  brewSession.checkedItems = Array.from(checkedItems);
+  safeSessionStorage.setJSON(SESSION_STORAGE_KEY, brewSession);
 }
 
 /**

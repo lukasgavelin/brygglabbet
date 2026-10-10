@@ -2,7 +2,7 @@
  * Recipe persistence (localStorage, JSON import/export, default recipe).
  */
 
-import { State, createInitialState, setNextId, generateId, pushHistory } from '../state.js';
+import { State, createInitialState, setNextId, generateId, pushHistory, applyState } from '../state.js';
 import { calculateOG, formatSG, scaleRecipe } from '../core/calculations.js';
 import { PRESET_RECIPES } from '../core/data.js';
 import { openModal, closeModal } from './modals.js';
@@ -20,20 +20,17 @@ import { setupInputSteppers } from './stepper.js';
 import { exportBeerXML, importBeerXML } from '../core/beerxml.js';
 import { getBatches, getBatchesForRecipe, importBatches } from '../core/batches.js';
 import { updateRecipeBrewCountBadge } from './batches.js';
+import { safeStorage, safeSessionStorage } from '../core/storage.js';
 
 const LOCAL_STORAGE_KEY = 'brygglabbet_recipes';
 const FALLBACK_STORAGE_KEY = 'brew_recipes';
 
 export function getSavedRecipes() {
-  try {
-    const primary = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (primary) return JSON.parse(primary);
-    const fallback = localStorage.getItem(FALLBACK_STORAGE_KEY);
-    if (fallback) return JSON.parse(fallback);
-    return {};
-  } catch {
-    return {};
-  }
+  const primary = safeStorage.getJSON(LOCAL_STORAGE_KEY, null);
+  if (primary && typeof primary === 'object') return primary;
+  const fallback = safeStorage.getJSON(FALLBACK_STORAGE_KEY, null);
+  if (fallback && typeof fallback === 'object') return fallback;
+  return {};
 }
 
 export function saveRecipe() {
@@ -48,13 +45,15 @@ export function saveRecipe() {
     }
   }
   all[name] = JSON.parse(JSON.stringify(State));
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(all));
-  showToast(`💾 Recept sparat: ${name}`, 'success');
+  const success = safeStorage.setJSON(LOCAL_STORAGE_KEY, all);
+  if (success) {
+    showToast(`💾 Recept sparat: ${name}`, 'success');
+  }
 }
 
 export function newRecipe(recalculateCallback) {
   if (!confirm('Skapa ett nytt recept? Osparade ändringar försvinner.')) return;
-  Object.assign(State, createInitialState());
+  applyState(State, createInitialState());
   syncUIFromState(recalculateCallback);
 }
 
@@ -107,7 +106,7 @@ export function openRecipeModal(recalculateCallback) {
         e.stopPropagation();
         if (confirm(`Ta bort "${name}"?`)) {
           delete all[name];
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(all));
+          safeStorage.setJSON(LOCAL_STORAGE_KEY, all);
           div.remove();
           if (Object.keys(all).length === 0) noMsg.style.display = '';
         }
@@ -131,41 +130,50 @@ export function loadPresetRecipe(presetId, recalculateCallback) {
   const baseVol = preset.recipe.batchVolume || 20;
   const factor = targetVol / baseVol;
 
-  State.recipe = {
+  const scaledRecipe = {
     ...preset.recipe,
     batchVolume: targetVol,
     boilVolume: Math.round((preset.recipe.boilVolume || 25) * factor),
   };
 
-  State.fermentables = (preset.fermentables || []).map((f) => ({
+  const scaledFermentables = (preset.fermentables || []).map((f) => ({
     ...f,
     id: generateId(),
     amount: Math.round(f.amount * factor * 100) / 100,
   }));
 
-  State.hops = (preset.hops || []).map((h) => ({
+  const scaledHops = (preset.hops || []).map((h) => ({
     ...h,
     id: generateId(),
     amount: Math.round(h.amount * factor),
   }));
 
-  State.yeast = preset.yeast ? JSON.parse(JSON.stringify(preset.yeast)) : { name: '' };
-  State.mash = (preset.mash || []).map((m) => ({ ...m, id: generateId() }));
+  const scaledYeast = preset.yeast ? JSON.parse(JSON.stringify(preset.yeast)) : { name: '' };
+  const scaledMash = (preset.mash || []).map((m) => ({ ...m, id: generateId() }));
 
-  if (preset.water) {
-    State.water = {
-      volume: Math.round((preset.water.volume || 25) * factor),
-      base: { ...(preset.water.base || { ca: 0, mg: 0, na: 0, cl: 0, so4: 0, hco3: 0 }) },
-      salts: {
-        gypsum: Math.round((preset.water.salts?.gypsum || 0) * factor * 10) / 10,
-        calciumChloride: Math.round((preset.water.salts?.calciumChloride || 0) * factor * 10) / 10,
-        epsomSalt: Math.round((preset.water.salts?.epsomSalt || 0) * factor * 10) / 10,
-        tableSalt: Math.round((preset.water.salts?.tableSalt || 0) * factor * 10) / 10,
-        chalk: Math.round((preset.water.salts?.chalk || 0) * factor * 10) / 10,
-        bakingSoda: Math.round((preset.water.salts?.bakingSoda || 0) * factor * 10) / 10,
-      },
-    };
-  }
+  const scaledWater = preset.water
+    ? {
+        volume: Math.round((preset.water.volume || 25) * factor),
+        base: { ...(preset.water.base || { ca: 0, mg: 0, na: 0, cl: 0, so4: 0, hco3: 0 }) },
+        salts: {
+          gypsum: Math.round((preset.water.salts?.gypsum || 0) * factor * 10) / 10,
+          calciumChloride: Math.round((preset.water.salts?.calciumChloride || 0) * factor * 10) / 10,
+          epsomSalt: Math.round((preset.water.salts?.epsomSalt || 0) * factor * 10) / 10,
+          tableSalt: Math.round((preset.water.salts?.tableSalt || 0) * factor * 10) / 10,
+          chalk: Math.round((preset.water.salts?.chalk || 0) * factor * 10) / 10,
+          bakingSoda: Math.round((preset.water.salts?.bakingSoda || 0) * factor * 10) / 10,
+        },
+      }
+    : State.water;
+
+  applyState(State, {
+    recipe: scaledRecipe,
+    fermentables: scaledFermentables,
+    hops: scaledHops,
+    yeast: scaledYeast,
+    mash: scaledMash,
+    water: scaledWater,
+  });
 
   let maxId = 0;
   [...State.fermentables, ...State.hops, ...State.mash].forEach((x) => {
@@ -250,7 +258,7 @@ export function scaleCurrentRecipe(targetBatchVol, targetEff, recalculateCallbac
   }
 
   const updatedState = scaleRecipe(State, newBatchVol, newEff);
-  Object.assign(State, updatedState);
+  applyState(State, updatedState);
 
   syncUIFromState(recalculateCallback);
   showToast(`⚖️ Receptet har skalats om till ${newBatchVol}L!`, 'success');
@@ -261,7 +269,7 @@ export function loadRecipe(name, recalculateCallback) {
   const saved = all[name];
   if (!saved) return;
 
-  Object.assign(State, JSON.parse(JSON.stringify(saved)));
+  applyState(State, saved);
 
   let maxId = 0;
   [...State.fermentables, ...State.hops, ...State.mash].forEach((x) => {
@@ -324,16 +332,13 @@ function isStateDefault(state) {
 export function autosaveSession() {
   try {
     if (isStateDefault(State)) {
-      sessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
+      safeSessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
       return;
     }
-    sessionStorage.setItem(
-      AUTOSAVE_STORAGE_KEY,
-      JSON.stringify({
-        state: State,
-        savedAt: Date.now(),
-      })
-    );
+    safeSessionStorage.setJSON(AUTOSAVE_STORAGE_KEY, {
+      state: State,
+      savedAt: Date.now(),
+    });
   } catch (err) {
     console.warn('Autosave error:', err);
   }
@@ -341,12 +346,11 @@ export function autosaveSession() {
 
 export function checkAndRestoreSession(recalculateCallback) {
   try {
-    const raw = sessionStorage.getItem(AUTOSAVE_STORAGE_KEY);
-    if (!raw) return false;
-    const data = JSON.parse(raw);
+    const data = safeSessionStorage.getJSON(AUTOSAVE_STORAGE_KEY, null);
+    if (!data) return false;
     if (data && data.state && data.savedAt) {
       if (isStateDefault(data.state)) {
-        sessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
+        safeSessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
         return false;
       }
       const ageMinutes = (Date.now() - data.savedAt) / (1000 * 60);
@@ -359,7 +363,7 @@ export function checkAndRestoreSession(recalculateCallback) {
             )} min sedan). Vill du återställa den?`
           )
         ) {
-          Object.assign(State, data.state);
+          applyState(State, data.state);
           let maxId = 0;
           [...(State.fermentables || []), ...(State.hops || []), ...(State.mash || [])].forEach(
             (x) => {
@@ -373,11 +377,11 @@ export function checkAndRestoreSession(recalculateCallback) {
         }
       }
     }
-    sessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
+    safeSessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
     return false;
   } catch (err) {
     console.warn('Restore session error:', err);
-    sessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
+    safeSessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
     return false;
   }
 }
@@ -425,7 +429,7 @@ export function importJSON(e, recalculateCallback) {
     try {
       if (isXml) {
         const stateSlice = importBeerXML(evt.target.result);
-        Object.assign(State, stateSlice);
+        applyState(State, stateSlice);
         let maxId = 0;
         [...(State.fermentables || []), ...(State.hops || []), ...(State.mash || [])].forEach(
           (x) => {
@@ -452,7 +456,7 @@ export function importJSON(e, recalculateCallback) {
 
         delete data._version;
         delete data.exportDate;
-        Object.assign(State, data);
+        applyState(State, data);
 
         let maxId = 0;
         [...(State.fermentables || []), ...(State.hops || []), ...(State.mash || [])].forEach(
@@ -475,6 +479,6 @@ export function importJSON(e, recalculateCallback) {
 }
 
 export function loadDefaultRecipe(recalculateCallback) {
-  Object.assign(State, createInitialState());
+  applyState(State, createInitialState());
   syncUIFromState(recalculateCallback);
 }

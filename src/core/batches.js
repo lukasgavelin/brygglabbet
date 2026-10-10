@@ -15,6 +15,7 @@ import {
   sgToBrix,
   hydrometerTempCorrection,
 } from './brewtools.js';
+import { safeStorage } from './storage.js';
 
 export const BATCHES_STORAGE_KEY = 'brygglabbet_batches';
 
@@ -394,33 +395,94 @@ export function generateBatchICS(batch) {
 }
 
 /**
- * Loads all saved batches from localStorage.
- * @returns {Array<object>}
+ * Normalizes a raw batch object, providing safe defaults for missing or legacy fields.
+ * @param {object} [raw]
+ * @returns {object|null}
  */
-export function getBatches() {
-  try {
-    if (typeof localStorage === 'undefined') return [];
-    const raw = localStorage.getItem(BATCHES_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+export function normalizeBatch(raw = {}) {
+  if (!raw || typeof raw !== 'object') return null;
+  const now = new Date().toISOString();
+  const id = raw.id || `batch-${Date.now().toString(36)}`;
+  return {
+    id,
+    createdAt: raw.createdAt || now,
+    updatedAt: raw.updatedAt || now,
+    brewDate: raw.brewDate || formatDateISO(),
+    recipeId: raw.recipeId || null,
+    recipeName: raw.recipeName || 'Namnlöst recept',
+    recipeSnapshot: raw.recipeSnapshot || null,
+    metricsSnapshot: raw.metricsSnapshot || null,
+    measured: {
+      preboilSG: raw.measured?.preboilSG || '',
+      preboilVol: raw.measured?.preboilVol || '',
+      sampleTempC: Number(raw.measured?.sampleTempC) || 20,
+      og: raw.measured?.og || '',
+      fermenterVol: raw.measured?.fermenterVol || '',
+      mashPH: raw.measured?.mashPH || '',
+    },
+    readings: Array.isArray(raw.readings)
+      ? raw.readings.map((r, i) => ({
+          id: r.id || `rd-${i + 1}`,
+          date: r.date || formatDateISO(),
+          mode: r.mode || 'sg',
+          value: r.value !== undefined && r.value !== null ? r.value : (r.sg || r.brix || ''),
+          tempC: Number(r.tempC) || 20,
+          note: r.note || '',
+          sg: r.sg !== undefined && r.sg !== null ? Number(r.sg) : null,
+          brix: r.brix !== undefined && r.brix !== null ? Number(r.brix) : null,
+          abv: r.abv !== undefined && r.abv !== null ? Number(r.abv) : null,
+          apparentAttenuation: r.apparentAttenuation !== undefined && r.apparentAttenuation !== null ? Number(r.apparentAttenuation) : null,
+        }))
+      : [],
+    fg: raw.fg !== undefined ? raw.fg : null,
+    abv: raw.abv !== undefined ? raw.abv : null,
+    attenuation: raw.attenuation !== undefined ? raw.attenuation : null,
+    actualEfficiency: raw.actualEfficiency !== undefined ? raw.actualEfficiency : null,
+    bottling: {
+      date: raw.bottling?.date || '',
+      method: raw.bottling?.method === 'fat' ? 'fat' : 'flaska',
+      volumeL: raw.bottling?.volumeL !== undefined && raw.bottling.volumeL !== null ? Number(raw.bottling.volumeL) : null,
+      vols: raw.bottling?.vols !== undefined && raw.bottling.vols !== null
+        ? Number(raw.bottling.vols)
+        : (raw.bottling?.targetVols !== undefined && raw.bottling.targetVols !== null ? Number(raw.bottling.targetVols) : 2.4),
+      targetVols: raw.bottling?.targetVols !== undefined && raw.bottling.targetVols !== null
+        ? Number(raw.bottling.targetVols)
+        : (raw.bottling?.vols !== undefined && raw.bottling.vols !== null ? Number(raw.bottling.vols) : 2.4),
+      tempC: raw.bottling?.tempC !== undefined && raw.bottling.tempC !== null ? Number(raw.bottling.tempC) : 20,
+      sugarType: raw.bottling?.sugarType || 'strösocker',
+      sugarG: raw.bottling?.sugarG !== undefined && raw.bottling.sugarG !== null
+        ? Number(raw.bottling.sugarG)
+        : (raw.bottling?.sugarGrams !== undefined && raw.bottling.sugarGrams !== null ? Number(raw.bottling.sugarGrams) : null),
+      sugarGrams: raw.bottling?.sugarGrams !== undefined && raw.bottling.sugarGrams !== null
+        ? Number(raw.bottling.sugarGrams)
+        : (raw.bottling?.sugarG !== undefined && raw.bottling.sugarG !== null ? Number(raw.bottling.sugarG) : null),
+      sugarGPerL: raw.bottling?.sugarGPerL !== undefined && raw.bottling.sugarGPerL !== null ? Number(raw.bottling.sugarGPerL) : null,
+    },
+    fermentationPlan: Array.isArray(raw.fermentationPlan) ? raw.fermentationPlan : [],
+    dryHopSchedule: Array.isArray(raw.dryHopSchedule) ? raw.dryHopSchedule : [],
+    estimatedBottlingDate: raw.estimatedBottlingDate || null,
+    status: raw.status || BATCH_STATUS.FERMENTING,
+    notes: raw.notes || '',
+    tastingNotes: raw.tastingNotes || '',
+    rating: Number(raw.rating) || 0,
+  };
 }
 
 /**
- * Saves the full batches array to localStorage.
+ * Loads all saved batches from storage.
+ * @returns {Array<object>}
+ */
+export function getBatches() {
+  const parsed = safeStorage.getJSON(BATCHES_STORAGE_KEY, []);
+  return Array.isArray(parsed) ? parsed.map(normalizeBatch).filter(Boolean) : [];
+}
+
+/**
+ * Saves the full batches array to storage.
  * @param {Array<object>} batches
  */
 export function saveBatches(batches) {
-  try {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(BATCHES_STORAGE_KEY, JSON.stringify(batches));
-    }
-  } catch (err) {
-    console.error('Kunde inte spara batcher till localStorage:', err);
-  }
+  safeStorage.setJSON(BATCHES_STORAGE_KEY, batches);
 }
 
 /**

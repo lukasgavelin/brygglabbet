@@ -24,6 +24,7 @@ import { triggerPrint } from '../print.js';
 import { openToolsModal } from '../tools.js';
 import { renderMashTable } from '../mash.js';
 import { escHtml } from '../toast.js';
+import { safeStorage } from '../../core/storage.js';
 
 // eslint-disable-next-line no-unused-vars
 let isMobileViewActive = false;
@@ -592,7 +593,7 @@ function setupViewSwitcher() {
 
 function checkViewportMode() {
   const isSmallScreen = window.innerWidth <= 768;
-  const userPref = localStorage.getItem('brygglabbet_view_mode');
+  const userPref = safeStorage.getItem('brygglabbet_view_mode');
 
   if (userPref === 'desktop') {
     setMode('desktop');
@@ -619,5 +620,5 @@ function setMode(mode) {
     isMobileViewActive = false;
   }
 
-  localStorage.setItem('brygglabbet_view_mode', mode);
+  safeStorage.setItem('brygglabbet_view_mode', mode);
 }
