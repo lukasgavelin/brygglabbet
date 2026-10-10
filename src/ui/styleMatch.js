@@ -11,8 +11,24 @@ export function updateStyleMatch(values, styleId) {
   if (!nameEl || !barsEl) return;
 
   if (!styleId) {
-    nameEl.textContent = 'Välj en stil i Recept-fliken';
+    nameEl.innerHTML = `
+      <div style="font-size:0.83rem; color:var(--text-muted); margin-bottom:6px;">Ingen ölstil vald</div>
+      <button type="button" class="btn btn-ghost btn-sm" id="btn-jump-to-style" style="border:1px dashed var(--border); width:100%; justify-content:center; font-size:0.78rem;">
+        🎯 Välj ölstil för att jämföra
+      </button>
+    `;
     barsEl.innerHTML = '';
+    document.getElementById('btn-jump-to-style')?.addEventListener('click', () => {
+      const sec = document.getElementById('sec-equipment');
+      if (sec && sec.classList.contains('collapsed')) {
+        sec.classList.remove('collapsed');
+      }
+      const sel = document.getElementById('recipe-style');
+      if (sel) {
+        sel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        sel.focus();
+      }
+    });
     return;
   }
 
@@ -33,6 +49,14 @@ export function updateStyleMatch(values, styleId) {
       min: style.og_min,
       max: style.og_max,
       val: values.og,
+      fmt: (v) => formatSG(v),
+    },
+    {
+      key: 'fg',
+      label: 'FG',
+      min: style.fg_min,
+      max: style.fg_max,
+      val: values.fg,
       fmt: (v) => formatSG(v),
     },
     {

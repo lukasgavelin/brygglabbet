@@ -268,18 +268,18 @@ function syncRecipeFromUI() {
 }
 
 function setupFermentableEvents() {
-  document.getElementById('btn-add-fermentable')?.addEventListener('click', () => {
-    openFermentableModal(recalculate);
-  });
+  const openFerm = () => openFermentableModal(recalculate);
+  document.getElementById('btn-add-fermentable')?.addEventListener('click', openFerm);
+  document.getElementById('btn-empty-add-fermentable')?.addEventListener('click', openFerm);
   document.getElementById('fermentable-search')?.addEventListener('input', (e) => {
     filterModalList('fermentable-list', e.target.value);
   });
 }
 
 function setupHopEvents() {
-  document.getElementById('btn-add-hop')?.addEventListener('click', () => {
-    openHopModal(recalculate);
-  });
+  const openHop = () => openHopModal(recalculate);
+  document.getElementById('btn-add-hop')?.addEventListener('click', openHop);
+  document.getElementById('btn-empty-add-hop')?.addEventListener('click', openHop);
   document.getElementById('hop-search')?.addEventListener('input', (e) => {
     filterModalList('hop-list', e.target.value);
   });

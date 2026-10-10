@@ -277,6 +277,11 @@ export function loadRecipe(name, recalculateCallback) {
   });
   setNextId(maxId);
 
+  // Uncollapse primary sections so loaded recipe is visible immediately
+  ['sec-equipment', 'sec-fermentables', 'sec-mash', 'sec-hops', 'sec-yeast'].forEach((id) => {
+    document.getElementById(id)?.classList.remove('collapsed');
+  });
+
   syncUIFromState(recalculateCallback);
   showToast(`📂 Recept laddat: ${name}`, 'success');
 }

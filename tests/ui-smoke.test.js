@@ -367,6 +367,43 @@ describe('UI smoke: bryggverktyg & mäsk-pH', () => {
     expect(document.body.classList.contains('mobile-mode')).toBe(false);
   });
 
+  it('verifierar UI-förbättringar: toggle-all, BU:GU-badge, stilmatchning med FG, och kveik-val', async () => {
+    const { recalculate } = await import('../src/ui/sidebar.js');
+
+    // 1. Toggle all accordions
+    const toggleBtn = document.getElementById('btn-toggle-all-accordions');
+    expect(toggleBtn).toBeDefined();
+    toggleBtn.click();
+    const allCollapsedAfter = Array.from(document.querySelectorAll('.accordion-card')).every((c) =>
+      c.classList.contains('collapsed')
+    );
+    expect(allCollapsedAfter).toBe(true);
+
+    toggleBtn.click();
+    const anyCollapsedAfter = Array.from(document.querySelectorAll('.accordion-card')).some((c) =>
+      c.classList.contains('collapsed')
+    );
+    expect(anyCollapsedAfter).toBe(false);
+
+    // 2. BU:GU-badge
+    recalculate();
+    const buguBadge = document.getElementById('sb-bugu-badge');
+    expect(buguBadge).toBeDefined();
+    expect(buguBadge.style.display).not.toBe('none');
+    expect(['Balanserad', 'Humlig', 'Maltfokuserad', 'Mycket bitter']).toContain(buguBadge.textContent);
+
+    // 3. Stilmatchning med FG
+    const styleBars = document.getElementById('style-bars-container');
+    expect(styleBars.textContent).toContain('FG');
+    expect(styleBars.textContent).toContain('OG');
+    expect(styleBars.textContent).toContain('IBU');
+
+    // 4. Kveik-option value
+    const yeastSelect = document.getElementById('yeast-type');
+    const kveikOpt = Array.from(yeastSelect.options).find((o) => o.textContent === 'Kveik');
+    expect(kveikOpt.value).toBe('kveik');
+  });
+
   it('inga renderfel loggades (desktop + mobil)', () => {
     expect(renderErrors).toEqual([]);
   });

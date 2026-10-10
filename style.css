@@ -159,6 +159,24 @@ body {
   white-space: nowrap;
 }
 
+.recipe-name-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.recipe-name-edit-icon {
+  position: absolute;
+  right: 6px;
+  font-size: 0.75rem;
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+.recipe-name-wrapper:hover .recipe-name-edit-icon,
+#recipe-name-input:focus + .recipe-name-edit-icon {
+  opacity: 0.9;
+}
+
 #recipe-name-input {
   flex: 1;
   background: transparent;
@@ -168,11 +186,12 @@ body {
   font-family: var(--font-heading);
   font-size: 1rem;
   font-weight: 600;
-  padding: 4px 8px;
+  padding: 4px 26px 4px 8px;
   outline: none;
   transition: border-color var(--transition);
   max-width: 360px;
 }
+#recipe-name-input:hover { border-bottom-color: var(--accent-dim); }
 #recipe-name-input:focus { border-color: var(--accent); }
 #recipe-name-input::placeholder { color: var(--text-dim); font-weight: 400; }
 
@@ -307,20 +326,35 @@ body {
 /* --- Quick Navigation ----------------------------------- */
 #quick-nav {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border);
   padding: 0 12px;
   overflow-x: auto;
   flex-shrink: 0;
-  gap: 4px;
+  gap: 8px;
 }
 #quick-nav::-webkit-scrollbar { height: 2px; }
+
+.quick-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quick-nav-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
+}
 
 .quick-nav-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0 16px;
+  padding: 0 14px;
   height: var(--tab-h);
   background: transparent;
   border: none;
@@ -342,6 +376,21 @@ body {
   background: var(--accent-muted);
 }
 .quick-nav-btn .quick-icon { font-size: 1.05rem; }
+
+.quick-nav-toggle {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  gap: 5px;
+}
+.quick-nav-toggle:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  background: var(--bg-hover);
+}
 
 /* --- Continuous Recipe Sheet & Accordions --------------- */
 #tab-content {

@@ -81,6 +81,33 @@ function updateSidebarStats({ sg, plato, fg_sg, fg_plato, abv, ibu, ebc, bugu, a
   set('sb-ibu', ibu > 0 ? ibu.toFixed(1) : '—');
   set('sb-ebc', ebc > 0 ? `${ebc.toFixed(0)} EBC` : '—');
   set('sb-bugu', bugu > 0 ? bugu.toFixed(2) : '—');
+
+  const buguBadge = document.getElementById('sb-bugu-badge');
+  if (buguBadge) {
+    if (bugu > 0) {
+      buguBadge.style.display = 'inline-block';
+      if (bugu < 0.40) {
+        buguBadge.textContent = 'Maltfokuserad';
+        buguBadge.style.background = 'rgba(217, 119, 6, 0.15)';
+        buguBadge.style.color = '#f59e0b';
+      } else if (bugu <= 0.65) {
+        buguBadge.textContent = 'Balanserad';
+        buguBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+        buguBadge.style.color = '#10b981';
+      } else if (bugu <= 0.85) {
+        buguBadge.textContent = 'Humlig';
+        buguBadge.style.background = 'rgba(249, 115, 22, 0.15)';
+        buguBadge.style.color = '#f97316';
+      } else {
+        buguBadge.textContent = 'Mycket bitter';
+        buguBadge.style.background = 'rgba(239, 68, 68, 0.15)';
+        buguBadge.style.color = '#ef4444';
+      }
+    } else {
+      buguBadge.style.display = 'none';
+    }
+  }
+
   set('sb-attenuation', apparentAtt > 0 ? `${apparentAtt.toFixed(0)} %` : '—');
 
   const totalMalt = State.fermentables.reduce((s, f) => s + (f.amount || 0), 0);

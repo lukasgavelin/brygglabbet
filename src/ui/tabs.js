@@ -7,6 +7,19 @@ import { computeRecipeMetrics } from '../core/calculations.js';
 import { STYLES } from '../core/data.js';
 
 export function setupTabNavigation() {
+  const toggleAllBtn = document.getElementById('btn-toggle-all-accordions');
+
+  function updateToggleAllBtn() {
+    if (!toggleAllBtn) return;
+    const cards = document.querySelectorAll('.accordion-card');
+    const anyCollapsed = Array.from(cards).some((c) => c.classList.contains('collapsed'));
+    toggleAllBtn.title = anyCollapsed ? 'Fäll ut alla sektioner' : 'Fäll ihop alla sektioner';
+    const textEl = toggleAllBtn.querySelector('.toggle-text');
+    const iconEl = toggleAllBtn.querySelector('.icon-toggle-expand');
+    if (textEl) textEl.textContent = anyCollapsed ? 'Fäll ut alla' : 'Fäll ihop alla';
+    if (iconEl) iconEl.textContent = anyCollapsed ? '⤢' : '⤡';
+  }
+
   // Accordion Header Toggle
   document.querySelectorAll('.accordion-header').forEach((header) => {
     header.addEventListener('click', (e) => {
@@ -16,9 +29,27 @@ export function setupTabNavigation() {
       const card = header.closest('.accordion-card');
       if (card) {
         card.classList.toggle('collapsed');
+        updateToggleAllBtn();
       }
     });
   });
+
+  // Toggle All Accordions
+  if (toggleAllBtn) {
+    toggleAllBtn.addEventListener('click', () => {
+      const cards = document.querySelectorAll('.accordion-card');
+      const anyCollapsed = Array.from(cards).some((c) => c.classList.contains('collapsed'));
+      cards.forEach((c) => {
+        if (anyCollapsed) {
+          c.classList.remove('collapsed');
+        } else {
+          c.classList.add('collapsed');
+        }
+      });
+      updateToggleAllBtn();
+    });
+    updateToggleAllBtn();
+  }
 
   // Quick Nav Jump Links
   const navBtns = document.querySelectorAll('.quick-nav-btn');

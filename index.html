@@ -28,7 +28,10 @@
     <h1>Brygglabbet</h1>
   </div>
   <div style="display:flex; align-items:center; gap:8px;">
-    <input type="text" id="recipe-name-input" placeholder="Receptnamn..." value="Mitt nya öl" autocomplete="off">
+    <div class="recipe-name-wrapper" title="Klicka för att byta receptnamn">
+      <input type="text" id="recipe-name-input" placeholder="Receptnamn..." value="Mitt nya öl" autocomplete="off">
+      <span class="recipe-name-edit-icon" aria-hidden="true">✏️</span>
+    </div>
     <span id="recipe-brew-badge" class="badge-tag hidden" style="cursor:pointer; background:var(--accent-muted); color:var(--accent); font-weight:600; padding:4px 8px; font-size:0.78rem;" title="Klicka för att se sparade bryggningar av detta recept">Bryggd 0 ggr</span>
   </div>
   <div class="header-actions">
@@ -70,34 +73,41 @@
 
     <!-- Quick Navigation (Smooth Scroll Links) -->
     <nav id="quick-nav" role="navigation" aria-label="Snabblänkar till receptsektioner">
-      <a href="#sec-equipment" class="quick-nav-btn active">
-        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Grunddata & Utrustning
-      </a>
-      <a href="#sec-fermentables" class="quick-nav-btn">
-        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></span> Malt
-      </a>
-      <a href="#sec-mash" class="quick-nav-btn">
-        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></span> Mäsk
-      </a>
-      <a href="#sec-hops" class="quick-nav-btn">
-        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></span> Humle
-      </a>
-      <a href="#sec-yeast" class="quick-nav-btn">
-        <span class="quick-icon">🧫</span> Jäst
-      </a>
-      <a href="#sec-water" class="quick-nav-btn">
-        <span class="quick-icon">💧</span> Vatten (Valfritt)
-      </a>
-      <a href="#sec-recipe-info" class="quick-nav-btn">
-        <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> Anteckningar & Bryggdag
-      </a>
+      <div class="quick-nav-links">
+        <a href="#sec-equipment" class="quick-nav-btn active">
+          <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Grunddata
+        </a>
+        <a href="#sec-fermentables" class="quick-nav-btn">
+          <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></span> Malt
+        </a>
+        <a href="#sec-mash" class="quick-nav-btn">
+          <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></span> Mäsk
+        </a>
+        <a href="#sec-hops" class="quick-nav-btn">
+          <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></span> Humle
+        </a>
+        <a href="#sec-yeast" class="quick-nav-btn">
+          <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 2v7.5L5.2 18A2 2 0 0 0 7 21h10a2 2 0 0 0 1.8-3L14 9.5V2h-4z"/><circle cx="10" cy="15" r="1"/><circle cx="13" cy="17" r="1"/></svg></span> Jäst
+        </a>
+        <a href="#sec-water" class="quick-nav-btn">
+          <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span> Vatten
+        </a>
+        <a href="#sec-recipe-info" class="quick-nav-btn">
+          <span class="quick-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> Anteckningar
+        </a>
+      </div>
+      <div class="quick-nav-actions">
+        <button id="btn-toggle-all-accordions" class="btn btn-ghost btn-xs" title="Fäll ut eller ihop alla sektioner" aria-label="Fäll ut eller ihop alla sektioner">
+          <span class="icon-toggle-expand">⤢</span> <span class="toggle-text">Fäll ut alla</span>
+        </button>
+      </div>
     </nav>
 
     <!-- Continuous Recipe Sheet Container -->
     <div id="tab-content">
 
       <!-- ===== 1. GRUNDDATA & UTRUSTNINGSPROFIL ============================= -->
-      <section id="sec-equipment" class="accordion-card collapsed">
+      <section id="sec-equipment" class="accordion-card">
         <div class="accordion-header" data-toggle="accordion">
           <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span> Grunddata & Utrustningsprofil</h2>
           <div class="accordion-header-actions">
@@ -245,7 +255,7 @@
       </section>
 
       <!-- ===== 2. MALT & RÅVAROR ============================= -->
-      <section id="sec-fermentables" class="accordion-card collapsed">
+      <section id="sec-fermentables" class="accordion-card">
         <div class="accordion-header" data-toggle="accordion">
           <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 22s8-4 12-10"/><path d="M10 14c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M14 10c-1-3 0-6 4-9 0 0 1 3-1 6"/><path d="M7 17c-2-2-1-5 2-7 0 0 2 2 0 5"/><path d="M11 13c-2-2-1-5 2-7 0 0 2 2 0 5"/></svg></span> Malt & Jäsbara Råvaror</h2>
           <div class="accordion-header-actions">
@@ -284,13 +294,14 @@
             </table>
           </div>
           <div id="fermentables-empty" class="empty-state">
-            Inga råvaror tillagda ännu. Klicka på "Lägg till" för att välja ur maltbiblioteket.
+            <p>Inga råvaror tillagda ännu. Välj bland basmalt, specialmalt och socker i maltbiblioteket.</p>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-empty-add-fermentable" style="margin-top:10px;">＋ Lägg till malt</button>
           </div>
         </div>
       </section>
 
       <!-- ===== 4. MÄSKNING ============================= -->
-      <section id="sec-mash" class="accordion-card collapsed">
+      <section id="sec-mash" class="accordion-card">
         <div class="accordion-header" data-toggle="accordion">
           <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2c1.5 3 2.5 5 2.5 7.5A4.5 4.5 0 0 1 10 14a4.5 4.5 0 0 1-4.5-4.5C5.5 7 6.5 5 8 2z"/><path d="M12 22a8.5 8.5 0 0 0 8.5-8.5c0-3.5-2.5-6.5-5.5-9.5-1 3-2.5 5-4.5 6.5-1.5-1.5-2.5-3.5-2.5-5.5C5 8.5 3.5 11 3.5 13.5A8.5 8.5 0 0 0 12 22z"/></svg></span> Mäskningsprofil & Steg</h2>
           <div class="accordion-header-actions">
@@ -327,7 +338,8 @@
             </table>
           </div>
           <div id="mash-empty" class="empty-state">
-            Inga mäsksteg tillagda ännu. Klicka på "Lägg till mäsksteg" eller välj ett preset ovan.
+            <p>Inga mäsksteg tillagda ännu. Välj ett preset ovan eller lägg till ett eget mäsksteg.</p>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-empty-add-mash" style="margin-top:10px;">＋ Lägg till mäsksteg</button>
           </div>
 
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px">
@@ -338,7 +350,7 @@
       </section>
 
       <!-- ===== 5. HUMLE ============================= -->
-      <section id="sec-hops" class="accordion-card collapsed">
+      <section id="sec-hops" class="accordion-card">
         <div class="accordion-header" data-toggle="accordion">
           <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v3"/><path d="M12 5c-3 1-5 3.5-5 7 0 4.5 3.5 8 5 10 1.5-2 5-5.5 5-10 0-3.5-2-6-5-7z"/><path d="M12 7c-2 2-2 5 0 7"/><path d="M12 7c2 2 2 5 0 7"/><path d="M8.5 10c1 1.5 3 2 3.5 2"/><path d="M15.5 10c-1 1.5-3 2-3.5 2"/></svg></span> Humleschema</h2>
           <div class="accordion-header-actions">
@@ -376,15 +388,16 @@
             </table>
           </div>
           <div id="hops-empty" class="empty-state">
-            Ingen humle tillagd ännu. Klicka på "Lägg till" för att välja ur humlebiblioteket.
+            <p>Ingen humle tillagd ännu. Skapa ditt humleschema med kok, whirlpool och torrhumling.</p>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-empty-add-hop" style="margin-top:10px;">＋ Lägg till humle</button>
           </div>
         </div>
       </section>
 
       <!-- ===== 5. JÄST & FERMENTERING ============================= -->
-      <section id="sec-yeast" class="accordion-card collapsed">
+      <section id="sec-yeast" class="accordion-card">
         <div class="accordion-header" data-toggle="accordion">
-          <h2 class="accordion-title"><span class="title-icon">🧫</span> Jäst & Jäsning</h2>
+          <h2 class="accordion-title"><span class="title-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 2v7.5L5.2 18A2 2 0 0 0 7 21h10a2 2 0 0 0 1.8-3L14 9.5V2h-4z"/><circle cx="10" cy="15" r="1"/><circle cx="13" cy="17" r="1"/></svg></span> Jäst & Jäsning</h2>
           <div class="accordion-header-actions">
             <span class="accordion-badge" id="badge-yeast">Ingen jäst vald</span>
             <svg class="chevron-icon svg-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
@@ -421,7 +434,7 @@
                   <option value="ale">Ale (Överjäst)</option>
                   <option value="lager">Lager (Underjäst)</option>
                   <option value="wheat">Veteöl</option>
-                  <option value="kviek">Kveik</option>
+                  <option value="kveik">Kveik</option>
                   <option value="wild">Vild / Brett</option>
                 </select>
               </div>
@@ -617,12 +630,36 @@
           <div class="card" style="background:var(--bg-secondary); border-color:var(--border)">
             <p class="section-label" style="margin-bottom:8px">Slutgiltig vattenprofil</p>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap:10px; text-align:center">
-              <div><span style="font-size:0.75rem; color:var(--text-muted)">Ca²⁺</span><div id="w-res-ca" style="font-weight:700">0 ppm</div></div>
-              <div><span style="font-size:0.75rem; color:var(--text-muted)">Mg²⁺</span><div id="w-res-mg" style="font-weight:700">0 ppm</div></div>
-              <div><span style="font-size:0.75rem; color:var(--text-muted)">Na⁺</span><div id="w-res-na" style="font-weight:700">0 ppm</div></div>
-              <div><span style="font-size:0.75rem; color:var(--text-muted)">Cl⁻</span><div id="w-res-cl" style="font-weight:700">0 ppm</div></div>
-              <div><span style="font-size:0.75rem; color:var(--text-muted)">SO₄²⁻</span><div id="w-res-so4" style="font-weight:700">0 ppm</div></div>
-              <div><span style="font-size:0.75rem; color:var(--text-muted)">Cl / SO₄</span><div id="w-res-ratio" style="font-weight:700; color:var(--accent-bright)">1.0 (Balanserad)</div></div>
+              <div>
+                <span style="font-size:0.75rem; color:var(--text-muted)">Ca²⁺</span>
+                <div id="w-res-ca" style="font-weight:700">0 ppm</div>
+                <span style="font-size:0.68rem; color:var(--text-dim)" title="Rekommenderat bryggintervall">riktv: 50–150</span>
+              </div>
+              <div>
+                <span style="font-size:0.75rem; color:var(--text-muted)">Mg²⁺</span>
+                <div id="w-res-mg" style="font-weight:700">0 ppm</div>
+                <span style="font-size:0.68rem; color:var(--text-dim)" title="Rekommenderat bryggintervall">riktv: 5–30</span>
+              </div>
+              <div>
+                <span style="font-size:0.75rem; color:var(--text-muted)">Na⁺</span>
+                <div id="w-res-na" style="font-weight:700">0 ppm</div>
+                <span style="font-size:0.68rem; color:var(--text-dim)" title="Rekommenderat bryggintervall">riktv: 0–100</span>
+              </div>
+              <div>
+                <span style="font-size:0.75rem; color:var(--text-muted)">Cl⁻</span>
+                <div id="w-res-cl" style="font-weight:700">0 ppm</div>
+                <span style="font-size:0.68rem; color:var(--text-dim)" title="Rekommenderat bryggintervall">riktv: 50–200</span>
+              </div>
+              <div>
+                <span style="font-size:0.75rem; color:var(--text-muted)">SO₄²⁻</span>
+                <div id="w-res-so4" style="font-weight:700">0 ppm</div>
+                <span style="font-size:0.68rem; color:var(--text-dim)" title="Rekommenderat bryggintervall">riktv: 50–350</span>
+              </div>
+              <div>
+                <span style="font-size:0.75rem; color:var(--text-muted)">Cl / SO₄</span>
+                <div id="w-res-ratio" style="font-weight:700; color:var(--accent-bright)">1.0 (Balanserad)</div>
+                <span style="font-size:0.68rem; color:var(--text-dim)" title="Malt vs humlebalans">&lt;1 humlig, &gt;1 maltig</span>
+              </div>
             </div>
           </div>
 
@@ -776,10 +813,13 @@
           Bitterhet/Malt (BU:GU)
           <span class="tooltip-wrap">
             <span class="help-icon" aria-label="Hjälp: Bitterhet/Malt-kvot">?</span>
-            <span class="tooltip-text">Balans mellan beska (IBU) och sötma (GU). &lt;0.5 är maltfokuserad, 0.5–0.7 balanserad och &gt;0.8 utpräglat bitter/humledriven.</span>
+            <span class="tooltip-text">Balans mellan beska (IBU) och sötma (GU). &lt;0.4 är maltfokuserad, 0.4–0.65 balanserad och &gt;0.65 utpräglat humledriven.</span>
           </span>
         </span>
-        <div class="stat-value" id="sb-bugu">—</div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="badge-tag" id="sb-bugu-badge" style="font-size:0.72rem; font-weight:600; padding:2px 6px; display:none;"></span>
+          <div class="stat-value" id="sb-bugu">—</div>
+        </div>
       </div>
       <div class="stat-row">
         <span class="stat-label">Förjäsningsgrad</span>
@@ -1099,7 +1139,7 @@
               <option value="ale">Ale (Överjäst)</option>
               <option value="lager">Lager (Underjäst)</option>
               <option value="wheat">Veteöl</option>
-              <option value="kviek">Kveik</option>
+              <option value="kveik">Kveik</option>
               <option value="wild">Vild / Brett</option>
             </select>
           </div>

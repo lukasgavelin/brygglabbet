@@ -16,6 +16,7 @@ export function setupMashTab(recalculateCallback) {
 
   document.getElementById('btn-add-mash-step')?.addEventListener('click', handleAddStep);
   document.getElementById('btn-add-mash-step-header')?.addEventListener('click', handleAddStep);
+  document.getElementById('btn-empty-add-mash')?.addEventListener('click', handleAddStep);
 
   document.querySelectorAll('[data-mash-preset]').forEach((btn) => {
     btn.addEventListener('click', () => {
