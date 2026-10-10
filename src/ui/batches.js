@@ -128,6 +128,7 @@ export function openBatchesView(batchId = null) {
  */
 export function closeBatchesView() {
   const desktopView = document.getElementById('desktop-app-view');
+  const mobileView = document.getElementById('mobile-app-view');
   const batchesView = document.getElementById('batches-view');
 
   if (!batchesView) return;
@@ -136,7 +137,12 @@ export function closeBatchesView() {
   activeBatchId = null;
 
   batchesView.classList.add('hidden');
-  desktopView?.classList.remove('view-hidden');
+  const isMobile = document.body.classList.contains('mobile-mode') || window.innerWidth <= 768;
+  if (isMobile && mobileView) {
+    mobileView.classList.remove('view-hidden');
+  } else {
+    desktopView?.classList.remove('view-hidden');
+  }
 
   updateRecipeBrewCountBadge();
   if (globalRecalculate) globalRecalculate();

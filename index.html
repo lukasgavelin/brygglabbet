@@ -855,6 +855,7 @@
   <div class="mobile-menu-backdrop" id="mobile-menu-backdrop"></div>
   <div class="mobile-menu-dropdown" id="mobile-menu-dropdown">
     <div class="mobile-menu-header">Huvudverktyg</div>
+    <button class="mobile-menu-item" id="mobile-menu-batches" style="font-weight:bold; color:var(--accent);"><span class="quick-icon">📒</span> Mina bryggningar</button>
     <button class="mobile-menu-item" id="mobile-menu-brewday" style="font-weight:bold; color:var(--accent-bright);"><span class="quick-icon">🍺</span> Bryggdagsläge</button>
     <button class="mobile-menu-item" id="mobile-menu-print"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Skriv ut bryggprotokoll</button>
     <button class="mobile-menu-item" id="mobile-menu-tools"><span class="quick-icon">🧰</span> Bryggverktyg</button>
@@ -978,9 +979,9 @@
           <div class="mobile-loss-item">
             <label for="mobile-eq-mash-thickness">Mäskkvot (L/kg)</label>
             <div class="mobile-stepper">
-              <button class="stepper-btn" data-eq-loss="mashThickness" data-dir="-0.2">–</button>
+              <button class="stepper-btn" data-eq-loss="mashRatio" data-dir="-0.2">–</button>
               <input type="number" inputmode="decimal" class="stepper-input" id="mobile-eq-mash-thickness" value="3.0" step="0.1">
-              <button class="stepper-btn" data-eq-loss="mashThickness" data-dir="0.2">+</button>
+              <button class="stepper-btn" data-eq-loss="mashRatio" data-dir="0.2">+</button>
             </div>
           </div>
         </div>
@@ -1109,6 +1110,23 @@
           </div>
         </div>
 
+        <div class="mobile-form-group" style="margin-top:10px">
+          <label for="mobile-ferm-profile">Jäsningsprofil</label>
+          <select id="mobile-ferm-profile">
+            <option value="auto">Automatisk (från jästtyp)</option>
+            <option value="ale">Standard Ale (19°C, 12 dgr)</option>
+            <option value="lager">Traditionell Lager (11°C, diacetylvila, kallagring)</option>
+            <option value="kveik">Kveik Express (33°C, 4 dgr)</option>
+            <option value="wheat">Veteöl / Belgisk (20°C, 10 dgr)</option>
+          </select>
+        </div>
+
+        <label class="tool-check" style="margin:8px 0">
+          <input type="checkbox" id="mobile-ferm-coldcrash"> Kallkrascha i schema (+2 dgr vid 3°C)
+        </label>
+
+        <div class="tool-result" id="mobile-ferm-schedule-summary" style="margin-top:8px; font-size:0.85rem;"></div>
+
         <hr class="mobile-menu-divider" style="margin: 16px 0">
 
         <p class="section-label">💧 Vattenbehandling & Salter <span style="font-size:0.75rem; font-weight:normal; color:var(--text-muted);">(Valfritt)</span></p>
@@ -1118,6 +1136,11 @@
           <select id="mobile-water-preset" class="mobile-select-lg">
             <option value="">— Välj profil —</option>
           </select>
+        </div>
+
+        <div class="mobile-form-group" style="margin-bottom:12px">
+          <label for="mobile-water-volume">Total behandlad vattenvolym (L)</label>
+          <input type="number" inputmode="decimal" id="mobile-water-volume" value="25" min="1" step="0.5">
         </div>
 
         <div class="mobile-salt-grid">
@@ -1133,27 +1156,27 @@
           <div class="mobile-salt-item">
             <label>Kalciumklorid (CaCl₂)</label>
             <div class="mobile-stepper">
-              <button class="stepper-btn" data-salt="cacl2" data-dir="-1">–</button>
-              <input type="number" inputmode="decimal" class="stepper-input" id="mobile-salt-cacl2" value="0" step="0.5">
-              <button class="stepper-btn" data-salt="cacl2" data-dir="1">+</button>
+              <button class="stepper-btn" data-salt="calciumChloride" data-dir="-1">–</button>
+              <input type="number" inputmode="decimal" class="stepper-input" id="mobile-salt-calciumChloride" value="0" step="0.5">
+              <button class="stepper-btn" data-salt="calciumChloride" data-dir="1">+</button>
             </div>
           </div>
 
           <div class="mobile-salt-item">
             <label>Epsomsalt (MgSO₄)</label>
             <div class="mobile-stepper">
-              <button class="stepper-btn" data-salt="epsom" data-dir="-1">–</button>
-              <input type="number" inputmode="decimal" class="stepper-input" id="mobile-salt-epsom" value="0" step="0.5">
-              <button class="stepper-btn" data-salt="epsom" data-dir="1">+</button>
+              <button class="stepper-btn" data-salt="epsomSalt" data-dir="-1">–</button>
+              <input type="number" inputmode="decimal" class="stepper-input" id="mobile-salt-epsomSalt" value="0" step="0.5">
+              <button class="stepper-btn" data-salt="epsomSalt" data-dir="1">+</button>
             </div>
           </div>
 
           <div class="mobile-salt-item">
             <label>Bordssalt (NaCl)</label>
             <div class="mobile-stepper">
-              <button class="stepper-btn" data-salt="nacl" data-dir="-1">–</button>
-              <input type="number" inputmode="decimal" class="stepper-input" id="mobile-salt-nacl" value="0" step="0.5">
-              <button class="stepper-btn" data-salt="nacl" data-dir="1">+</button>
+              <button class="stepper-btn" data-salt="tableSalt" data-dir="-1">–</button>
+              <input type="number" inputmode="decimal" class="stepper-input" id="mobile-salt-tableSalt" value="0" step="0.5">
+              <button class="stepper-btn" data-salt="tableSalt" data-dir="1">+</button>
             </div>
           </div>
         </div>
@@ -1161,6 +1184,45 @@
         <div class="mobile-water-summary-box">
           <span>Cl⁻ / SO₄²⁻-kvot:</span>
           <strong id="mobile-water-ratio">1.0 (Balanserad)</strong>
+        </div>
+
+        <!-- Mobil: Mäsk-pH & syra -->
+        <div class="card" id="mobile-card-mash-ph" style="margin-top:14px">
+          <p class="section-label" style="margin-bottom:8px">🧪 Mäsk-pH &amp; syra</p>
+          <div class="ph-summary">
+            <div>
+              <span class="tool-hint">Uppskattat mäsk-pH</span>
+              <div class="ph-big" id="mobile-w-ph-value">—</div>
+              <div class="tool-hint" id="mobile-w-ph-label"></div>
+            </div>
+            <div>
+              <span class="tool-hint">Restalkalinitet (RA)</span>
+              <div style="font-weight:700" id="mobile-w-ra-value">—</div>
+              <div class="tool-hint" id="mobile-w-ra-label"></div>
+            </div>
+          </div>
+          <label class="tool-check" style="margin:10px 0">
+            <input type="checkbox" id="mobile-acid-enabled"> Justera pH med syra
+          </label>
+          <div id="mobile-acid-controls" class="hidden">
+            <div class="mobile-form-group" style="margin-bottom:8px">
+              <label class="form-label" for="mobile-acid-target-ph">Mål-pH</label>
+              <input type="number" inputmode="decimal" id="mobile-acid-target-ph" value="5.4" min="5.0" max="5.8" step="0.05">
+            </div>
+            <div class="mobile-form-group" style="margin-bottom:8px">
+              <label class="form-label" for="mobile-acid-type">Syra</label>
+              <select id="mobile-acid-type">
+                <option value="lactic:80">Mjölksyra 80 %</option>
+                <option value="lactic:88">Mjölksyra 88 %</option>
+                <option value="phosphoric:10">Fosforsyra 10 %</option>
+                <option value="phosphoric:75">Fosforsyra 75 %</option>
+              </select>
+            </div>
+            <label class="tool-check" style="margin:8px 0">
+              <input type="checkbox" id="mobile-acid-treat-sparge" checked> Syra även lakvattnet
+            </label>
+            <div class="tool-result" id="mobile-acid-result" style="margin-top:8px"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -1202,6 +1264,9 @@
             <span class="quick-icon">🍺</span> Starta Bryggdagsläget →
           </button>
           <div class="mobile-ready-subactions">
+            <button class="btn btn-secondary btn-sm" id="mobile-btn-batches">
+              <span class="quick-icon">📒</span> Mina bryggningar
+            </button>
             <button class="btn btn-secondary btn-sm" id="mobile-btn-print-brewday">
               <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Skriv ut
             </button>

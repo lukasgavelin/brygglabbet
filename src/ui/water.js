@@ -192,15 +192,20 @@ export function renderWaterPanel(waterResult) {
   const ra = calculateResidualAlkalinity(waterResult);
   const raEl = document.getElementById('w-ra-value');
   if (raEl) raEl.textContent = `${ra.toFixed(0)} ppm CaCO₃`;
+  const mobileRaEl = document.getElementById('mobile-w-ra-value');
+  if (mobileRaEl) mobileRaEl.textContent = `${ra.toFixed(0)} ppm`;
+
+  let raDesc = '';
+  if (ra < -150) raDesc = 'Mycket låg – passar hoppy lagers';
+  else if (ra < -50) raDesc = 'Låg – passar ljust öl, IPA';
+  else if (ra < 50) raDesc = 'Neutral – allround';
+  else if (ra < 150) raDesc = 'Måttlig – passar amber/porter';
+  else raDesc = 'Hög – passar dunkla öl';
 
   const raLabel = document.getElementById('w-ra-label');
-  if (raLabel) {
-    if (ra < -150) raLabel.textContent = 'Mycket låg – passar hoppy lagers';
-    else if (ra < -50) raLabel.textContent = 'Låg – passar ljust öl, IPA';
-    else if (ra < 50) raLabel.textContent = 'Neutral – allround';
-    else if (ra < 150) raLabel.textContent = 'Måttlig – passar amber/porter';
-    else raLabel.textContent = 'Hög – passar dunkla öl';
-  }
+  if (raLabel) raLabel.textContent = raDesc;
+  const mobileRaLabel = document.getElementById('mobile-w-ra-label');
+  if (mobileRaLabel) mobileRaLabel.textContent = raDesc;
 
   const raPct = Math.min(100, Math.max(0, ((ra + 200) / 400) * 100));
   const raFill = document.getElementById('w-ra-fill');
@@ -212,17 +217,23 @@ export function renderWaterPanel(waterResult) {
   const mashRatio = Number(State.equipment?.mashRatio) || 3;
   const ph = estimateMashPH(waterResult, State.fermentables, mashRatio);
   const phEl = document.getElementById('w-ph-value');
+  const mobilePhEl = document.getElementById('mobile-w-ph-value');
   const hasGrain = (State.fermentables || []).some((f) => f.type !== 'sugar' && Number(f.amount) > 0);
-  if (phEl) phEl.textContent = hasGrain ? ph.toFixed(2) : '—';
+  const phText = hasGrain ? ph.toFixed(2) : '—';
+  if (phEl) phEl.textContent = phText;
+  if (mobilePhEl) mobilePhEl.textContent = phText;
+
+  let phDesc = '';
+  if (ph < 5.0) phDesc = '⚠️ För lågt – kan ge syrlig smak';
+  else if (ph < 5.2) phDesc = 'Lågt – passar rostat öl';
+  else if (ph < 5.5) phDesc = '✓ Optimalt för de flesta öl';
+  else if (ph < 5.7) phDesc = 'Lite högt – försök sänka med syra';
+  else phDesc = '⚠️ För högt – kan ge mjuk smak';
 
   const phLabel = document.getElementById('w-ph-label');
-  if (phLabel) {
-    if (ph < 5.0) phLabel.textContent = '⚠️ För lågt – kan ge syrlig smak';
-    else if (ph < 5.2) phLabel.textContent = 'Lågt – passar rostat öl';
-    else if (ph < 5.5) phLabel.textContent = '✓ Optimalt för de flesta öl';
-    else if (ph < 5.7) phLabel.textContent = 'Lite högt – försök sänka med syra';
-    else phLabel.textContent = '⚠️ För högt – kan ge mjuk smak';
-  }
+  if (phLabel) phLabel.textContent = phDesc;
+  const mobilePhLabel = document.getElementById('mobile-w-ph-label');
+  if (mobilePhLabel) mobilePhLabel.textContent = phDesc;
 
   const phPct = Math.min(100, Math.max(0, ((ph - 4.5) / 2.0) * 100));
   const phFill = document.getElementById('w-ph-fill');
@@ -271,47 +282,69 @@ export function getAcidSettings() {
 }
 
 function setupAcidControls(recalculateCallback) {
-  const onChange = () => {
+  const onChange = (e) => {
+    const isMobile = e?.target?.id?.startsWith('mobile-');
+    const prefix = isMobile ? 'mobile-' : '';
+    const otherPrefix = isMobile ? '' : 'mobile-';
     const acid = getAcidSettings();
-    const [type, strength] = (document.getElementById('acid-type')?.value || 'lactic:80').split(':');
-    acid.enabled = !!document.getElementById('acid-enabled')?.checked;
-    acid.targetPH = getNumVal(['acid-target-ph'], 5.4);
+    const typeEl = document.getElementById(`${prefix}acid-type`) || document.getElementById('acid-type');
+    const [type, strength] = (typeEl?.value || 'lactic:80').split(':');
+    const enabledEl = document.getElementById(`${prefix}acid-enabled`) ?? document.getElementById('acid-enabled');
+    acid.enabled = !!enabledEl?.checked;
+    acid.targetPH = getNumVal([`${prefix}acid-target-ph`, `${otherPrefix}acid-target-ph`, 'acid-target-ph'], 5.4);
     acid.type = type;
     acid.strength = Number(strength);
-    acid.treatSparge = !!document.getElementById('acid-treat-sparge')?.checked;
+    const spargeEl = document.getElementById(`${prefix}acid-treat-sparge`) ?? document.getElementById('acid-treat-sparge');
+    acid.treatSparge = !!spargeEl?.checked;
     syncAcidToUI();
     recalculateCallback();
   };
-  ['acid-enabled', 'acid-type', 'acid-treat-sparge'].forEach((id) =>
+  ['acid-enabled', 'acid-type', 'acid-treat-sparge', 'mobile-acid-enabled', 'mobile-acid-type', 'mobile-acid-treat-sparge'].forEach((id) =>
     document.getElementById(id)?.addEventListener('change', onChange)
   );
-  document.getElementById('acid-target-ph')?.addEventListener('input', onChange);
+  ['acid-target-ph', 'mobile-acid-target-ph'].forEach((id) =>
+    document.getElementById(id)?.addEventListener('input', onChange)
+  );
 }
 
 function syncAcidToUI() {
   const acid = getAcidSettings();
-  const enabledEl = document.getElementById('acid-enabled');
-  if (enabledEl) enabledEl.checked = acid.enabled;
-  const targetEl = document.getElementById('acid-target-ph');
-  if (targetEl && document.activeElement !== targetEl) targetEl.value = acid.targetPH;
-  const typeEl = document.getElementById('acid-type');
-  if (typeEl) typeEl.value = `${acid.type}:${acid.strength}`;
-  const spargeEl = document.getElementById('acid-treat-sparge');
-  if (spargeEl) spargeEl.checked = acid.treatSparge;
+  ['acid-enabled', 'mobile-acid-enabled'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.checked = acid.enabled;
+  });
+  ['acid-target-ph', 'mobile-acid-target-ph'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && document.activeElement !== el) el.value = acid.targetPH;
+  });
+  ['acid-type', 'mobile-acid-type'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = `${acid.type}:${acid.strength}`;
+  });
+  ['acid-treat-sparge', 'mobile-acid-treat-sparge'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.checked = acid.treatSparge;
+  });
   document.getElementById('acid-controls')?.classList.toggle('hidden', !acid.enabled);
+  document.getElementById('mobile-acid-controls')?.classList.toggle('hidden', !acid.enabled);
 }
 
 function renderAcidResult(waterResult, mashRatio) {
-  const out = document.getElementById('acid-result');
-  if (!out) return;
+  const outDesktop = document.getElementById('acid-result');
+  const outMobile = document.getElementById('mobile-acid-result');
+  if (!outDesktop && !outMobile) return;
+  const setHtml = (html) => {
+    if (outDesktop) outDesktop.innerHTML = html;
+    if (outMobile) outMobile.innerHTML = html;
+  };
   const acid = getAcidSettings();
   if (!acid.enabled) {
-    out.innerHTML = '';
+    setHtml('');
     return;
   }
   const hasGrain = (State.fermentables || []).some((f) => f.type !== 'sugar' && Number(f.amount) > 0);
   if (!hasGrain) {
-    out.innerHTML = '<div class="tool-hint">Lägg till malt i receptet för att beräkna syramängd.</div>';
+    setHtml('<div class="tool-hint">Lägg till malt i receptet för att beräkna syramängd.</div>');
     return;
   }
 
@@ -349,5 +382,5 @@ function renderAcidResult(waterResult, mashRatio) {
       html += '<div class="tool-hint" style="margin-top:6px">Ingen lakning i utrustningsprofilen (t.ex. BIAB) – lakvattensyra behövs inte.</div>';
     }
   }
-  out.innerHTML = html;
+  setHtml(html);
 }

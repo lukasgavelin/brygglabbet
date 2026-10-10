@@ -260,6 +260,113 @@ describe('UI smoke: bryggverktyg & mäsk-pH', () => {
     expect(brewBadge.textContent).toContain('Bryggd 1 gång');
   });
 
+  it('stödjer mobilparitet: mäskkvot, salter, vattenvolym, mäsk-pH, humlekort och batchåtkomst', async () => {
+    const { State } = await import('../src/state.js');
+    const { recalculate } = await import('../src/ui/sidebar.js');
+
+    // Växla till mobilläge
+    document.getElementById('btn-switch-to-mobile').click();
+    const mobileApp = document.getElementById('mobile-app-view');
+    expect(mobileApp.classList.contains('view-hidden')).toBe(false);
+    expect(document.body.classList.contains('mobile-mode')).toBe(true);
+
+    // 1. Mäskkvot i mobilläge
+    const prevMashRatio = State.equipment.mashRatio || 3.0;
+    const mashPlusBtn = document.querySelector('.stepper-btn[data-eq-loss="mashRatio"][data-dir="0.2"]');
+    expect(mashPlusBtn).toBeDefined();
+    mashPlusBtn.click();
+    expect(State.equipment.mashRatio).toBeCloseTo(prevMashRatio + 0.2, 2);
+
+    // 2. Vattenvolym och salter i mobilläge
+    const waterVolInp = document.getElementById('mobile-water-volume');
+    expect(waterVolInp).toBeDefined();
+    waterVolInp.value = '28';
+    waterVolInp.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(State.water.volume).toBe(28);
+
+    const prevCacl2 = State.water.salts.calciumChloride || 0;
+    const cacl2PlusBtn = document.querySelector('.stepper-btn[data-salt="calciumChloride"][data-dir="1"]');
+    expect(cacl2PlusBtn).toBeDefined();
+    cacl2PlusBtn.click();
+    expect(State.water.salts.calciumChloride).toBeCloseTo(prevCacl2 + 0.5, 1);
+
+    // 3. Mobil Mäsk-pH & syra
+    recalculate();
+    const mobilePhVal = document.getElementById('mobile-w-ph-value');
+    expect(mobilePhVal.textContent).toMatch(/^\d\.\d\d$/);
+
+    const mobileAcidCb = document.getElementById('mobile-acid-enabled');
+    mobileAcidCb.checked = true;
+    mobileAcidCb.dispatchEvent(new Event('change', { bubbles: true }));
+    const mobileAcidTarget = document.getElementById('mobile-acid-target-ph');
+    mobileAcidTarget.value = '5.3';
+    mobileAcidTarget.dispatchEvent(new Event('input', { bubbles: true }));
+    recalculate();
+
+    expect(State.water.acid.enabled).toBe(true);
+    expect(State.water.acid.targetPH).toBe(5.3);
+    const mobileAcidRes = document.getElementById('mobile-acid-result');
+    expect(mobileAcidRes.textContent).toContain('ml');
+    expect(mobileAcidRes.textContent).not.toContain('NaN');
+
+    // 4. Jäsningsprofil i mobilläge
+    const mobileFermProf = document.getElementById('mobile-ferm-profile');
+    const mobileFermCold = document.getElementById('mobile-ferm-coldcrash');
+    const mobileFermSum = document.getElementById('mobile-ferm-schedule-summary');
+    expect(mobileFermProf).toBeDefined();
+    expect(mobileFermCold).toBeDefined();
+    expect(mobileFermSum).toBeDefined();
+
+    mobileFermProf.value = 'kveik';
+    mobileFermProf.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(mobileFermSum.textContent).toContain('33°C');
+
+    mobileFermCold.checked = true;
+    mobileFermCold.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(mobileFermSum.textContent).toContain('Kallkrasch');
+
+    // 5. Mobil humlekort med whirlpool & torrhumling
+    const hop = State.hops[0];
+    expect(hop).toBeDefined();
+    hop.use = 'whirlpool';
+    hop.whirlpoolTemp = 82;
+    recalculate();
+
+    const wpTempInp = document.querySelector('#mobile-hops-list [data-field="whirlpoolTemp"]');
+    expect(wpTempInp).toBeDefined();
+    expect(Number(wpTempInp.value)).toBe(82);
+
+    hop.use = 'torrhumle';
+    hop.dryHopDay = 4;
+    hop.dryHopDays = 4;
+    recalculate();
+
+    const dhDayInp = document.querySelector('#mobile-hops-list [data-field="dryHopDay"]');
+    const dhDaysInp = document.querySelector('#mobile-hops-list [data-field="dryHopDays"]');
+    expect(dhDayInp).toBeDefined();
+    expect(dhDaysInp).toBeDefined();
+    expect(Number(dhDayInp.value)).toBe(4);
+    expect(Number(dhDaysInp.value)).toBe(4);
+
+    // 6. Mobil batchåtkomst via knapp i Screen 5 och återgång till mobilläge
+    const mobileBatchesBtn = document.getElementById('mobile-btn-batches');
+    expect(mobileBatchesBtn).toBeDefined();
+    mobileBatchesBtn.click();
+
+    const batchesView = document.getElementById('batches-view');
+    expect(batchesView.classList.contains('hidden')).toBe(false);
+    expect(mobileApp.classList.contains('view-hidden')).toBe(true);
+
+    // Stäng batches och bekräfta att vi återvänder till mobilläget
+    document.getElementById('btn-close-batches').click();
+    expect(batchesView.classList.contains('hidden')).toBe(true);
+    expect(mobileApp.classList.contains('view-hidden')).toBe(false);
+
+    // Återställ till desktopläge
+    document.getElementById('btn-switch-to-desktop').click();
+    expect(document.body.classList.contains('mobile-mode')).toBe(false);
+  });
+
   it('inga renderfel loggades (desktop + mobil)', () => {
     expect(renderErrors).toEqual([]);
   });

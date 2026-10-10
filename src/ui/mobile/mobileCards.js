@@ -182,20 +182,75 @@ export function renderMobileHopsCards(recalculateCallback) {
         </div>
 
         <div class="mobile-field-group">
-          <label class="mobile-field-label">Kocktid (min)</label>
-          <div class="mobile-stepper">
-            <button class="stepper-btn" data-step="time" data-dir="-1" data-id="${h.id}" ${h.use === 'torrhumle' ? 'disabled' : ''}>–</button>
-            <input type="number" inputmode="decimal" class="stepper-input" value="${h.time}" min="0" max="300" step="5" data-id="${h.id}" data-field="time" ${h.use === 'torrhumle' ? 'disabled' : ''}>
-            <button class="stepper-btn" data-step="time" data-dir="1" data-id="${h.id}" ${h.use === 'torrhumle' ? 'disabled' : ''}>+</button>
-          </div>
+          <label class="mobile-field-label">Form</label>
+          <select class="mobile-select" data-id="${h.id}" data-field="form">
+            <option value="pellets" ${h.form === 'pellets' ? 'selected' : ''}>Pellets</option>
+            <option value="kottar" ${h.form === 'kottar' ? 'selected' : ''}>Kottar</option>
+          </select>
         </div>
       </div>
 
+      ${h.use === 'whirlpool' ? `
+      <div class="mobile-card-row">
+        <div class="mobile-field-group">
+          <label class="mobile-field-label">Whirlpooltid (min)</label>
+          <div class="mobile-stepper">
+            <button class="stepper-btn" data-step="time" data-dir="-1" data-id="${h.id}">–</button>
+            <input type="number" inputmode="decimal" class="stepper-input" value="${h.time ?? 15}" min="0" max="120" step="5" data-id="${h.id}" data-field="time">
+            <button class="stepper-btn" data-step="time" data-dir="1" data-id="${h.id}">+</button>
+          </div>
+        </div>
+
+        <div class="mobile-field-group">
+          <label class="mobile-field-label">Temp (°C)</label>
+          <div class="mobile-stepper">
+            <button class="stepper-btn" data-step="whirlpoolTemp" data-dir="-1" data-id="${h.id}">–</button>
+            <input type="number" inputmode="decimal" class="stepper-input" value="${h.whirlpoolTemp ?? 80}" min="40" max="100" step="1" data-id="${h.id}" data-field="whirlpoolTemp">
+            <button class="stepper-btn" data-step="whirlpoolTemp" data-dir="1" data-id="${h.id}">+</button>
+          </div>
+        </div>
+      </div>
+      ` : h.use === 'torrhumle' ? `
+      <div class="mobile-card-row">
+        <div class="mobile-field-group">
+          <label class="mobile-field-label">Tillsätt dag</label>
+          <div class="mobile-stepper">
+            <button class="stepper-btn" data-step="dryHopDay" data-dir="-1" data-id="${h.id}">–</button>
+            <input type="number" inputmode="decimal" class="stepper-input" value="${h.dryHopDay ?? 7}" min="0" max="60" step="1" data-id="${h.id}" data-field="dryHopDay">
+            <button class="stepper-btn" data-step="dryHopDay" data-dir="1" data-id="${h.id}">+</button>
+          </div>
+        </div>
+
+        <div class="mobile-field-group">
+          <label class="mobile-field-label">Kontakttid (dagar)</label>
+          <div class="mobile-stepper">
+            <button class="stepper-btn" data-step="dryHopDays" data-dir="-1" data-id="${h.id}">–</button>
+            <input type="number" inputmode="decimal" class="stepper-input" value="${h.dryHopDays ?? 3}" min="1" max="30" step="1" data-id="${h.id}" data-field="dryHopDays">
+            <button class="stepper-btn" data-step="dryHopDays" data-dir="1" data-id="${h.id}">+</button>
+          </div>
+        </div>
+      </div>
+      ` : `
+      <div class="mobile-field-group">
+        <label class="mobile-field-label">Koktid (min)</label>
+        <div class="mobile-stepper">
+          <button class="stepper-btn" data-step="time" data-dir="-1" data-id="${h.id}">–</button>
+          <input type="number" inputmode="decimal" class="stepper-input" value="${h.time ?? 60}" min="0" max="300" step="5" data-id="${h.id}" data-field="time">
+          <button class="stepper-btn" data-step="time" data-dir="1" data-id="${h.id}">+</button>
+        </div>
+      </div>
+      `}
+
       <div class="mobile-card-footer">
-        <span class="mobile-meta-tag">Form: <strong>${h.form || 'Pellets'}</strong></span>
+        <span class="mobile-meta-tag">Form: <strong>${h.form === 'kottar' ? 'Kottar' : 'Pellets'}</strong></span>
         <span class="mobile-meta-tag">IBU-bidrag: <strong>${h.use === 'torrhumle' ? '0.0' : ibuContrib} IBU</strong></span>
       </div>
     `;
+
+    const useSel = card.querySelector('[data-field="use"]');
+    if (useSel && h.use) useSel.value = h.use;
+    const formSel = card.querySelector('[data-field="form"]');
+    if (formSel && h.form) formSel.value = h.form;
 
     container.appendChild(card);
   });
@@ -203,7 +258,7 @@ export function renderMobileHopsCards(recalculateCallback) {
   // Attach input listeners
   container.querySelectorAll('input, select').forEach((el) => {
     el.addEventListener('change', (e) => {
-      const id = parseInt(e.target.dataset.id);
+      const id = parseInt(e.target.dataset.id, 10);
       const field = e.target.dataset.field;
       const item = State.hops.find((h) => h.id === id);
       if (item) {
@@ -212,6 +267,9 @@ export function renderMobileHopsCards(recalculateCallback) {
             ? e.target.value
             : parseFloat(e.target.value) || 0;
         item[field] = val;
+        if (field === 'use') {
+          renderMobileHopsCards(recalculateCallback);
+        }
         recalculateCallback();
       }
     });
@@ -220,7 +278,7 @@ export function renderMobileHopsCards(recalculateCallback) {
   // Attach stepper buttons listeners
   container.querySelectorAll('.stepper-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const id = parseInt(btn.dataset.id);
+      const id = parseInt(btn.dataset.id, 10);
       const stepType = btn.dataset.step;
       const dir = parseFloat(btn.dataset.dir);
       const item = State.hops.find((h) => h.id === id);
@@ -233,7 +291,14 @@ export function renderMobileHopsCards(recalculateCallback) {
         item.alpha = Math.max(0, Math.round((item.alpha + dir * 0.5) * 10) / 10);
       } else if (stepType === 'time') {
         item.time = Math.max(0, Math.round(item.time + dir * 5));
+      } else if (stepType === 'whirlpoolTemp') {
+        item.whirlpoolTemp = Math.min(100, Math.max(40, (item.whirlpoolTemp ?? 80) + dir * 5));
+      } else if (stepType === 'dryHopDay') {
+        item.dryHopDay = Math.min(60, Math.max(0, (item.dryHopDay ?? 7) + dir));
+      } else if (stepType === 'dryHopDays') {
+        item.dryHopDays = Math.min(30, Math.max(1, (item.dryHopDays ?? 3) + dir));
       }
+      renderMobileHopsCards(recalculateCallback);
       recalculateCallback();
     });
   });
@@ -241,7 +306,7 @@ export function renderMobileHopsCards(recalculateCallback) {
   // Remove buttons
   container.querySelectorAll('[data-remove="hop"]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const id = parseInt(btn.dataset.id);
+      const id = parseInt(btn.dataset.id, 10);
       State.hops = State.hops.filter((h) => h.id !== id);
       recalculateCallback();
     });

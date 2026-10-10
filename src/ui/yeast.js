@@ -70,23 +70,26 @@ export function setupYeastTab(recalculateCallback) {
     State.yeast.notes = e.target.value;
   });
 
-  const onFermChange = () => {
+  const onFermChange = (e) => {
     State.recipe.fermentation = State.recipe.fermentation || { profile: 'auto', coldCrash: false };
-    const pEl = document.getElementById('ferm-profile');
-    const cEl = document.getElementById('ferm-coldcrash');
+    const isMobile = e?.target?.id?.startsWith('mobile-');
+    const pEl = document.getElementById(isMobile ? 'mobile-ferm-profile' : 'ferm-profile') || document.getElementById('ferm-profile');
+    const cEl = document.getElementById(isMobile ? 'mobile-ferm-coldcrash' : 'ferm-coldcrash') ?? document.getElementById('ferm-coldcrash');
     if (pEl) State.recipe.fermentation.profile = pEl.value;
     if (cEl) State.recipe.fermentation.coldCrash = cEl.checked;
-    renderFermentationSummary();
+    syncYeastToUI();
     recalculateCallback();
   };
 
-  document.getElementById('ferm-profile')?.addEventListener('change', onFermChange);
-  document.getElementById('ferm-coldcrash')?.addEventListener('change', onFermChange);
+  ['ferm-profile', 'ferm-coldcrash', 'mobile-ferm-profile', 'mobile-ferm-coldcrash'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('change', onFermChange);
+  });
 }
 
 export function renderFermentationSummary() {
   const summaryEl = document.getElementById('ferm-schedule-summary');
-  if (!summaryEl) return;
+  const mobileSummaryEl = document.getElementById('mobile-ferm-schedule-summary');
+  if (!summaryEl && !mobileSummaryEl) return;
 
   const ferm = State.recipe.fermentation || { profile: 'auto', coldCrash: false };
   const effectiveType = ferm.profile && ferm.profile !== 'auto' ? ferm.profile : (State.yeast?.type || 'ale');
@@ -120,10 +123,12 @@ export function renderFermentationSummary() {
     dryHopNote = `<div style="margin-top:4px;">🌿 <strong>Torrhumling:</strong> ${list}</div>`;
   }
 
-  summaryEl.innerHTML = `
+  const html = `
     <div>⏱️ <strong>Jässchema:</strong> ${stagesStr} (totalt ca <strong>${totalDays} dagar</strong>).</div>
     ${dryHopNote}
   `;
+  if (summaryEl) summaryEl.innerHTML = html;
+  if (mobileSummaryEl) mobileSummaryEl.innerHTML = html;
 }
 
 export function syncYeastToUI() {
@@ -151,10 +156,14 @@ export function syncYeastToUI() {
   if (recipeAttMax) recipeAttMax.value = State.yeast.attMax || 78;
 
   State.recipe.fermentation = State.recipe.fermentation || { profile: 'auto', coldCrash: false };
-  const pEl = document.getElementById('ferm-profile');
-  const cEl = document.getElementById('ferm-coldcrash');
-  if (pEl) pEl.value = State.recipe.fermentation.profile || 'auto';
-  if (cEl) cEl.checked = Boolean(State.recipe.fermentation.coldCrash);
+  ['ferm-profile', 'mobile-ferm-profile'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = State.recipe.fermentation.profile || 'auto';
+  });
+  ['ferm-coldcrash', 'mobile-ferm-coldcrash'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.checked = Boolean(State.recipe.fermentation.coldCrash);
+  });
   renderFermentationSummary();
 }
 

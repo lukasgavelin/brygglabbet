@@ -19,6 +19,7 @@ import { STYLES, YEASTS, EQUIPMENT_PROFILES, WATER_PROFILES, MASH_PRESETS } from
 import { saveRecipe, newRecipe, openRecipeModal, openPresetRecipesModal, exportJSON, exportBeerXMLFile, syncUIFromState } from '../recipes.js';
 import { openModal, openFermentableModal, openHopModal } from '../modals.js';
 import { toggleBrewdayView } from '../brewday.js';
+import { openBatchesView } from '../batches.js';
 import { triggerPrint } from '../print.js';
 import { openToolsModal } from '../tools.js';
 import { renderMashTable } from '../mash.js';
@@ -86,7 +87,8 @@ export function updateMobileUI(recalculateCallback) {
   setVal('mobile-total-water', `${waterReq.totalWater.toFixed(1)} L`);
 
   // 4. Water Salts & Cl:SO4 ratio
-  const waterIons = calculateWaterProfile(State.water.base, State.water.salts, State.recipe.batchVolume);
+  const treatedWaterVol = State.water?.volume || 25;
+  const waterIons = calculateWaterProfile(State.water.base, State.water.salts, treatedWaterVol);
   const ratioResult = chlorideSulfateBalance(waterIons);
   const ratioText = ratioResult.ratio > 0 ? `${ratioResult.ratio.toFixed(1)} (${ratioResult.label})` : '1.0 (Balanserad)';
   setVal('mobile-water-ratio', ratioText);
@@ -125,7 +127,7 @@ function syncMobileInputValues() {
     setInp('mobile-eq-boiloff', State.equipment.boilOffRate);
     setInp('mobile-eq-kettle-loss', State.equipment.kettleLoss);
     setInp('mobile-eq-grain-abs', State.equipment.grainAbsorption);
-    setInp('mobile-eq-mash-thickness', State.equipment.mashThickness);
+    setInp('mobile-eq-mash-thickness', State.equipment.mashRatio);
   }
 
   setInp('mobile-yeast-name', State.yeast.name);
@@ -134,10 +136,11 @@ function syncMobileInputValues() {
   setInp('mobile-att-min', State.yeast.attMin);
   setInp('mobile-att-max', State.yeast.attMax);
 
+  setInp('mobile-water-volume', State.water.volume || 25);
   setInp('mobile-salt-gypsum', State.water.salts.gypsum);
-  setInp('mobile-salt-cacl2', State.water.salts.cacl2);
-  setInp('mobile-salt-epsom', State.water.salts.epsom);
-  setInp('mobile-salt-nacl', State.water.salts.nacl);
+  setInp('mobile-salt-calciumChloride', State.water.salts.calciumChloride);
+  setInp('mobile-salt-epsomSalt', State.water.salts.epsomSalt);
+  setInp('mobile-salt-tableSalt', State.water.salts.tableSalt);
 }
 
 function setupMobileInputs(recalculateCallback) {
@@ -193,6 +196,9 @@ function setupMobileInputs(recalculateCallback) {
   });
 
   // Screen 5 CTA buttons
+  document.getElementById('mobile-btn-batches')?.addEventListener('click', () => {
+    openBatchesView();
+  });
   document.getElementById('mobile-btn-start-brewday')?.addEventListener('click', () => {
     toggleBrewdayView(recalculateCallback);
   });
@@ -274,7 +280,7 @@ function setupMobileEquipmentInputs(recalculateCallback) {
     { id: 'mobile-eq-boiloff', key: 'boilOffRate' },
     { id: 'mobile-eq-kettle-loss', key: 'kettleLoss' },
     { id: 'mobile-eq-grain-abs', key: 'grainAbsorption' },
-    { id: 'mobile-eq-mash-thickness', key: 'mashThickness' },
+    { id: 'mobile-eq-mash-thickness', key: 'mashRatio' },
   ];
 
   eqInputs.forEach(({ id, key }) => {
@@ -311,6 +317,15 @@ function setupMobileWaterInputs(recalculateCallback) {
     });
   }
 
+  // Water volume input
+  const volInp = document.getElementById('mobile-water-volume');
+  if (volInp) {
+    volInp.addEventListener('input', (e) => {
+      State.water.volume = parseFloat(e.target.value) || 0;
+      recalculateCallback();
+    });
+  }
+
   // Salt steppers
   document.querySelectorAll('.mobile-salt-item .stepper-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -318,6 +333,17 @@ function setupMobileWaterInputs(recalculateCallback) {
       const dir = parseFloat(btn.dataset.dir);
       if (State.water.salts[saltKey] !== undefined) {
         State.water.salts[saltKey] = Math.max(0, Math.round((State.water.salts[saltKey] + dir * 0.5) * 10) / 10);
+        recalculateCallback();
+      }
+    });
+  });
+
+  // Salt direct inputs
+  document.querySelectorAll('.mobile-salt-item .stepper-input').forEach((inp) => {
+    inp.addEventListener('input', (e) => {
+      const saltKey = inp.id.replace('mobile-salt-', '');
+      if (State.water.salts[saltKey] !== undefined) {
+        State.water.salts[saltKey] = Math.max(0, parseFloat(e.target.value) || 0);
         recalculateCallback();
       }
     });
@@ -534,6 +560,7 @@ function populateMobileWaterSelector() {
 }
 
 function setupMobileMenuActions(recalculateCallback) {
+  document.getElementById('mobile-menu-batches')?.addEventListener('click', () => openBatchesView());
   document.getElementById('mobile-menu-brewday')?.addEventListener('click', () => toggleBrewdayView(recalculateCallback));
   document.getElementById('mobile-menu-print')?.addEventListener('click', triggerPrint);
   document.getElementById('mobile-menu-tools')?.addEventListener('click', () => openToolsModal());
