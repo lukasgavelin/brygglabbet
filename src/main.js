@@ -25,6 +25,7 @@ import {
   openPresetRecipesModal,
   scaleCurrentRecipe,
   exportJSON,
+  exportFullWorkspaceBackup,
   exportBeerXMLFile,
   importJSON,
   loadDefaultRecipe,
@@ -173,6 +174,7 @@ function setupHeaderControls() {
   // Export & Import in Header
   document.getElementById('btn-export')?.addEventListener('click', exportJSON);
   document.getElementById('btn-export-beerxml')?.addEventListener('click', exportBeerXMLFile);
+  document.getElementById('btn-export-full-backup')?.addEventListener('click', exportFullWorkspaceBackup);
   document.getElementById('btn-import')?.addEventListener('click', () => {
     document.getElementById('import-file-input')?.click();
   });

@@ -337,10 +337,11 @@ function isStateDefault(state) {
 export function autosaveSession() {
   try {
     if (isStateDefault(State)) {
+      safeStorage.removeItem(AUTOSAVE_STORAGE_KEY);
       safeSessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
       return;
     }
-    safeSessionStorage.setJSON(AUTOSAVE_STORAGE_KEY, {
+    safeStorage.setJSON(AUTOSAVE_STORAGE_KEY, {
       state: State,
       savedAt: Date.now(),
     });
@@ -351,21 +352,23 @@ export function autosaveSession() {
 
 export function checkAndRestoreSession(recalculateCallback) {
   try {
-    const data = safeSessionStorage.getJSON(AUTOSAVE_STORAGE_KEY, null);
+    const data = safeStorage.getJSON(AUTOSAVE_STORAGE_KEY, null) || safeSessionStorage.getJSON(AUTOSAVE_STORAGE_KEY, null);
     if (!data) return false;
     if (data && data.state && data.savedAt) {
       if (isStateDefault(data.state)) {
+        safeStorage.removeItem(AUTOSAVE_STORAGE_KEY);
         safeSessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
         return false;
       }
       const ageMinutes = (Date.now() - data.savedAt) / (1000 * 60);
-      if (ageMinutes < 60) {
+      if (ageMinutes < 1440) { // 24 timmar
         const recipeName = data.state.recipe?.name || 'recept';
+        const timeDesc = ageMinutes < 60
+          ? `${Math.round(ageMinutes)} min sedan`
+          : `${Math.round(ageMinutes / 60)} h sedan`;
         if (
           confirm(
-            `Hittade en automatisk sparfil för "${recipeName}" (från ${Math.round(
-              ageMinutes
-            )} min sedan). Vill du återställa den?`
+            `Hittade en automatisk sparfil för "${recipeName}" (från ${timeDesc}). Vill du återställa den?`
           )
         ) {
           applyState(State, data.state);
@@ -382,10 +385,12 @@ export function checkAndRestoreSession(recalculateCallback) {
         }
       }
     }
+    safeStorage.removeItem(AUTOSAVE_STORAGE_KEY);
     safeSessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
     return false;
   } catch (err) {
     console.warn('Restore session error:', err);
+    safeStorage.removeItem(AUTOSAVE_STORAGE_KEY);
     safeSessionStorage.removeItem(AUTOSAVE_STORAGE_KEY);
     return false;
   }
@@ -410,6 +415,32 @@ export function exportJSON() {
   showToast('📤 Recept och batcher exporterade som JSON', 'success');
 }
 
+/**
+ * Exports complete workspace backup including all saved recipes, batches and current recipe state.
+ */
+export function exportFullWorkspaceBackup() {
+  const allRecipes = getSavedRecipes();
+  const allBatches = getBatches();
+  const backupPayload = {
+    _format: 'brygglabbet_full_backup',
+    _version: 2,
+    createdAt: new Date().toISOString(),
+    currentRecipe: State,
+    recipes: allRecipes,
+    batches: allBatches,
+  };
+  const data = JSON.stringify(backupPayload, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const dateStr = new Date().toISOString().slice(0, 10);
+  a.download = `brygglabbet_full_backup_${dateStr}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('💾 Fullständig säkerhetskopia nedladdad (alla recept och batcher)!', 'success');
+}
+
 export function exportBeerXMLFile() {
   const name = State.recipe.name || 'recept';
   const xmlContent = exportBeerXML(State);
@@ -427,7 +458,7 @@ export function importJSON(e, recalculateCallback) {
   const file = e.target.files[0];
   if (!file) return;
 
-  const isXml = file.name.endsWith('.xml') || file.name.endsWith('.beerxml');
+  const isXml = Boolean(file.name && (file.name.endsWith('.xml') || file.name.endsWith('.beerxml')));
 
   const reader = new FileReader();
   reader.onload = (evt) => {
@@ -449,6 +480,32 @@ export function importJSON(e, recalculateCallback) {
         if (!data || typeof data !== 'object') {
           throw new Error('Invalid format');
         }
+
+        // Handle full workspace backup
+        if (data._format === 'brygglabbet_full_backup') {
+          if (Array.isArray(data.batches) && data.batches.length > 0) {
+            importBatches(data.batches);
+          }
+          if (data.recipes && typeof data.recipes === 'object') {
+            const current = getSavedRecipes();
+            const merged = { ...current, ...data.recipes };
+            safeStorage.setJSON(LOCAL_STORAGE_KEY, merged);
+          }
+          if (data.currentRecipe && typeof data.currentRecipe === 'object') {
+            applyState(State, data.currentRecipe);
+          }
+          let maxId = 0;
+          [...(State.fermentables || []), ...(State.hops || []), ...(State.mash || [])].forEach(
+            (x) => {
+              if (x.id && x.id > maxId) maxId = x.id;
+            }
+          );
+          setNextId(maxId);
+          syncUIFromState(recalculateCallback);
+          showToast('💾 Fullständig säkerhetskopia har återställts!', 'success');
+          return;
+        }
+
         if (!data.recipe || !Array.isArray(data.fermentables) || !Array.isArray(data.hops)) {
           showToast('⚠️ Ogiltigt recept-format: nödvändiga fält saknas', 'error');
           return;

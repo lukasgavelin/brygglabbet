@@ -563,11 +563,26 @@ export function scaleRecipe(state, targetBatchVolume, targetEfficiency = null) {
     };
   });
 
+  const oldWater = state.water || {};
+  const oldSalts = oldWater.salts || {};
+  const scaledSalts = {};
+  Object.keys(oldSalts).forEach((saltKey) => {
+    const val = Number(oldSalts[saltKey]) || 0;
+    scaledSalts[saltKey] = Math.round(val * volRatio * 10) / 10;
+  });
+
+  const scaledWater = {
+    ...oldWater,
+    volume: Math.round((Number(oldWater.volume) || 25) * volRatio * 10) / 10,
+    salts: scaledSalts,
+  };
+
   return {
     ...state,
     recipe: {
       ...state.recipe,
       batchVolume: newBatchVol,
+      boilVolume: Math.round((Number(state.recipe?.boilVolume) || 25) * volRatio * 10) / 10,
       efficiency: targetEfficiency !== null ? targetEfficiency : state.recipe.efficiency,
     },
     equipment: {
@@ -577,6 +592,7 @@ export function scaleRecipe(state, targetBatchVolume, targetEfficiency = null) {
     },
     fermentables: scaledFermentables,
     hops: scaledHops,
+    water: scaledWater,
   };
 }
 

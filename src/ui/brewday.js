@@ -30,16 +30,52 @@ import { openToolsModal } from './tools.js';
 import { showToast, escHtml } from './toast.js';
 import { createBatch } from '../core/batches.js';
 import { safeSessionStorage } from '../core/storage.js';
+import { requestWakeLock, releaseWakeLock } from '../core/wakelock.js';
 
 // Timer & Navigation state
 let activeTimer = null;
 let timerSecondsRemaining = 0;
+let timerTargetTimestampMs = null;
 let activeTimerTargetId = null;
 let isTimerRunning = false;
 
 let currentStepIndex = 0;
 let isBrewdayOpen = false;
 let activeMobileTab = 'steps'; // 'steps' | 'ingredients'
+
+/**
+ * Requests browser notification permission if not yet decided.
+ */
+export function requestNotificationPermission() {
+  if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+    try {
+      Notification.requestPermission();
+    } catch {
+      // ignore
+    }
+  }
+}
+
+/**
+ * Triggers a system push notification if permission is granted.
+ * @param {string} title
+ * @param {string} body
+ * @param {string} [tag='brewday-alert']
+ */
+export function showSystemNotification(title, body, tag = 'brewday-alert') {
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    try {
+      new Notification(title, {
+        body,
+        icon: './favicon.svg',
+        tag,
+        renotify: true,
+      });
+    } catch {
+      // ignore
+    }
+  }
+}
 
 // UI Persistence & Brew Session state
 const SESSION_STORAGE_KEY = 'brygglabbet_brew_session';
@@ -104,6 +140,8 @@ export function toggleBrewdayView(recalculateCallback) {
     document.getElementById('mobile-menu-backdrop')?.classList.remove('open');
 
     renderBrewdayContent(recalculateCallback);
+    requestWakeLock();
+    requestNotificationPermission();
     showToast('🍺 Välkommen till Bryggdagsläget!', 'info');
 
     // Smooth scroll to active card initially if on steps tab
@@ -117,6 +155,9 @@ export function toggleBrewdayView(recalculateCallback) {
     }, 150);
   } else {
     brewdayView.classList.add('hidden');
+    if (!isTimerRunning) {
+      releaseWakeLock();
+    }
 
     if (document.body.classList.contains('mobile-mode')) {
       mobileView?.classList.remove('view-hidden');
@@ -1111,12 +1152,19 @@ function setupTimerControls() {
         clearInterval(activeTimer);
         activeTimer = null;
         isTimerRunning = false;
+        timerTargetTimestampMs = null;
         btn.classList.remove('running');
         btn.innerHTML = '▶ Fortsätt';
         btn.classList.replace('btn-warning', 'btn-primary');
         updateHeaderTimerIndicator();
+        if (!isBrewdayOpen) {
+          releaseWakeLock();
+        }
       } else {
         // Start or Resume timer
+        requestWakeLock();
+        requestNotificationPermission();
+
         if (activeTimerTargetId !== targetId) {
           if (activeTimer) {
             clearInterval(activeTimer);
@@ -1128,6 +1176,7 @@ function setupTimerControls() {
           timerSecondsRemaining = parseInt(btn.dataset.time, 10) || 3600;
         }
 
+        timerTargetTimestampMs = Date.now() + timerSecondsRemaining * 1000;
         isTimerRunning = true;
         btn.classList.add('running');
         btn.innerHTML = '⏸️ Pausa';
@@ -1136,19 +1185,23 @@ function setupTimerControls() {
 
         clearInterval(activeTimer);
         activeTimer = setInterval(() => {
-          timerSecondsRemaining--;
+          const now = Date.now();
+          const remainingSecs = Math.max(0, Math.ceil((timerTargetTimestampMs - now) / 1000));
+          timerSecondsRemaining = remainingSecs;
 
-          // Check for active boil hop additions
+          // Check for active boil hop additions with threshold check (<= targetSecs)
           if (activeTimerTargetId === 'timer-display-boil' && State.hops && State.hops.length > 0) {
             const boilHops = State.hops.filter((h) => h.use === 'kok' || h.use === 'whirlpool');
             boilHops.forEach((h, hopIdx) => {
               const targetSecs = (h.use === 'kok' ? (h.time || 0) : 0) * 60;
               const alertKey = `${h.name}-${h.amount}-${targetSecs}`;
-              if (timerSecondsRemaining === targetSecs && !triggeredHopAlerts.has(alertKey)) {
+              if (timerSecondsRemaining <= targetSecs && !triggeredHopAlerts.has(alertKey)) {
                 triggeredHopAlerts.add(alertKey);
                 playAlarmNotification();
                 const timeLabel = h.time > 0 ? `${h.time} min kvar av koket` : 'Whirlpool / Kokslut';
-                showToast(`🌿 Humlegiva: Tillsätt ${h.amount} g ${h.name} (${timeLabel})!`, 'warning');
+                const msg = `Tillsätt ${h.amount} g ${h.name} (${timeLabel})!`;
+                showSystemNotification('🌿 Humlegiva – Brygglabbet', msg, `hop-${hopIdx}`);
+                showToast(`🌿 Humlegiva: ${msg}`, 'warning', 12000);
 
                 // Animate/highlight the checklist row
                 const hopCb = document.getElementById(`step-boil-hop-${hopIdx}`);
@@ -1168,6 +1221,7 @@ function setupTimerControls() {
             activeTimer = null;
             isTimerRunning = false;
             timerSecondsRemaining = 0;
+            timerTargetTimestampMs = null;
 
             const currentTargetEl = document.getElementById(activeTimerTargetId);
             if (currentTargetEl) {
@@ -1178,8 +1232,13 @@ function setupTimerControls() {
             btn.classList.replace('btn-warning', 'btn-success');
 
             playAlarmNotification();
+            showSystemNotification('⏰ Timer klar – Brygglabbet', 'Timern har löpt ut!', 'timer-done');
             showToast('⏰ Timern har löpt ut!', 'success');
             updateHeaderTimerIndicator();
+
+            if (!isBrewdayOpen) {
+              releaseWakeLock();
+            }
 
             // Auto-check completed step checkbox
             if (activeTimerTargetId && activeTimerTargetId.startsWith('timer-display-mash-')) {
@@ -1211,7 +1270,7 @@ function setupTimerControls() {
             }
             updateHeaderTimerIndicator();
           }
-        }, 1000);
+        }, 500);
       }
     });
   });
@@ -1226,9 +1285,13 @@ function setupTimerControls() {
         clearInterval(activeTimer);
         activeTimer = null;
         isTimerRunning = false;
+        timerTargetTimestampMs = null;
         timerSecondsRemaining = totalSecs;
         if (targetId === 'timer-display-boil') {
           triggeredHopAlerts.clear();
+        }
+        if (!isBrewdayOpen) {
+          releaseWakeLock();
         }
       }
 

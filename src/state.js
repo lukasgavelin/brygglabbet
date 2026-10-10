@@ -88,14 +88,14 @@ export function createInitialState() {
  * @param {object} [raw] - Partial or legacy state object
  * @returns {object} Clean, safe application state
  */
-export function normalizeState(raw = {}) {
-  const initial = createInitialState();
+export function normalizeState(raw = {}, baseState = null) {
+  const initial = baseState ? JSON.parse(JSON.stringify(baseState)) : createInitialState();
   if (!raw || typeof raw !== 'object') return initial;
 
   const rawRecipe = raw.recipe || {};
-  const rawEq = raw.equipment || {};
-  const rawYeast = raw.yeast || {};
-  const rawWater = raw.water || {};
+  const rawEq = raw.equipment !== undefined ? raw.equipment : (baseState?.equipment || {});
+  const rawYeast = raw.yeast !== undefined ? raw.yeast : (baseState?.yeast || {});
+  const rawWater = raw.water !== undefined ? raw.water : (baseState?.water || {});
   const rawSalts = rawWater.salts || {};
   const rawAcid = rawWater.acid || {};
   const rawFerm = rawRecipe.fermentation || {};
@@ -241,7 +241,7 @@ export function normalizeState(raw = {}) {
  * @returns {object} Mutated targetState
  */
 export function applyState(targetState, newState) {
-  const clean = normalizeState(newState);
+  const clean = normalizeState(newState, targetState);
   Object.keys(clean).forEach((key) => {
     targetState[key] = clean[key];
   });
