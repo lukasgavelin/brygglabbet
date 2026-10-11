@@ -1,12 +1,18 @@
 /**
  * Mobile Card View Renderer for Fermentables and Hops.
- * Replaces table view on mobile with thumb-friendly card components.
+ * Thumb-friendly card components with in-place DOM updates (no DOM thrashing)
+ * and continuous auto-repeat steppers with acceleration.
  */
 
 import { State } from '../../state.js';
 import { computeRecipeMetrics, ebcToColor } from '../../core/calculations.js';
 import { escHtml } from '../toast.js';
+import { setupContinuousStepperDelegation } from './mobileStepper.js';
 
+/**
+ * Renders or updates fermentable cards on mobile with zero DOM thrashing.
+ * @param {Function} recalculateCallback
+ */
 export function renderMobileFermentablesCards(recalculateCallback) {
   const container = document.getElementById('mobile-fermentables-list');
   const empty = document.getElementById('mobile-fermentables-empty');
@@ -16,6 +22,7 @@ export function renderMobileFermentablesCards(recalculateCallback) {
   if (State.fermentables.length === 0) {
     container.style.display = 'none';
     if (empty) empty.style.display = 'block';
+    container.innerHTML = '';
     return;
   }
   container.style.display = 'flex';
@@ -26,6 +33,57 @@ export function renderMobileFermentablesCards(recalculateCallback) {
   const ebcResult = { perFermentable: metrics.ebcPerFermentable };
   const totalKg = State.fermentables.reduce((s, f) => s + (f.amount || 0), 0);
 
+  // Initialize delegated listeners once
+  if (!container.dataset.initialized) {
+    setupFermentablesDelegation(container, recalculateCallback);
+    container.dataset.initialized = 'true';
+  }
+
+  // Check if we can perform an IN-PLACE update (same IDs in same order)
+  const currentCards = Array.from(container.children);
+  const isMatch =
+    currentCards.length === State.fermentables.length &&
+    currentCards.every((card, idx) => Number(card.dataset.cardId) === Number(State.fermentables[idx]?.id));
+
+  if (isMatch) {
+    // Fast path: In-place DOM update without destroying elements or losing focus
+    State.fermentables.forEach((f, idx) => {
+      const card = currentCards[idx];
+      const pct = totalKg > 0 ? ((f.amount / totalKg) * 100).toFixed(1) : '0.0';
+      const gu = ogResult.guPerFermentable[idx]?.toFixed(1) ?? '—';
+      const ebcContrib = ebcResult.perFermentable[idx]?.toFixed(1) ?? '—';
+
+      const dot = card.querySelector('.ebc-dot');
+      if (dot) dot.style.background = ebcToColor(f.ebc);
+
+      const nameInp = card.querySelector('.mobile-input-name');
+      if (nameInp && document.activeElement !== nameInp && nameInp.value !== f.name) {
+        nameInp.value = f.name;
+      }
+
+      const amountInp = card.querySelector('input[data-field="amount"]');
+      if (amountInp && document.activeElement !== amountInp && Number(amountInp.value) !== f.amount) {
+        amountInp.value = f.amount;
+      }
+
+      const ebcInp = card.querySelector('input[data-field="ebc"]');
+      if (ebcInp && document.activeElement !== ebcInp && Number(ebcInp.value) !== f.ebc) {
+        ebcInp.value = f.ebc;
+      }
+
+      const tagPct = card.querySelector('.tag-pct');
+      if (tagPct) tagPct.textContent = `${pct}%`;
+
+      const tagGu = card.querySelector('.tag-gu');
+      if (tagGu) tagGu.textContent = `+${gu}`;
+
+      const tagEbc = card.querySelector('.tag-ebc');
+      if (tagEbc) tagEbc.textContent = ebcContrib;
+    });
+    return;
+  }
+
+  // Slow path: structural change (item added/removed/reordered)
   container.innerHTML = '';
 
   State.fermentables.forEach((f, idx) => {
@@ -36,6 +94,7 @@ export function renderMobileFermentablesCards(recalculateCallback) {
 
     const card = document.createElement('div');
     card.className = 'mobile-card';
+    card.dataset.cardId = String(f.id);
     card.innerHTML = `
       <div class="mobile-card-header">
         <div class="mobile-card-title">
@@ -66,58 +125,63 @@ export function renderMobileFermentablesCards(recalculateCallback) {
       </div>
 
       <div class="mobile-card-footer">
-        <span class="mobile-meta-tag">Andel: <strong>${pct}%</strong></span>
-        <span class="mobile-meta-tag">OG-bidrag: <strong>+${gu}</strong></span>
-        <span class="mobile-meta-tag">EBC: <strong>${ebcContrib}</strong></span>
+        <span class="mobile-meta-tag">Andel: <strong class="tag-pct">${pct}%</strong></span>
+        <span class="mobile-meta-tag">OG-bidrag: <strong class="tag-gu">+${gu}</strong></span>
+        <span class="mobile-meta-tag">EBC: <strong class="tag-ebc">${ebcContrib}</strong></span>
       </div>
     `;
 
     container.appendChild(card);
   });
+}
 
-  // Attach input listeners
-  container.querySelectorAll('input').forEach((inp) => {
-    inp.addEventListener('change', (e) => {
-      const id = parseInt(e.target.dataset.id);
-      const field = e.target.dataset.field;
-      const item = State.fermentables.find((f) => f.id === id);
-      if (item) {
-        item[field] = field === 'name' ? e.target.value : parseFloat(e.target.value) || 0;
-        recalculateCallback();
-      }
-    });
+function setupFermentablesDelegation(container, recalculateCallback) {
+  // 1. Direct inputs & blur/change
+  container.addEventListener('change', (e) => {
+    const id = parseInt(e.target.dataset.id, 10);
+    const field = e.target.dataset.field;
+    if (!id || !field) return;
+
+    const item = State.fermentables.find((f) => f.id === id);
+    if (item) {
+      item[field] = field === 'name' ? e.target.value : parseFloat(e.target.value) || 0;
+      recalculateCallback();
+    }
   });
 
-  // Attach stepper buttons listeners
-  container.querySelectorAll('.stepper-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = parseInt(btn.dataset.id);
-      const stepType = btn.dataset.step;
-      const dir = parseFloat(btn.dataset.dir);
-      const item = State.fermentables.find((f) => f.id === id);
-      if (!item) return;
-
-      if (stepType === 'amount') {
-        const step = item.amount >= 1 ? 0.25 : 0.05;
-        item.amount = Math.max(0, Math.round((item.amount + dir * step) * 100) / 100);
-      } else if (stepType === 'ebc') {
-        const step = item.ebc >= 50 ? 5 : 1;
-        item.ebc = Math.max(0, Math.round(item.ebc + dir * step));
-      }
-      recalculateCallback();
-    });
+  // 2. Remove buttons
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-remove="fermentable"]');
+    if (!btn) return;
+    const id = parseInt(btn.dataset.id, 10);
+    State.fermentables = State.fermentables.filter((f) => f.id !== id);
+    renderMobileFermentablesCards(recalculateCallback);
+    recalculateCallback();
   });
 
-  // Remove buttons
-  container.querySelectorAll('[data-remove="fermentable"]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = parseInt(btn.dataset.id);
-      State.fermentables = State.fermentables.filter((f) => f.id !== id);
-      recalculateCallback();
-    });
+  // 3. Continuous press steppers with auto-repeat & acceleration
+  setupContinuousStepperDelegation(container, (btn) => {
+    const id = parseInt(btn.dataset.id, 10);
+    const stepType = btn.dataset.step;
+    const dir = parseFloat(btn.dataset.dir);
+    const item = State.fermentables.find((f) => f.id === id);
+    if (!item) return;
+
+    if (stepType === 'amount') {
+      const step = item.amount >= 1 ? 0.25 : 0.05;
+      item.amount = Math.max(0, Math.round((item.amount + dir * step) * 100) / 100);
+    } else if (stepType === 'ebc') {
+      const step = item.ebc >= 50 ? 5 : 1;
+      item.ebc = Math.max(0, Math.round(item.ebc + dir * step));
+    }
+    recalculateCallback();
   });
 }
 
+/**
+ * Renders or updates hops cards on mobile with zero DOM thrashing.
+ * @param {Function} recalculateCallback
+ */
 export function renderMobileHopsCards(recalculateCallback) {
   const container = document.getElementById('mobile-hops-list');
   const empty = document.getElementById('mobile-hops-empty');
@@ -127,6 +191,7 @@ export function renderMobileHopsCards(recalculateCallback) {
   if (State.hops.length === 0) {
     container.style.display = 'none';
     if (empty) empty.style.display = 'block';
+    container.innerHTML = '';
     return;
   }
   container.style.display = 'flex';
@@ -135,6 +200,75 @@ export function renderMobileHopsCards(recalculateCallback) {
   const metrics = computeRecipeMetrics(State);
   const ibuResult = { total: metrics.ibu, perHop: metrics.ibuPerHop };
 
+  // Initialize delegated listeners once
+  if (!container.dataset.initialized) {
+    setupHopsDelegation(container, recalculateCallback);
+    container.dataset.initialized = 'true';
+  }
+
+  // Check if we can perform an IN-PLACE update
+  const currentCards = Array.from(container.children);
+  const isMatch =
+    currentCards.length === State.hops.length &&
+    currentCards.every((card, idx) => {
+      const h = State.hops[idx];
+      return (
+        Number(card.dataset.cardId) === Number(h?.id) &&
+        card.dataset.hopUse === (h?.use || 'kok')
+      );
+    });
+
+  if (isMatch) {
+    // Fast path: In-place DOM update
+    State.hops.forEach((h, idx) => {
+      const card = currentCards[idx];
+      const ibuContrib = ibuResult.perHop[idx]?.toFixed(1) ?? '0.0';
+
+      const nameInp = card.querySelector('.mobile-input-name');
+      if (nameInp && document.activeElement !== nameInp && nameInp.value !== h.name) {
+        nameInp.value = h.name;
+      }
+
+      const amountInp = card.querySelector('input[data-field="amount"]');
+      if (amountInp && document.activeElement !== amountInp && Number(amountInp.value) !== h.amount) {
+        amountInp.value = h.amount;
+      }
+
+      const alphaInp = card.querySelector('input[data-field="alpha"]');
+      if (alphaInp && document.activeElement !== alphaInp && Number(alphaInp.value) !== h.alpha) {
+        alphaInp.value = h.alpha;
+      }
+
+      const timeInp = card.querySelector('input[data-field="time"]');
+      if (timeInp && document.activeElement !== timeInp && Number(timeInp.value) !== (h.time ?? 60)) {
+        timeInp.value = h.time ?? 60;
+      }
+
+      const wpTempInp = card.querySelector('input[data-field="whirlpoolTemp"]');
+      if (wpTempInp && document.activeElement !== wpTempInp && Number(wpTempInp.value) !== (h.whirlpoolTemp ?? 80)) {
+        wpTempInp.value = h.whirlpoolTemp ?? 80;
+      }
+
+      const dryHopDayInp = card.querySelector('input[data-field="dryHopDay"]');
+      if (dryHopDayInp && document.activeElement !== dryHopDayInp && Number(dryHopDayInp.value) !== (h.dryHopDay ?? 7)) {
+        dryHopDayInp.value = h.dryHopDay ?? 7;
+      }
+
+      const dryHopDaysInp = card.querySelector('input[data-field="dryHopDays"]');
+      if (dryHopDaysInp && document.activeElement !== dryHopDaysInp && Number(dryHopDaysInp.value) !== (h.dryHopDays ?? 3)) {
+        dryHopDaysInp.value = h.dryHopDays ?? 3;
+      }
+
+      const tagIbu = card.querySelector('.tag-ibu');
+      if (tagIbu) tagIbu.textContent = `${h.use === 'torrhumle' ? '0.0' : ibuContrib} IBU`;
+
+      const tagForm = card.querySelector('.tag-form');
+      if (tagForm) tagForm.textContent = h.form === 'kottar' ? 'Kottar' : 'Pellets';
+    });
+    return;
+  }
+
+  // Slow path: structural change or hop use change
   container.innerHTML = '';
 
   State.hops.forEach((h, idx) => {
@@ -142,6 +276,8 @@ export function renderMobileHopsCards(recalculateCallback) {
 
     const card = document.createElement('div');
     card.className = 'mobile-card';
+    card.dataset.cardId = String(h.id);
+    card.dataset.hopUse = h.use || 'kok';
     card.innerHTML = `
       <div class="mobile-card-header">
         <div class="mobile-card-title">
@@ -242,8 +378,8 @@ export function renderMobileHopsCards(recalculateCallback) {
       `}
 
       <div class="mobile-card-footer">
-        <span class="mobile-meta-tag">Form: <strong>${h.form === 'kottar' ? 'Kottar' : 'Pellets'}</strong></span>
-        <span class="mobile-meta-tag">IBU-bidrag: <strong>${h.use === 'torrhumle' ? '0.0' : ibuContrib} IBU</strong></span>
+        <span class="mobile-meta-tag">Form: <strong class="tag-form">${h.form === 'kottar' ? 'Kottar' : 'Pellets'}</strong></span>
+        <span class="mobile-meta-tag">IBU-bidrag: <strong class="tag-ibu">${h.use === 'torrhumle' ? '0.0' : ibuContrib} IBU</strong></span>
       </div>
     `;
 
@@ -254,61 +390,61 @@ export function renderMobileHopsCards(recalculateCallback) {
 
     container.appendChild(card);
   });
+}
 
-  // Attach input listeners
-  container.querySelectorAll('input, select').forEach((el) => {
-    el.addEventListener('change', (e) => {
-      const id = parseInt(e.target.dataset.id, 10);
-      const field = e.target.dataset.field;
-      const item = State.hops.find((h) => h.id === id);
-      if (item) {
-        const val =
-          field === 'name' || field === 'form' || field === 'use'
-            ? e.target.value
-            : parseFloat(e.target.value) || 0;
-        item[field] = val;
-        if (field === 'use') {
-          renderMobileHopsCards(recalculateCallback);
-        }
-        recalculateCallback();
+function setupHopsDelegation(container, recalculateCallback) {
+  // 1. Direct inputs & selects
+  container.addEventListener('change', (e) => {
+    const id = parseInt(e.target.dataset.id, 10);
+    const field = e.target.dataset.field;
+    if (!id || !field) return;
+
+    const item = State.hops.find((h) => h.id === id);
+    if (item) {
+      const val =
+        field === 'name' || field === 'form' || field === 'use'
+          ? e.target.value
+          : parseFloat(e.target.value) || 0;
+      item[field] = val;
+      if (field === 'use') {
+        renderMobileHopsCards(recalculateCallback);
       }
-    });
+      recalculateCallback();
+    }
   });
 
-  // Attach stepper buttons listeners
-  container.querySelectorAll('.stepper-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = parseInt(btn.dataset.id, 10);
-      const stepType = btn.dataset.step;
-      const dir = parseFloat(btn.dataset.dir);
-      const item = State.hops.find((h) => h.id === id);
-      if (!item) return;
-
-      if (stepType === 'amount') {
-        const step = item.amount >= 50 ? 10 : 5;
-        item.amount = Math.max(0, Math.round(item.amount + dir * step));
-      } else if (stepType === 'alpha') {
-        item.alpha = Math.max(0, Math.round((item.alpha + dir * 0.5) * 10) / 10);
-      } else if (stepType === 'time') {
-        item.time = Math.max(0, Math.round(item.time + dir * 5));
-      } else if (stepType === 'whirlpoolTemp') {
-        item.whirlpoolTemp = Math.min(100, Math.max(40, (item.whirlpoolTemp ?? 80) + dir * 5));
-      } else if (stepType === 'dryHopDay') {
-        item.dryHopDay = Math.min(60, Math.max(0, (item.dryHopDay ?? 7) + dir));
-      } else if (stepType === 'dryHopDays') {
-        item.dryHopDays = Math.min(30, Math.max(1, (item.dryHopDays ?? 3) + dir));
-      }
-      renderMobileHopsCards(recalculateCallback);
-      recalculateCallback();
-    });
+  // 2. Remove buttons
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-remove="hop"]');
+    if (!btn) return;
+    const id = parseInt(btn.dataset.id, 10);
+    State.hops = State.hops.filter((h) => h.id !== id);
+    renderMobileHopsCards(recalculateCallback);
+    recalculateCallback();
   });
 
-  // Remove buttons
-  container.querySelectorAll('[data-remove="hop"]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = parseInt(btn.dataset.id, 10);
-      State.hops = State.hops.filter((h) => h.id !== id);
-      recalculateCallback();
-    });
+  // 3. Continuous press steppers
+  setupContinuousStepperDelegation(container, (btn) => {
+    const id = parseInt(btn.dataset.id, 10);
+    const stepType = btn.dataset.step;
+    const dir = parseFloat(btn.dataset.dir);
+    const item = State.hops.find((h) => h.id === id);
+    if (!item) return;
+
+    if (stepType === 'amount') {
+      const step = item.amount >= 50 ? 10 : 5;
+      item.amount = Math.max(0, Math.round(item.amount + dir * step));
+    } else if (stepType === 'alpha') {
+      item.alpha = Math.max(0, Math.round((item.alpha + dir * 0.5) * 10) / 10);
+    } else if (stepType === 'time') {
+      item.time = Math.max(0, Math.round(item.time + dir * 5));
+    } else if (stepType === 'whirlpoolTemp') {
+      item.whirlpoolTemp = Math.min(100, Math.max(40, (item.whirlpoolTemp ?? 80) + dir * 5));
+    } else if (stepType === 'dryHopDay') {
+      item.dryHopDay = Math.min(60, Math.max(0, (item.dryHopDay ?? 7) + dir));
+    } else if (stepType === 'dryHopDays') {
+      item.dryHopDays = Math.min(30, Math.max(1, (item.dryHopDays ?? 3) + dir));
+    }
+    recalculateCallback();
   });
 }

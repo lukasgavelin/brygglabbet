@@ -4,7 +4,7 @@
  */
 
 import { State } from '../state.js';
-
+import { setupContinuousStepperDelegation } from './mobile/mobileStepper.js';
 
 const SYNCED_FIELDS = [
   { desktopId: 'recipe-name-input', mobileId: 'mobile-recipe-name', path: ['recipe', 'name'], type: 'text' },
@@ -118,13 +118,10 @@ export function setupSyncBridge(recalculateCallback) {
     if (mobileId) bindField(mobileId, desktopId);
   });
 
-  // Delegated steppers on #mobile-app-view
+  // Delegated steppers on #mobile-app-view with continuous press & repeat
   const mobileContainer = document.getElementById('mobile-app-view');
   if (mobileContainer) {
-    mobileContainer.addEventListener('click', (e) => {
-      const btn = e.target.closest('.stepper-btn');
-      if (!btn) return;
-
+    setupContinuousStepperDelegation(mobileContainer, (btn) => {
       // 1. Equipment loss steppers
       if (btn.dataset.eqLoss) {
         const field = btn.dataset.eqLoss;

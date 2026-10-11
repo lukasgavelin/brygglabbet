@@ -478,10 +478,11 @@ export async function scanTiltHydrometer(onReading) {
 | **Sprint 2** | **Lagring & Offline** | Vite-plugin-pwa precaching, fullständig backup-export, persistent autosave i `safeStorage`, QuotaExceeded-resiliens. | ✅ **Genomförd** |
 | **Refaktorisering (DOM)** | **DOM-modularisering & Skuldsanering** | Utbrytning av modaler och mobillayout till `modalsTemplate.js` & `mobileTemplate.js`, unifierad tvåvägssynk (`syncBridge.js`). | ✅ **Genomförd** |
 | **Sprint 3** | **Enhetsöverbryggning** | Serverlös QR-synk med komprimerad URL-hash (`#brew=` / `#recipe=`) via `lz-string`, offline SVG-rendering, startup-ingest, BeerXML-profilbevarande. | ✅ **Genomförd** |
+| **Mobiloptimering** | **Touch-ergonomi & Prestanda** | Horisontell swipe-navigering mellan 5 skärmar, auto-repeat stepprar med acceleration, in-place DOM-rendering (noll thrashing), safe-area insets (`viewport-fit=cover`). | ✅ **Genomförd** |
 | **Sprint 4** | **IoT & Digitala Hydrometrar** | Web Bluetooth Tilt-hydrometeravläsning, SG- och temperaturloggning direkt i Mina bryggningar. | ⏳ **Nästa steg** |
 
 ---
 
 > [!NOTE]
 > **Aktuell status:**  
-> Sprint 1, Sprint 2, DOM-modulariseringen och Sprint 3 är slutförda med 155 passerande automatiserade tester över 14 testfiler. Appen är helt produktionsklar med PWA precaching och serverlös QR-överföring. Nästa steg är **Sprint 4** (Web Bluetooth & Tilt).
+> Sprint 1, Sprint 2, DOM-modulariseringen, Sprint 3 och Mobiloptimeringen är slutförda med **164 passerande automatiserade tester** över 15 testfiler. Appen är helt produktionsklar med PWA precaching, serverlös QR-överföring och native mobilupplevelse med swipe och touch-acceleration. Nästa steg är **Sprint 4** (Web Bluetooth & Tilt).

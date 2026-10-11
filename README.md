@@ -56,10 +56,13 @@ Appen kombinerar ett **receptbyggarflöde i 7 logiska steg** med ett **interakti
 - **Lokal historik (Undo/Redo)**: Fullständig historikstack med tangentbordsgenvägar (`Ctrl+Z`, `Ctrl+Shift+Z` / `Cmd+Z`, `Cmd+Shift+Z`).
 - **Utskriftsprotokoll**: Optimerad `@media print`-layout för fysiska bryggprotokoll med mätfält och checklistor.
 
-### 7. 📱 Parallellt Mobil-UI & Skottsäker Offline PWA
-- Fullt responsivt gränssnitt med en skräddarsydd mobilvy (`mobileApp.js`), touch-vänliga steppers och bottenmeny.
-- Komplett paritet med desktop: mäsk-pH, syrajustering, whirlpool-temperatur, torrhumlingstid, jässcheman och Mina bryggningar.
-- **Modulariserad DOM & Sanerad Teknisk Skuld**: `index.html` har bantats med över 600 rader genom utbrytning av modaldialoger (`modalsTemplate.js`) och mobillayout (`mobileTemplate.js`). Unifierad tvåvägssynk (`syncBridge.js`) och händelsedelegation eliminerar duplicerad eventhantering och drift mellan vyerna.
+### 7. 📱 Parallellt Mobil-UI & Touch-Ergonomi (100 % Källar-Offline PWA)
+- **Horisontell Swipe-navigering**: Intuitiv växling mellan de 5 mobilskärmarna (`Profil` ⇄ `Malt & Mäsk` ⇄ `Humle` ⇄ `Jäst & Vatten` ⇄ `Bryggdag`) med mjuka riktningsanimationer och haptisk återkoppling.
+- **Kontinuerlig Auto-repeat på Stepprar**: Håll ned `+` eller `–` för att snabbt och steglöst justera malt (kg), humle (g), mäskraster (°C/min) och salter med acceleration från 95 ms ned till 40 ms.
+- **In-place DOM-uppdateringar (Zero DOM Thrashing)**: Kortens DOM-noder återanvänds i minnet vid värdeändringar istället för att förstöras och byggas om. Eliminerar lagg och bevarar aktivt inputfokus vid snabbjusteringar.
+- **Safe-Area Insets & Kant-till-Kant**: Fullt stöd för iPhone-notchar/dynamic island och Android hemknappsbalk (`viewport-fit=cover`, `env(safe-area-inset-top)` och `env(safe-area-inset-bottom)`).
+- **Optimerade Touch-targets**: Alla interaktiva knappar har minst 44×44 px touch-yta och `touch-action: manipulation` för att eliminera webbläsarens 300 ms klickfördröjning.
+- **Modulariserad DOM & Unifierad Synk**: `index.html` har bantats med över 600 rader (`modalsTemplate.js`, `mobileTemplate.js`). Unifierad synkbro (`syncBridge.js`) och händelsedelegation eliminerar drift mellan desktop och mobil.
 - **Vite PWA & Workbox Precaching**: Automatisk precaching av alla hashade JavaScript- och CSS-bundles vid produktionsbygge. Appen startar 100 % tillförlitligt i källare och garage utan mobiltäckning.
 
 ### 8. 📲 Serverlös QR-synk & URL-hash (PC till Mobil)
@@ -138,7 +141,7 @@ brygglabbet/
 │       ├── icons.js             # SVG-ikoner
 │       ├── errorBoundary.js     # Global crash recovery & error boundary
 │       ├── templates/           # Modulära HTML-templates (modalsTemplate.js)
-│       └── mobile/              # Parallellt Mobil-UI (router, bottenmeny, mobilkort, mobileTemplate.js)
+│       └── mobile/              # Parallellt Mobil-UI (router, bottenmeny, mobilkort, mobileStepper.js, mobileTemplate.js)
 └── tests/
     ├── calculations.test.js     # 28 tester för brygg- och kemiformler
     ├── brewtools.test.js        # 45 tester för verktygs- och syraformler
@@ -153,6 +156,7 @@ brygglabbet/
     ├── rescue-fixes.test.js     # 4 tester för vatten/saltskalning, BeerXML-skydd, Wake Lock & full backup
     ├── architecture-modularization.test.js # 13 tester för DOM-modularisering och event delegation
     ├── recipe-sharing.test.js   # 8 tester för serverlös receptdelning, URL-hash & offline QR-kod
+    ├── mobile-optimization.test.js # 9 tester för swipe-navigering, in-place rendering & touch-stepprar
     └── ui-smoke.test.js         # 9 rök- och integrationsfälttester (desktop + mobil)
 ```
 
@@ -174,7 +178,7 @@ npm run dev
 ```bash
 npm test
 ```
-*Kör samtliga 155 tester över 14 testfiler.*
+*Kör samtliga 164 tester över 15 testfiler.*
 
 ### 4. Bygg för produktion (inkl. PWA Workbox bundles)
 ```bash

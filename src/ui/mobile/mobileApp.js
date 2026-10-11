@@ -17,6 +17,7 @@ import { setupMobileNav } from './mobileNav.js';
 import { mountMobileAppView } from './mobileTemplate.js';
 import { renderMobileFermentablesCards, renderMobileHopsCards } from './mobileCards.js';
 import { MASH_PRESETS } from '../../core/data.js';
+import { setupContinuousStepperDelegation } from './mobileStepper.js';
 import {
   saveRecipe,
   newRecipe,
@@ -171,14 +172,51 @@ function renderMobileMashSteps(recalculateCallback) {
   const container = document.getElementById('mobile-mash-steps-list');
   if (!container) return;
 
-  container.innerHTML = '';
+  // Initialize delegated listeners once
+  if (!container.dataset.initialized) {
+    setupMashStepsDelegation(container, recalculateCallback);
+    container.dataset.initialized = 'true';
+  }
 
+  // Ensure all steps have IDs
   State.mash.forEach((step) => {
     if (step.id === undefined || step.id === null) {
       step.id = generateId();
     }
+  });
+
+  // Fast path: In-place DOM update if IDs match
+  const currentCards = Array.from(container.children);
+  const isMatch =
+    currentCards.length === State.mash.length &&
+    currentCards.every((card, idx) => Number(card.dataset.cardId) === Number(State.mash[idx]?.id));
+
+  if (isMatch) {
+    State.mash.forEach((step, idx) => {
+      const card = currentCards[idx];
+      const nameInp = card.querySelector('.mobile-input-name');
+      if (nameInp && document.activeElement !== nameInp && nameInp.value !== step.name) {
+        nameInp.value = step.name;
+      }
+      const tempInp = card.querySelector('input[data-field="temp"]');
+      if (tempInp && document.activeElement !== tempInp && Number(tempInp.value) !== step.temp) {
+        tempInp.value = step.temp;
+      }
+      const timeInp = card.querySelector('input[data-field="time"]');
+      if (timeInp && document.activeElement !== timeInp && Number(timeInp.value) !== step.time) {
+        timeInp.value = step.time;
+      }
+    });
+    return;
+  }
+
+  // Slow path: structural update
+  container.innerHTML = '';
+
+  State.mash.forEach((step) => {
     const card = document.createElement('div');
     card.className = 'mobile-card';
+    card.dataset.cardId = String(step.id);
     card.innerHTML = `
       <div class="mobile-card-header">
         <div class="mobile-card-title">
@@ -211,43 +249,43 @@ function renderMobileMashSteps(recalculateCallback) {
 
     container.appendChild(card);
   });
+}
 
-  // Inputs
-  container.querySelectorAll('input').forEach((inp) => {
-    inp.addEventListener('change', (e) => {
-      const id = parseInt(e.target.dataset.id, 10);
-      const field = e.target.dataset.field;
-      const step = State.mash.find((s) => s.id === id);
-      if (step) {
-        step[field] = field === 'name' ? e.target.value : parseFloat(e.target.value) || 0;
-        recalculateCallback();
-      }
-    });
-  });
+function setupMashStepsDelegation(container, recalculateCallback) {
+  // Inputs change
+  container.addEventListener('change', (e) => {
+    const id = parseInt(e.target.dataset.id, 10);
+    const field = e.target.dataset.field;
+    if (!id || !field) return;
 
-  // Steppers
-  container.querySelectorAll('.stepper-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = parseInt(btn.dataset.id, 10);
-      const field = btn.dataset.stepField;
-      const dir = parseFloat(btn.dataset.dir);
-      const step = State.mash.find((s) => s.id === id);
-      if (step) {
-        step[field] = Math.max(0, step[field] + dir);
-        recalculateCallback();
-      }
-    });
-  });
-
-  // Remove
-  container.querySelectorAll('[data-remove-step]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = parseInt(btn.dataset.removeStep, 10);
-      State.mash = State.mash.filter((s) => s.id !== id);
-      renderMobileMashSteps(recalculateCallback);
-      renderMashTable(recalculateCallback);
+    const step = State.mash.find((s) => s.id === id);
+    if (step) {
+      step[field] = field === 'name' ? e.target.value : parseFloat(e.target.value) || 0;
       recalculateCallback();
-    });
+    }
+  });
+
+  // Remove step
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-remove-step]');
+    if (!btn) return;
+    const id = parseInt(btn.dataset.removeStep, 10);
+    State.mash = State.mash.filter((s) => s.id !== id);
+    renderMobileMashSteps(recalculateCallback);
+    renderMashTable(recalculateCallback);
+    recalculateCallback();
+  });
+
+  // Continuous steppers
+  setupContinuousStepperDelegation(container, (btn) => {
+    const id = parseInt(btn.dataset.id, 10);
+    const field = btn.dataset.stepField;
+    const dir = parseFloat(btn.dataset.dir);
+    const step = State.mash.find((s) => s.id === id);
+    if (step) {
+      step[field] = Math.max(0, step[field] + dir);
+      recalculateCallback();
+    }
   });
 }
 

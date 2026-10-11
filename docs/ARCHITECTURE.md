@@ -88,8 +88,9 @@ brygglabbet/
 │       │   └── modalsTemplate.js# Modulära modaldialoger (8 modaler inkl. QR-delning)
 │       └── mobile/              # Parallellt mobiloptimerat gränssnitt med full paritet
 │           ├── mobileApp.js     # Mobilvy-initiering & skärmorkestrering
-│           ├── mobileNav.js     # Mobil bottenmeny & header-synk
-│           ├── mobileCards.js   # Mobilanpassade kort och summeringar
+│           ├── mobileNav.js     # Mobil bottenmeny, header-synk & horisontella swipe-gester
+│           ├── mobileCards.js   # Mobilanpassade ingredienskort med in-place DOM-uppdatering
+│           ├── mobileStepper.js # Kontinuerlig auto-repeat och acceleration för mobil-stepprar
 │           └── mobileTemplate.js# Modulärt mobil-layouttemplate (Header, Sticky Bar, 5 Skärmar, App Bar)
 └── tests/
     ├── calculations.test.js     # Tester för alla bryggformler och kemiberäkningar
@@ -105,6 +106,7 @@ brygglabbet/
     ├── rescue-fixes.test.js     # Tester för vatten/saltskalning, BeerXML-skydd, Wake Lock & full backup
     ├── architecture-modularization.test.js # Tester för index.html modularisering och desktop-mobil synk
     ├── recipe-sharing.test.js   # Tester för serverlös receptdelning, URL-hash & offline QR-kod
+    ├── mobile-optimization.test.js # Tester för touch-gestik, swipe-navigering, in-place rendering & safe-area
     └── ui-smoke.test.js         # Rök- och integrationsfälttester (desktop + mobil)
 ```
 
@@ -327,14 +329,33 @@ handleIncomingShareHash() på mobilen
 
 ---
 
-## 9. Testsvit & Kvalitetssäkring
+## 9. Mobiloptimering & Touch-ergonomi
+
+Mobilgränssnittet är arkitektoniskt frikopplat och specialanpassat för smidig enhandsanvändning vid bryggverket:
+
+1. **Horisontell Swipe-navigering**:
+   - Touch-gester på `#mobile-screen-container` känner av horisontella svep (`deltaX > 45px`, horisontellt dominant) och växlar mellan de 5 skärmarna (`Profil` ⇄ `Malt & Mäsk` ⇄ `Humle` ⇄ `Jäst & Vatten` ⇄ `Bryggdag`).
+   - Mjuka glidande riktningsanimationer (`slide-in-right` / `slide-in-left`) och haptisk återkoppling via `navigator.vibrate(6)`.
+2. **In-place DOM-uppdateringar (Zero DOM Thrashing)**:
+   - `renderMobileFermentablesCards`, `renderMobileHopsCards` och `renderMobileMashSteps` identifierar om kortens ID-struktur är oförändrad och uppdaterar värden, beräknade bidrag och taggar direkt i befintliga DOM-noder.
+   - Eliminerar onödig DOM-destruktion, bevarar inputfokus och ger stabil 60 FPS-prestanda på mobila enheter.
+3. **Kontinuerlig Auto-repeat Stepprar (`mobileStepper.js`)**:
+   - Alla `+` / `–` knappar på mobilen stöder att hållas nedtryckta: efter 320 ms inleds automatisk repetering i 95 ms-intervall som accelererar ned till 40 ms vid längre tryck.
+   - Synkroniserad händelsehantering som stödjer både enstaka snabba klick, tangentbord, och långtryck utan dubbeltriggning.
+4. **Safe-Area Insets & Kant-till-Kant PWA**:
+   - `viewport-fit=cover` i `index.html` tillsammans med `env(safe-area-inset-top)` på headern och `env(safe-area-inset-bottom)` på bottenmenyn och modalerna eliminerar överlappning med iPhone-notch och Android-hemindikatorer.
+   - Minsta touch-target på 44×44 px och `touch-action: manipulation` eliminerar 300 ms klickfördröjning.
+
+---
+
+## 10. Testsvit & Kvalitetssäkring
 
 Tester körs med **Vitest**:
 ```bash
 npm test
 ```
 
-### Testmoduler (155 tester i 14 testfiler):
+### Testmoduler (164 tester i 15 testfiler):
 1. `tests/calculations.test.js` – 28 tester för OG, FG, ABV, IBU (Tinseth & Malowicki), EBC (Morey), vattenkalkyler och kemi.
 2. `tests/brewtools.test.js` – 45 tester för kolsyra (flaskor & fat), refraktometer (Terrill), hydrometer 20°C, pitch rate, strike-temp, infusion och syradosering.
 3. `tests/batches.test.js` – 11 tester för batch-CRUD, jässcheman, tidslinjer, mätningar, flaskning, påminnelser och RFC 5545 .ics kalenderexport.
@@ -348,11 +369,12 @@ npm test
 11. `tests/rescue-fixes.test.js` – 4 tester för vatten/saltskalning, BeerXML-skydd, Wake Lock och full backup.
 12. `tests/architecture-modularization.test.js` – 13 tester för index.html modularisering, dynamisk montering, selector-synk och event delegation.
 13. `tests/recipe-sharing.test.js` – 8 tester för serverlös receptdelning, URL-hash, lz-string komprimering, offline QR-kod & startup-ingest.
-14. `tests/ui-smoke.test.js` – 9 rök- och integrationsfälttester (desktop + mobil).
+14. `tests/mobile-optimization.test.js` – 9 tester för touch-gestik, swipe-navigering, in-place rendering, auto-repeat stepprar & safe-area.
+15. `tests/ui-smoke.test.js` – 9 rök- och integrationsfälttester (desktop + mobil).
 
 ---
 
-## 10. Bygg- & Produktionsprocess
+## 11. Bygg- & Produktionsprocess
 
 ```bash
 # Installera beroenden
