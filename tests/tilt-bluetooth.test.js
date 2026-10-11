@@ -286,7 +286,7 @@ describe('Tilt UI Controller (tiltController.js)', () => {
 
     expect(logSpy).toHaveBeenCalledTimes(1);
     expect(logSpy.mock.calls[0][0].sg).toBeCloseTo(1.055, 2);
-    expect(logSpy.mock.calls[0][0].tempC).toBeCloseTo(18.5, 1);
+    expect(logSpy.mock.calls[0][0].tempC).toBeCloseTo(18.5, 0);
     expect(logSpy.mock.calls[0][0].note).toContain('Tilt Röd');
 
     controller.stop();

@@ -78,6 +78,13 @@ Appen kombinerar ett **receptbyggarflöde i 7 logiska steg** med ett **interakti
 - **Bakgrunds- och Auto-loggning**: Aktivera automatisk loggning med 15-minutersintervall för att dokumentera jäsningsförloppet handsfree.
 - **Fristående Verktygsflik**: Finns även tillgänglig i *Bryggverktyg*-modalen för snabb testning och avläsning oberoende av sparade batcher.
 
+### 10. 🏠 Start-Hubb & Skrivbordsdashboard (Modern Desktop UI)
+- **Välkomnande Cockpit istället för "Massa rader"**: Användaren möts på datorn av en luftig och inbjudande Start-Hubb med tydliga vägval istället för att omedelbart överhopas av 40+ tabellrader och inmatningsfält.
+- **Snabbval för vanliga intentioner**: ➕ *Nytt recept*, 📋 *Välj bland stilmallar*, 🍺 *Aktivt recept (med live-nyckeltal)*, och ⏱️ *Starta Bryggdagsläget*.
+- **Direktöverblick av Jäsning & Arkiv**: Visar pågående jäsningar med dagar i jäskärl och kalenderpåminnelser, senast sparade recept samt inbäddad Tilt IoT-panel.
+- **Permanent Fliknavigering i Headern**: Växla blixtsnabbt mellan `🏠 Översikt`, `📝 Recept`, `📒 Mina bryggningar` och `🍺 Bryggdag` med ett klick eller genom att klicka på logotypen.
+- **Smart Minne & Cockpit-inställning**: Appen minns aktiv vy under sessionen, och vana bryggare som vill hoppa direkt in i receptredigeraren kan aktivera kryssrutan *"Starta alltid direkt i receptredigeraren framöver"*.
+
 ---
 
 ## 📐 Standarder & Enheter
@@ -129,6 +136,7 @@ brygglabbet/
 │   │   └── data/                # Statiska databaser (malter, humle, jäst, stilar, profiler, mäskscheman)
 │   └── ui/
 │       ├── batches.js           # Mina bryggningar (historik, tidslinje, logg, flaskning & betyg)
+│       ├── dashboard.js         # Desktop Start-Hubb & navigation (cockpitvy, snabbval, aktiva jäsningar)
 │       ├── tiltController.js    # Tilt UI-controller, mätvärdespanel, auto-loggning & session persistence
 │       ├── brewday.js           # Bryggdagsläge, monoton timestamp-timer, humlelarm, Wake Lock & systemnotiser
 │       ├── shareQr.js           # QR-delningsdialog, lägesväljare & startup-hashavlyssnare
@@ -156,6 +164,7 @@ brygglabbet/
     ├── brewtools.test.js        # 45 tester för verktygs- och syraformler
     ├── batches.test.js          # 11 tester för batcher, scheman och .ics-export
     ├── tilt-bluetooth.test.js   # 17 tester för Tilt Web Bluetooth, iBeacon, simulator & UI
+    ├── dashboard.test.js        # 6 tester för Start-Hubb, vynamn, preferenser & navigering
     ├── data.test.js             # 10 tester för databasens integritet
     ├── beerxml.test.js          # 4 tester för BeerXML-konvertering
     ├── mash.test.js             # 3 tester för mäskscheman
@@ -188,7 +197,7 @@ npm run dev
 ```bash
 npm test
 ```
-*Kör samtliga 181 tester över 16 testfiler.*
+*Kör samtliga 187 tester över 17 testfiler.*
 
 ### 4. Bygg för produktion (inkl. PWA Workbox bundles)
 ```bash

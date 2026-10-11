@@ -3763,4 +3763,497 @@ body.mobile-mode #mobile-stats-fab {
   }
 }
 
+/* ==========================================================================
+   Desktop Navigation Bar & Start-Hubb Dashboard Styles
+   ========================================================================== */
+
+/* --- Desktop Nav Bar (in Header) --- */
+.desktop-nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  margin-left: 6px;
+}
+
+.desktop-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.desktop-nav-btn:hover {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.desktop-nav-btn.active {
+  background: var(--bg-card);
+  color: var(--accent-bright);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Dashboard / Start-Hubb Container --- */
+.dashboard-view {
+  min-height: calc(100vh - var(--header-h));
+  background: var(--bg-primary);
+  padding: 24px 28px 80px 28px;
+  max-width: 1320px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.hub-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* --- Hub Hero --- */
+.hub-hero {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.08) 0%, rgba(245, 158, 11, 0.03) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.hub-hero-main {
+  flex: 1;
+  min-width: 280px;
+}
+
+.hub-hero-badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-bright);
+  margin-bottom: 8px;
+}
+
+.hub-hero-title {
+  font-family: var(--font-heading);
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
+}
+
+.hub-hero-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 680px;
+  line-height: 1.45;
+}
+
+.hub-hero-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hub-meta-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  min-width: 95px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.hub-meta-pill.highlight {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.hub-meta-num {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  line-height: 1.1;
+}
+
+.hub-meta-pill.highlight .hub-meta-num {
+  color: #10b981;
+}
+
+.hub-meta-lbl {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-top: 2px;
+  text-align: center;
+}
+
+/* --- 4 Primary Action Cards Grid --- */
+.hub-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.hub-action-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.hub-action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  border-color: var(--accent);
+}
+
+.hub-action-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  margin-bottom: 12px;
+}
+
+.hub-action-body {
+  flex: 1;
+}
+
+.hub-action-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+}
+
+.hub-action-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.hub-action-footer {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+
+.hub-action-link {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--accent);
+  transition: color 0.15s ease;
+}
+
+.hub-action-card:hover .hub-action-link {
+  color: var(--accent-bright);
+}
+
+/* Special Active Recipe Card */
+.hub-action-active-recipe {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, var(--bg-card) 0%, rgba(217, 119, 6, 0.03) 100%);
+}
+
+.hub-active-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+.hub-recipe-specs {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* --- Main Dashboard Two-Column Grid --- */
+.hub-main-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 24px;
+}
+
+.hub-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.hub-section-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.hub-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hub-section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hub-section-icon {
+  font-size: 1.25rem;
+}
+
+.hub-section-title-wrap h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.hub-section-body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Empty Box */
+.hub-empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 16px;
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* Batch Items in Hub */
+.hub-batch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hub-batch-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hub-batch-item:hover {
+  background: var(--bg-card);
+  border-color: var(--accent);
+  transform: translateX(2px);
+}
+
+.hub-batch-main {
+  flex: 1;
+}
+
+.hub-batch-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.hub-batch-meta {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.hub-batch-reminder {
+  font-size: 0.82rem;
+  color: var(--accent-bright);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* Saved Recipes Grid in Hub */
+.hub-recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.hub-recipe-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hub-recipe-chip:hover {
+  background: var(--bg-card);
+  border-color: var(--accent);
+}
+
+.hub-recipe-chip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hub-recipe-chip-body strong {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.hub-recipe-chip-meta {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.hub-recipe-chip-arrow {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Quick Tools Grid in Hub */
+.hub-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.hub-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.hub-tool-btn:hover {
+  background: var(--bg-card);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.hub-tool-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.hub-tool-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.hub-tool-text strong {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+}
+
+.hub-tool-text span {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+}
+
+/* Hub Footer */
+.hub-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0 10px 0;
+  border-top: 1px dashed var(--border);
+  margin-top: 8px;
+}
+
+.hub-pref-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.hub-pref-check input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .hub-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hub-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktop-nav-bar {
+    display: none;
+  }
+}
+
+
 

@@ -23,10 +23,27 @@
 
 <!-- ===================== HEADER ========================= -->
 <header id="app-header">
-  <div class="header-logo">
+  <div class="header-logo" id="header-logo" style="cursor:pointer" title="Gå till Översikt & Start-Hubb">
     <span class="logo-icon"><svg class="svg-icon svg-icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M10 6h4M12 6v4l-4.5 7.5A1.2 1.2 0 0 0 8.5 19.3h7a1.2 1.2 0 0 0 1-1.8L12 10V6"/><path d="M9.5 16c1.5-.7 3.5 1 5 0"/></svg></span>
     <h1>Brygglabbet</h1>
   </div>
+
+  <!-- Desktop Navigation Bar -->
+  <nav class="desktop-nav-bar" id="desktop-nav-bar" aria-label="Huvudvyer">
+    <button type="button" class="desktop-nav-btn active" id="nav-btn-hub" data-nav-view="hub" title="Översikt & Start-Hubb">
+      <span class="nav-icon">🏠</span> Översikt
+    </button>
+    <button type="button" class="desktop-nav-btn" id="nav-btn-recipe" data-nav-view="recipe" title="Receptredigerare">
+      <span class="nav-icon">📝</span> Recept
+    </button>
+    <button type="button" class="desktop-nav-btn" id="nav-btn-batches" data-nav-view="batches" title="Mina bryggningar & Jäsning">
+      <span class="nav-icon">📒</span> Mina bryggningar
+    </button>
+    <button type="button" class="desktop-nav-btn" id="nav-btn-brewday" data-nav-view="brewday" title="Bryggdagsläget">
+      <span class="nav-icon">🍺</span> Bryggdag
+    </button>
+  </nav>
+
   <div style="display:flex; align-items:center; gap:8px;">
     <div class="recipe-name-wrapper" title="Klicka för att byta receptnamn">
       <input type="text" id="recipe-name-input" placeholder="Receptnamn..." value="Mitt nya öl" autocomplete="off">
@@ -68,8 +85,11 @@
   </div>
 </header>
 
+<!-- ===================== DASHBOARD / START-HUBB VIEW ====== -->
+<div id="dashboard-view" class="dashboard-view"></div>
+
 <!-- ===================== APP BODY ======================== -->
-<div id="app-body">
+<div id="app-body" class="hidden">
 
   <!-- MAIN CONTENT (tabs + content) -->
   <div id="main-content">

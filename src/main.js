@@ -47,6 +47,7 @@ import { initErrorBoundary } from './ui/errorBoundary.js';
 import { mountModals } from './ui/templates/modalsTemplate.js';
 import { mountMobileAppView } from './ui/mobile/mobileTemplate.js';
 import { setupShareQrModal, handleIncomingShareHash } from './ui/shareQr.js';
+import { setupDashboard, switchDesktopView } from './ui/dashboard.js';
 
 // Initialize global crash recovery & error boundary
 initErrorBoundary();
@@ -89,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupToolsModal(debouncedRecalculate);
   setupBatchesView(recalculate);
   setupShareQrModal();
+  setupDashboard(recalculate);
 
   const importedFromHash = handleIncomingShareHash(recalculate);
   let restored = false;
@@ -97,6 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!restored) {
       loadDefaultRecipe(recalculate);
     }
+  } else {
+    switchDesktopView('recipe');
   }
 
   setupInputSteppers(debouncedRecalculate);
@@ -160,9 +164,20 @@ function setupHeaderControls() {
   document.getElementById('btn-new')?.addEventListener('click', () => {
     pushHistory();
     newRecipe(recalculate);
+    switchDesktopView('recipe');
   });
-  document.getElementById('btn-open')?.addEventListener('click', () => openRecipeModal(recalculate));
-  document.getElementById('btn-presets')?.addEventListener('click', () => openPresetRecipesModal(recalculate));
+  document.getElementById('btn-open')?.addEventListener('click', () => {
+    openRecipeModal(() => {
+      recalculate();
+      switchDesktopView('recipe');
+    });
+  });
+  document.getElementById('btn-presets')?.addEventListener('click', () => {
+    openPresetRecipesModal(() => {
+      recalculate();
+      switchDesktopView('recipe');
+    });
+  });
   document.getElementById('btn-save')?.addEventListener('click', saveRecipe);
   document.getElementById('btn-toggle-brewday')?.addEventListener('click', () => toggleBrewdayView(recalculate));
   document.getElementById('btn-swe-info')?.addEventListener('click', () => openModal('modal-swe-info'));
@@ -201,7 +216,10 @@ function setupHeaderControls() {
   });
   document.getElementById('import-file-input')?.addEventListener('change', (e) => {
     pushHistory();
-    importJSON(e, recalculate);
+    importJSON(e, () => {
+      recalculate();
+      switchDesktopView('recipe');
+    });
   });
 
   // Recipe action triggers inside Section 7 (Anteckningar & CTA)
