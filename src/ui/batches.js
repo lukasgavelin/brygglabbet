@@ -30,6 +30,7 @@ import {
   brixToSG,
 } from '../core/brewtools.js';
 import { showToast, escHtml } from './toast.js';
+import { getTiltPanelHtml, setupTiltPanel } from './tiltController.js';
 
 let activeBatchId = null;
 let statusFilter = 'alla'; // 'alla' | 'jäser' | 'konditioneras' | 'klar'
@@ -633,6 +634,9 @@ function renderBatchDetail(container, batchId) {
       <div class="card" style="margin-top:16px;">
         <p class="section-label">📉 Gravitetsmätningar & Jäsningslogg</p>
 
+        <!-- TILT IOT WEB BLUETOOTH INTEGRATION -->
+        ${getTiltPanelHtml('batch-detail')}
+
         <!-- ADD READING FORM -->
         <div class="batch-reading-form">
           <div class="form-group" style="flex:1; min-width:130px;">
@@ -893,6 +897,32 @@ function renderBatchDetail(container, batchId) {
       renderBatchesView();
     });
   });
+
+  // Tilt IoT Web Bluetooth Hydrometer setup
+  const tiltPanelEl = container.querySelector('#batch-detail-tilt-panel');
+  if (tiltPanelEl) {
+    const defaultSG = (batch.readings && batch.readings.length > 0)
+      ? (batch.readings[batch.readings.length - 1].sg || 1.050)
+      : (parseFloat(measured.og) || planned.og || 1.050);
+
+    setupTiltPanel(tiltPanelEl, {
+      idPrefix: 'batch-detail',
+      defaultSG,
+      defaultTempC: 20.0,
+      onLogReading: ({ sg, tempC, note }) => {
+        addReadingToBatch(batch.id, {
+          date: formatDateISO(),
+          sg,
+          brix: null,
+          tempC,
+          isHydrometer: true,
+          note,
+        });
+        showToast(`📊 Tilt-mätning loggad till ${batch.recipeName}!`, 'success');
+        renderBatchesView();
+      },
+    });
+  }
 
   // Priming sugar live preview
   const updateSugarPreview = () => {

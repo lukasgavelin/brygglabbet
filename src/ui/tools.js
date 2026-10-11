@@ -27,6 +27,8 @@ import {
 import { openModal } from './modals.js';
 import { mountModals } from './templates/modalsTemplate.js';
 import { escHtml } from './utils.js';
+import { getTiltPanelHtml, setupTiltPanel } from './tiltController.js';
+import { showToast } from './toast.js';
 
 /** Tool values kept between tab switches within a session. */
 const values = {};
@@ -308,6 +310,29 @@ const TABS = {
           State.equipment.grainTemp = g;
           onStateChange();
         }
+      }
+    },
+  },
+  tilt: {
+    form() {
+      return `
+        <p class="tool-hint" style="margin-bottom:12px;">
+          Anslut din digitala Tilt Hydrometer via Web Bluetooth för att läsa av specifik gravitet (SG) och temperatur i realtid direkt i webbläsaren.
+        </p>
+        ${getTiltPanelHtml('tools-modal')}`;
+    },
+    results() {
+      const panel = document.getElementById('tools-modal-tilt-panel');
+      if (panel && !panel.dataset.initialized) {
+        panel.dataset.initialized = 'true';
+        setupTiltPanel(panel, {
+          idPrefix: 'tools-modal',
+          defaultSG: computeRecipeMetrics(State).og || 1.050,
+          defaultTempC: 20.0,
+          onLogReading: (r) => {
+            showToast(`Mätning avläst: ${r.sg.toFixed(3)} SG (${r.tempC}°C). För att spara historik, öppna "Mina bryggningar".`, 'info');
+          },
+        });
       }
     },
   },

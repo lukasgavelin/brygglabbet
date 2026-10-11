@@ -15,6 +15,7 @@ Brygglabbet är byggt som en modern, snabb Single Page Application (SPA) utan ex
 - **Dubbelriktad standardisering & Profilskydd**: Inbyggt stöd för både modern JSON-receptlagring och industristandarden **BeerXML 1.0**, där befintliga utrustnings- och vattenprofiler bevaras intakta vid import av ofullständiga filer.
 - **Web APIs & Hårdvaruintegration**:
   - **Screen Wake Lock API (`src/core/wakelock.js`)**: Håller skärmen tänd under bryggning och timers.
+  - **Web Bluetooth Scanning API (`src/core/tiltBluetooth.js`)**: Passiv Bluetooth LE iBeacon-skanning av digitala Tilt-hydrometrar för realtidsgravitet (SG/°P), temperatur och signalstyrka (RSSI) med inbyggd simulator för alla webbläsare.
   - **Web Audio API & Notification API**: Syntetiserade harmoniska larmsignaler kombinerat med OS-systemnotiser.
   - **Navigator Vibration API**: Haptisk feedback på mobila enheter.
   - **Web Storage API (`safeStorage`)**: Kvantitets- och kvotskyddad persistens med persistent autosave.
@@ -50,6 +51,7 @@ brygglabbet/
 │   │   ├── batches.js           # Batch-CRUD, jässchema, tidslinje & .ics-export
 │   │   ├── beerxml.js           # BeerXML 1.0 parser och serializer med kolsyra & givmetadata
 │   │   ├── recipeSharing.js     # Serverlös QR- och hash-komprimering (lz-string) & SVG QR-rendering
+│   │   ├── tiltBluetooth.js     # Tilt Hydrometer Web Bluetooth LE scanning, iBeacon-tolk & fysiksimulator
 │   │   ├── wakelock.js          # Screen Wake Lock API manager med visibilitychange-stöd
 │   │   ├── storage.js           # safeStorage & safeSessionStorage med QuotaExceeded-skydd
 │   │   ├── data.js              # Databas-exporteringshubb
@@ -64,9 +66,10 @@ brygglabbet/
 │   │       └── preset-recipes.js# Kompletta exempelreceptmallar
 │   └── ui/
 │       ├── batches.js           # Mina bryggningar (historik, tidslinje, logg, flaskning & betyg)
+│       ├── tiltController.js    # Tilt IoT panel controller, live DOM-rendering & sessionsbevarande
 │       ├── brewday.js           # Interaktivt bryggdagsläge, monoton timestamp-timer, Wake Lock & humlelarm
 │       ├── shareQr.js           # Serverlös QR-delningsdialog, URL-kopiering & startup-hashavlyssnare
-│       ├── tools.js             # Bryggverktygspanel (kolsyra, refraktometer, hydrometer, jäst, strike)
+│       ├── tools.js             # Bryggverktygspanel (kolsyra, refraktometer, hydrometer, jäst, strike, tilt)
 │       ├── equipment.js         # Utrustningsprofilsvy & förlustparametrar
 │       ├── fermentables.js      # Maltlista, tillsätt/ta bort, färgbidrag
 │       ├── hops.js              # Humleschema, whirlpool-temp & torrhumling
@@ -96,6 +99,7 @@ brygglabbet/
     ├── calculations.test.js     # Tester för alla bryggformler och kemiberäkningar
     ├── brewtools.test.js        # Tester för verktygskalkyler och syraformler
     ├── batches.test.js          # Tester för batcher, scheman och .ics-export
+    ├── tilt-bluetooth.test.js   # Tester för Tilt Web Bluetooth, iBeacon-avkodning, simulator & UI
     ├── data.test.js             # Integritetstest för unika ID:n och fält i databaserna
     ├── beerxml.test.js          # Tester för BeerXML-import och export
     ├── mash.test.js             # Tester för mäskvatten och tidsberäkningar
@@ -348,33 +352,64 @@ Mobilgränssnittet är arkitektoniskt frikopplat och specialanpassat för smidig
 
 ---
 
-## 10. Testsvit & Kvalitetssäkring
+## 10. IoT & Digitala Hydrometrar (Tilt Web Bluetooth & Simulator)
+
+Brygglabbet inkluderar en helt serverlös klientintegration mot **Tilt Hydrometer** via Web Bluetooth API (`src/core/tiltBluetooth.js` och `src/ui/tiltController.js`):
+
+### 10.1 iBeacon BLE-protokoll & Dataavkodning
+Tilt sänder telemetri via Apples tillverkarspecifika iBeacon-paket (Company ID `0x004c`):
+- **Byte 0–1**: iBeacon header (`0x02`, `0x15`).
+- **Byte 2–17**: 16-byte UUID som identifierar Tilt-färgen:
+  - `a495bb10c5b14b44b5121370f02d74de`: Röd
+  - `a495bb20c5b14b44b5121370f02d74de`: Grön
+  - `a495bb30c5b14b44b5121370f02d74de`: Svart
+  - `a495bb40c5b14b44b5121370f02d74de`: Lila
+  - `a495bb50c5b14b44b5121370f02d74de`: Orange
+  - `a495bb60c5b14b44b5121370f02d74de`: Blå
+  - `a495bb70c5b14b44b5121370f02d74de`: Gul
+  - `a495bb80c5b14b44b5121370f02d74de`: Rosa
+- **Byte 18–19**: Temperatur i Fahrenheit (big-endian `uint16`). Konverteras till Celsius med 1 decimals precision.
+- **Byte 20–21**: Specifik gravitet multiplicerad med 1000 (big-endian `uint16`, t.ex. $1050 \rightarrow 1.050\text{ SG}$).
+- **Byte 22**: Kalibrerad sändeffekt (TX Power vid 1 m) kombinerat med mätt RSSI i dBm för signalstyrkeklassificering (*Utmärkt*, *Bra*, *Godkänd*, *Svag*).
+
+### 10.2 Inbyggd Fysiksimulator (`startTiltSimulation`)
+Eftersom `navigator.bluetooth.requestLEScan` kräver Chromium-webbläsare med experimentell flagga (`chrome://flags/#enable-experimental-web-platform-features`), innehåller modulen en deterministisk och fysikalisk simulator. Den tillåter alla användare på valfri enhet (Safari, Firefox, Linux, iPhone) att testa live-telemetri med realistiskt brus och automatisk loggning.
+
+### 10.3 UI Controller & Sessionsbevarande (`tiltController.js`)
+- **Sömlös Batchintegration**: Integrerad i *Mina bryggningar* under Gravitetsmätningar samt som separat verktygsflik i *Bryggverktyg*.
+- **Sessionsbevarande**: Aktiva skanningar eller simuleringar överlever fullständiga återrenderingar av batch-detaljvyn utan avbrott eller blinkningar (`activeSessions`-karta indexerad på panelprefix).
+- **Auto-loggning**: Inbyggt stöd för schemalagd 15-minutersintervall-loggning till batchens gravitetshistorik med automatisk FG- och ABV-omräkning.
+
+---
+
+## 11. Testsvit & Kvalitetssäkring
 
 Tester körs med **Vitest**:
 ```bash
 npm test
 ```
 
-### Testmoduler (164 tester i 15 testfiler):
+### Testmoduler (181 tester i 16 testfiler):
 1. `tests/calculations.test.js` – 28 tester för OG, FG, ABV, IBU (Tinseth & Malowicki), EBC (Morey), vattenkalkyler och kemi.
 2. `tests/brewtools.test.js` – 45 tester för kolsyra (flaskor & fat), refraktometer (Terrill), hydrometer 20°C, pitch rate, strike-temp, infusion och syradosering.
 3. `tests/batches.test.js` – 11 tester för batch-CRUD, jässcheman, tidslinjer, mätningar, flaskning, påminnelser och RFC 5545 .ics kalenderexport.
-4. `tests/data.test.js` – 10 tester för databasens integritet, unika ID:n och giltiga numeriska intervall.
-5. `tests/beerxml.test.js` – 4 tester för import/export av BeerXML-recept med kolsyra och givmetadata.
-6. `tests/mash.test.js` – 3 tester för mäskscheman och infusionsberäkningar.
-7. `tests/recipes.test.js` – 2 tester för receptmallar och validering.
-8. `tests/state.test.js` – 3 tester för state mutation, prenumerationer och historik.
-9. `tests/integration.test.js` – 2 end-to-end integrationstester för kompletta receptflöden.
-10. `tests/storage-resilience.test.js` – 13 tester för persistensresiliens, kvotskydd och PWA-filer.
-11. `tests/rescue-fixes.test.js` – 4 tester för vatten/saltskalning, BeerXML-skydd, Wake Lock och full backup.
-12. `tests/architecture-modularization.test.js` – 13 tester för index.html modularisering, dynamisk montering, selector-synk och event delegation.
-13. `tests/recipe-sharing.test.js` – 8 tester för serverlös receptdelning, URL-hash, lz-string komprimering, offline QR-kod & startup-ingest.
-14. `tests/mobile-optimization.test.js` – 9 tester för touch-gestik, swipe-navigering, in-place rendering, auto-repeat stepprar & safe-area.
-15. `tests/ui-smoke.test.js` – 9 rök- och integrationsfälttester (desktop + mobil).
+4. `tests/tilt-bluetooth.test.js` – 17 tester för Tilt iBeacon-avkodning, färg-UUID, temperatur- och SG-tolkning, RSSI-kvalitet, fysiksimulator, panelcontroller och sessionsbevarande.
+5. `tests/data.test.js` – 10 tester för databasens integritet, unika ID:n och giltiga numeriska intervall.
+6. `tests/beerxml.test.js` – 4 tester för import/export av BeerXML-recept med kolsyra och givmetadata.
+7. `tests/mash.test.js` – 3 tester för mäskscheman och infusionsberäkningar.
+8. `tests/recipes.test.js` – 2 tester för receptmallar och validering.
+9. `tests/state.test.js` – 3 tester för state mutation, prenumerationer och historik.
+10. `tests/integration.test.js` – 2 end-to-end integrationstester för kompletta receptflöden.
+11. `tests/storage-resilience.test.js` – 13 tester för persistensresiliens, kvotskydd och PWA-filer.
+12. `tests/rescue-fixes.test.js` – 4 tester för vatten/saltskalning, BeerXML-skydd, Wake Lock och full backup.
+13. `tests/architecture-modularization.test.js` – 13 tester för index.html modularisering, dynamisk montering, selector-synk och event delegation.
+14. `tests/recipe-sharing.test.js` – 8 tester för serverlös receptdelning, URL-hash, lz-string komprimering, offline QR-kod & startup-ingest.
+15. `tests/mobile-optimization.test.js` – 9 tester för touch-gestik, swipe-navigering, in-place rendering, auto-repeat stepprar & safe-area.
+16. `tests/ui-smoke.test.js` – 9 rök- och integrationsfälttester (desktop + mobil).
 
 ---
 
-## 11. Bygg- & Produktionsprocess
+## 12. Bygg- & Produktionsprocess
 
 ```bash
 # Installera beroenden

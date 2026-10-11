@@ -155,6 +155,7 @@ export function getModalsHtml() {
       <button class="tools-tab" data-tool="hydro" role="tab">Hydrometer</button>
       <button class="tools-tab" data-tool="yeast" role="tab">Jäst</button>
       <button class="tools-tab" data-tool="strike" role="tab">Inmäskning</button>
+      <button class="tools-tab" data-tool="tilt" role="tab">🧲 Tilt</button>
     </div>
     <div class="modal-body" id="tools-body" style="padding:12px 0"></div>
   </div>

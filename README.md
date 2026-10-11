@@ -71,6 +71,13 @@ Appen kombinerar ett **receptbyggarflöde i 7 logiska steg** med ett **interakti
 - **100 % Offline Vektor-QR**: QR-koden renderas som skarp vektor-SVG lokalt i webbläsaren utan beroende av externa tredjeparts-API:er.
 - **Direktstart av Bryggdag**: Skanning med `#brew=` öppnar receptet och startar Bryggdagsläget direkt. Webbläsarens adressfält städas automatiskt med `history.replaceState` för att bevara rena bokmärken och förhindra dataöverskrivning.
 
+### 9. 🧲 IoT & Digital Hydrometer (Tilt Web Bluetooth)
+- **Realtidsavläsning via Web Bluetooth**: Läs av specifik gravitet (SG och °Plato), temperatur (°C och °F) samt signalstyrka (RSSI) direkt i webbläsaren via passiv Bluetooth Low Energy (BLE iBeacon) scanning utan externa servrar eller hubbar.
+- **Inbyggd Fysiksimulator (Demo)**: Testa telemetrin och gravitetshistorik direkt på vilken webbläsare eller enhet som helst (inkl. Safari, Firefox, Linux, iPhone) utan fysisk hårdvara eller experimentella webbläsarflaggor.
+- **Sömlös Batchintegration**: Integrerad direkt i "Mina bryggningar" under Gravitetsmätningar & Jäsningslogg. Klicka på "Logga mätning" för att omedelbart spara värdet i batchens logg och automatiskt uppdatera slutgravitet (FG), dämpningsgrad och alkoholhalt (ABV).
+- **Bakgrunds- och Auto-loggning**: Aktivera automatisk loggning med 15-minutersintervall för att dokumentera jäsningsförloppet handsfree.
+- **Fristående Verktygsflik**: Finns även tillgänglig i *Bryggverktyg*-modalen för snabb testning och avläsning oberoende av sparade batcher.
+
 ---
 
 ## 📐 Standarder & Enheter
@@ -113,6 +120,7 @@ brygglabbet/
 │   │   ├── calculations.js      # computeRecipeMetrics & rena beräkningsfunktioner (inkl. vatten/saltskalning)
 │   │   ├── brewtools.js         # Verktygsfunktioner (kolsyra, refraktivitet, hydrometer, syra, inmäskning)
 │   │   ├── batches.js           # Batchhantering, jässcheman, mätningar & .ics kalenderexport
+│   │   ├── tiltBluetooth.js     # Tilt Web Bluetooth LE scanning, iBeacon-avkodning & fysiksimulator
 │   │   ├── beerxml.js           # BeerXML 1.0 parser & serializer med kolsyra och givmetadata
 │   │   ├── recipeSharing.js     # Serverlös QR- och URL-hash komprimering (lz-string) & SVG QR-rendering
 │   │   ├── wakelock.js          # Screen Wake Lock API manager (håller skärmen vaken vid bryggning)
@@ -121,9 +129,10 @@ brygglabbet/
 │   │   └── data/                # Statiska databaser (malter, humle, jäst, stilar, profiler, mäskscheman)
 │   └── ui/
 │       ├── batches.js           # Mina bryggningar (historik, tidslinje, logg, flaskning & betyg)
+│       ├── tiltController.js    # Tilt UI-controller, mätvärdespanel, auto-loggning & session persistence
 │       ├── brewday.js           # Bryggdagsläge, monoton timestamp-timer, humlelarm, Wake Lock & systemnotiser
 │       ├── shareQr.js           # QR-delningsdialog, lägesväljare & startup-hashavlyssnare
-│       ├── tools.js             # Bryggverktygspanel (kolsyra, refraktometer, hydrometer, jäst, strike)
+│       ├── tools.js             # Bryggverktygspanel (kolsyra, refraktometer, hydrometer, jäst, strike, tilt)
 │       ├── equipment.js         # Utrustningsparametrar & vattenkrav
 │       ├── fermentables.js      # Malttabell & färgbidrag
 │       ├── hops.js              # Humleschema, whirlpool-temp & torrhumling
@@ -146,6 +155,7 @@ brygglabbet/
     ├── calculations.test.js     # 28 tester för brygg- och kemiformler
     ├── brewtools.test.js        # 45 tester för verktygs- och syraformler
     ├── batches.test.js          # 11 tester för batcher, scheman och .ics-export
+    ├── tilt-bluetooth.test.js   # 17 tester för Tilt Web Bluetooth, iBeacon, simulator & UI
     ├── data.test.js             # 10 tester för databasens integritet
     ├── beerxml.test.js          # 4 tester för BeerXML-konvertering
     ├── mash.test.js             # 3 tester för mäskscheman
@@ -178,7 +188,7 @@ npm run dev
 ```bash
 npm test
 ```
-*Kör samtliga 164 tester över 15 testfiler.*
+*Kör samtliga 181 tester över 16 testfiler.*
 
 ### 4. Bygg för produktion (inkl. PWA Workbox bundles)
 ```bash
