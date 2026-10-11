@@ -470,17 +470,18 @@ export async function scanTiltHydrometer(onReading) {
 
 ---
 
-## 📅 Genomförandeplan och Tidsestimat
-
-| Sprint | Fokusområde | Nyckelleverabler | Estimerad tid |
+## 📅 Genomförandeplan och Status
+ 
+| Sprint | Fokusområde | Nyckelleverabler | Status |
 | :---: | :--- | :--- | :---: |
-| **Sprint 1** | **Bryggdagssäkerhet & Kemi** | Screen Wake Lock, Monoton timer med timestamp, tröskellarm, Web Notifications, Vatten/salt-skalning i `scaleRecipe`. | 3–5 dagar |
-| **Sprint 2** | **Lagring & Offline** | Vite-plugin-pwa precaching, fullständig backup-export, flytta autosave från sessionStorage till persistent storage, IndexedDB-stöd. | 3–4 dagar |
-| **Sprint 3** | **Enhetsöverbryggning** | QR-kod med komprimerad URL-hash för blixtsnabb receptöverföring PC ➔ Mobil. Bevara profiler vid BeerXML. | 3 dagar |
-| **Sprint 4** | **IoT & Refaktorisering** | Web Bluetooth Tilt-prototyp, sanera duplicerad HTML mellan desktop och mobil, event delegation. | 5–7 dagar |
+| **Sprint 1** | **Bryggdagssäkerhet & Kemi** | Screen Wake Lock, Monoton timer med timestamp, tröskellarm, Web Notifications, Vatten/salt-skalning i `scaleRecipe`. | ✅ **Genomförd** |
+| **Sprint 2** | **Lagring & Offline** | Vite-plugin-pwa precaching, fullständig backup-export, persistent autosave i `safeStorage`, QuotaExceeded-resiliens. | ✅ **Genomförd** |
+| **Refaktorisering (DOM)** | **DOM-modularisering & Skuldsanering** | Utbrytning av modaler och mobillayout till `modalsTemplate.js` & `mobileTemplate.js`, unifierad tvåvägssynk (`syncBridge.js`). | ✅ **Genomförd** |
+| **Sprint 3** | **Enhetsöverbryggning** | Serverlös QR-synk med komprimerad URL-hash (`#brew=` / `#recipe=`) via `lz-string`, offline SVG-rendering, startup-ingest, BeerXML-profilbevarande. | ✅ **Genomförd** |
+| **Sprint 4** | **IoT & Digitala Hydrometrar** | Web Bluetooth Tilt-hydrometeravläsning, SG- och temperaturloggning direkt i Mina bryggningar. | ⏳ **Nästa steg** |
 
 ---
 
-> [!TIP]
-> **Första rekommenderade åtgärd:**  
-> Börja med **Sprint 1** (Screen Wake Lock + timestamp-timer + vatten-/saltskalning). Dessa åtgärder kräver noll externa beroenden, eliminerar risken för förstörda råvaror och kan implementeras och testas direkt i befintlig testsvit.
+> [!NOTE]
+> **Aktuell status:**  
+> Sprint 1, Sprint 2, DOM-modulariseringen och Sprint 3 är slutförda med 155 passerande automatiserade tester över 14 testfiler. Appen är helt produktionsklar med PWA precaching och serverlös QR-överföring. Nästa steg är **Sprint 4** (Web Bluetooth & Tilt).

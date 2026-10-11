@@ -46,6 +46,7 @@ import { safeStorage, onQuotaExceeded } from './core/storage.js';
 import { initErrorBoundary } from './ui/errorBoundary.js';
 import { mountModals } from './ui/templates/modalsTemplate.js';
 import { mountMobileAppView } from './ui/mobile/mobileTemplate.js';
+import { setupShareQrModal, handleIncomingShareHash } from './ui/shareQr.js';
 
 // Initialize global crash recovery & error boundary
 initErrorBoundary();
@@ -87,10 +88,17 @@ document.addEventListener('DOMContentLoaded', () => {
   setupPrintHandler();
   setupToolsModal(debouncedRecalculate);
   setupBatchesView(recalculate);
-  const restored = checkAndRestoreSession(recalculate);
-  if (!restored) {
-    loadDefaultRecipe(recalculate);
+  setupShareQrModal();
+
+  const importedFromHash = handleIncomingShareHash(recalculate);
+  let restored = false;
+  if (!importedFromHash) {
+    restored = checkAndRestoreSession(recalculate);
+    if (!restored) {
+      loadDefaultRecipe(recalculate);
+    }
   }
+
   setupInputSteppers(debouncedRecalculate);
   recalculate();
   showIbuModelNoticeOnce(restored);

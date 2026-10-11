@@ -62,6 +62,12 @@ Appen kombinerar ett **receptbyggarflöde i 7 logiska steg** med ett **interakti
 - **Modulariserad DOM & Sanerad Teknisk Skuld**: `index.html` har bantats med över 600 rader genom utbrytning av modaldialoger (`modalsTemplate.js`) och mobillayout (`mobileTemplate.js`). Unifierad tvåvägssynk (`syncBridge.js`) och händelsedelegation eliminerar duplicerad eventhantering och drift mellan vyerna.
 - **Vite PWA & Workbox Precaching**: Automatisk precaching av alla hashade JavaScript- och CSS-bundles vid produktionsbygge. Appen startar 100 % tillförlitligt i källare och garage utan mobiltäckning.
 
+### 8. 📲 Serverlös QR-synk & URL-hash (PC till Mobil)
+- **Zero-Backend Överföring**: Skapa receptet i lugn och ro på datorn i köket eller kontoret och överför det till mobilen i brygghörnan på en sekund genom att skanna en QR-kod med mobilkameran. Inga konton, inga inloggningar och ingen server behövs.
+- **Kompakt URL-hash**: Receptschemat komprimeras via `lz-string` och bäddas in i URL-hashen (`#brew=` eller `#recipe=`).
+- **100 % Offline Vektor-QR**: QR-koden renderas som skarp vektor-SVG lokalt i webbläsaren utan beroende av externa tredjeparts-API:er.
+- **Direktstart av Bryggdag**: Skanning med `#brew=` öppnar receptet och startar Bryggdagsläget direkt. Webbläsarens adressfält städas automatiskt med `history.replaceState` för att bevara rena bokmärken och förhindra dataöverskrivning.
+
 ---
 
 ## 📐 Standarder & Enheter
@@ -105,6 +111,7 @@ brygglabbet/
 │   │   ├── brewtools.js         # Verktygsfunktioner (kolsyra, refraktivitet, hydrometer, syra, inmäskning)
 │   │   ├── batches.js           # Batchhantering, jässcheman, mätningar & .ics kalenderexport
 │   │   ├── beerxml.js           # BeerXML 1.0 parser & serializer med kolsyra och givmetadata
+│   │   ├── recipeSharing.js     # Serverlös QR- och URL-hash komprimering (lz-string) & SVG QR-rendering
 │   │   ├── wakelock.js          # Screen Wake Lock API manager (håller skärmen vaken vid bryggning)
 │   │   ├── storage.js           # safeStorage & safeSessionStorage med kvotskydd
 │   │   ├── data.js              # Databasexportör
@@ -112,6 +119,7 @@ brygglabbet/
 │   └── ui/
 │       ├── batches.js           # Mina bryggningar (historik, tidslinje, logg, flaskning & betyg)
 │       ├── brewday.js           # Bryggdagsläge, monoton timestamp-timer, humlelarm, Wake Lock & systemnotiser
+│       ├── shareQr.js           # QR-delningsdialog, lägesväljare & startup-hashavlyssnare
 │       ├── tools.js             # Bryggverktygspanel (kolsyra, refraktometer, hydrometer, jäst, strike)
 │       ├── equipment.js         # Utrustningsparametrar & vattenkrav
 │       ├── fermentables.js      # Malttabell & färgbidrag
@@ -129,7 +137,8 @@ brygglabbet/
 │       ├── toast.js             # Toast-notifikationer
 │       ├── icons.js             # SVG-ikoner
 │       ├── errorBoundary.js     # Global crash recovery & error boundary
-│       └── mobile/              # Parallellt Mobil-UI (router, bottenmeny, mobilkort)
+│       ├── templates/           # Modulära HTML-templates (modalsTemplate.js)
+│       └── mobile/              # Parallellt Mobil-UI (router, bottenmeny, mobilkort, mobileTemplate.js)
 └── tests/
     ├── calculations.test.js     # 28 tester för brygg- och kemiformler
     ├── brewtools.test.js        # 45 tester för verktygs- och syraformler
@@ -142,6 +151,8 @@ brygglabbet/
     ├── integration.test.js      # 2 end-to-end integrationstester
     ├── storage-resilience.test.js # 13 tester för persistens, kvotskydd och PWA-filer
     ├── rescue-fixes.test.js     # 4 tester för vatten/saltskalning, BeerXML-skydd, Wake Lock & full backup
+    ├── architecture-modularization.test.js # 13 tester för DOM-modularisering och event delegation
+    ├── recipe-sharing.test.js   # 8 tester för serverlös receptdelning, URL-hash & offline QR-kod
     └── ui-smoke.test.js         # 9 rök- och integrationsfälttester (desktop + mobil)
 ```
 
@@ -163,7 +174,7 @@ npm run dev
 ```bash
 npm test
 ```
-*Kör samtliga 147 tester över 13 testfiler.*
+*Kör samtliga 155 tester över 14 testfiler.*
 
 ### 4. Bygg för produktion (inkl. PWA Workbox bundles)
 ```bash

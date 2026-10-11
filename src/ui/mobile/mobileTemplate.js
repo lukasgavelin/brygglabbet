@@ -35,6 +35,7 @@ export function getMobileAppTemplate() {
     <button class="mobile-menu-item" id="mobile-menu-export"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Exportera JSON</button>
     <button class="mobile-menu-item" id="mobile-menu-export-beerxml"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Exportera BeerXML</button>
     <button class="mobile-menu-item" id="mobile-menu-import"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Importera recept</button>
+    <button class="mobile-menu-item" id="mobile-menu-share-qr"><span class="quick-icon">📱</span> Dela recept / QR-kod</button>
     <hr class="mobile-menu-divider">
     <div class="mobile-menu-header">Historik & Hjälp</div>
     <button class="mobile-menu-item" id="mobile-menu-undo">↩️ Ångra ändring</button>
@@ -440,6 +441,9 @@ export function getMobileAppTemplate() {
             </button>
             <button class="btn btn-ghost btn-sm" id="mobile-btn-scale-brewday">
               <svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 16l3-8 3 8a3 3 0 0 1-6 0zM2 16l3-8 3 8a3 3 0 0 1-6 0zM12 3v18M3 7h18"/></svg> Skala
+            </button>
+            <button class="btn btn-secondary btn-sm" id="mobile-btn-share-qr">
+              <span class="quick-icon">📱</span> QR
             </button>
           </div>
         </div>

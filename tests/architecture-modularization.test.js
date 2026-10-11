@@ -42,16 +42,17 @@ describe('Arkitektur & Modularisering: index.html & Desktop-Mobil Sanering', () 
       expect(document.getElementById('modal-scale-recipe')).not.toBeNull();
       expect(document.getElementById('modal-swe-info')).not.toBeNull();
       expect(document.getElementById('modal-tools')).not.toBeNull();
+      expect(document.getElementById('modal-share-qr')).not.toBeNull();
     });
 
     it('mountModals är idempotent och duplicerar inte noder', () => {
       mountModals();
       const firstCount = document.querySelectorAll('.modal-overlay').length;
-      expect(firstCount).toBe(7);
+      expect(firstCount).toBe(8);
 
       mountModals();
       const secondCount = document.querySelectorAll('.modal-overlay').length;
-      expect(secondCount).toBe(7);
+      expect(secondCount).toBe(8);
     });
 
     it('genererar och monterar mobilvyn i #mobile-app-view', () => {

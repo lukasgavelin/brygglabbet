@@ -39,6 +39,7 @@
     <button class="btn btn-secondary btn-sm" id="btn-toggle-brewday" title="Växla till Bryggdagsläget"><span class="quick-icon">🍺</span> Bryggdag</button>
     <button class="btn btn-secondary btn-sm" id="btn-presets" title="Välj bland färdiga exempelrecept"><span class="quick-icon">📋</span> Exempelrecept</button>
     <button class="btn btn-primary btn-sm" id="btn-save" title="Spara recept"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Spara</button>
+    <button class="btn btn-secondary btn-sm" id="btn-share-qr" title="Dela recept eller öppna direkt i mobilen via QR-kod"><span class="quick-icon">📱</span> Mobil / QR</button>
     
     <!-- Kebab / Header Dropdown Menu -->
     <div class="header-menu-wrap">
@@ -52,6 +53,7 @@
         <button id="btn-export-beerxml" class="dropdown-item">🍺 Exportera aktivt recept (BeerXML)</button>
         <button id="btn-export-full-backup" class="dropdown-item">💾 Exportera fullständig backup</button>
         <button id="btn-import" class="dropdown-item">📤 Importera recept / backup</button>
+        <button id="btn-share-qr-menu" class="dropdown-item">📱 Dela recept / QR-kod</button>
         <div class="dropdown-divider"></div>
         <div class="dropdown-header">Verktyg &amp; Hjälp</div>
         <button id="btn-tools" class="dropdown-item">🧰 Bryggverktyg</button>
@@ -747,6 +749,9 @@
               </button>
               <button class="btn btn-secondary btn-sm" id="cta-btn-print" title="Skriv ut bryggprotokoll">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Skriv ut protokoll
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="cta-btn-share-qr" title="Öppna eller dela i mobilen via QR-kod">
+                <span class="quick-icon">📱</span> Mobil / QR
               </button>
               <button class="btn btn-ghost btn-sm" id="tab-btn-preset-recipes" title="Välj bland färdiga mallar">
                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 3v3m0 12v3M3 12h3m12 0h3m-3.5-6.5l-2 2m-7 7l-2 2m0-11l2 2m7 7l2 2"/></svg> Mallar

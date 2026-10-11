@@ -159,6 +159,44 @@ export function getModalsHtml() {
     <div class="modal-body" id="tools-body" style="padding:12px 0"></div>
   </div>
 </div>
+
+<!-- Modal: Dela recept & QR-kod -->
+<div class="modal-overlay hidden" id="modal-share-qr">
+  <div class="modal" style="max-width:480px; text-align:center;">
+    <div class="modal-header">
+      <h3 class="modal-title">📱 Öppna eller dela i mobilen</h3>
+      <button class="modal-close" data-close="modal-share-qr">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 8px;">
+      <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:14px;">
+        Skanna QR-koden med mobilens kamera för att flytta över receptet direkt till garaget eller bryggrummet – helt serverlöst utan konto!
+      </p>
+
+      <div style="display:flex; justify-content:center; gap:12px; margin-bottom:14px;">
+        <label style="font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
+          <input type="radio" name="share-target-mode" value="brew" id="share-mode-brew" checked>
+          <span>🍺 Starta i Bryggdagsläget</span>
+        </label>
+        <label style="font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
+          <input type="radio" name="share-target-mode" value="recipe" id="share-mode-recipe">
+          <span>📝 Öppna Receptet</span>
+        </label>
+      </div>
+
+      <div id="share-qr-container" style="background:#ffffff; padding:16px; border-radius:12px; display:inline-flex; justify-content:center; align-items:center; box-shadow:0 4px 16px rgba(0,0,0,0.25); min-width:260px; min-height:260px; margin:0 auto 16px;">
+        <span style="color:#666; font-size:0.85rem;">Genererar QR-kod...</span>
+      </div>
+
+      <div class="form-group" style="margin-top:8px;">
+        <label class="form-label" for="share-url-input" style="text-align:left;">Direktlänk med komprimerat recept:</label>
+        <div class="input-group">
+          <input type="text" id="share-url-input" readonly style="font-size:0.8rem; background:var(--bg-card); cursor:text;">
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-copy-share-url" style="white-space:nowrap;">📋 Kopiera</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 `;
 }
 

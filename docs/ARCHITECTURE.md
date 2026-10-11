@@ -49,6 +49,7 @@ brygglabbet/
 │   │   ├── brewtools.js         # Verktygsberäkningar (kolsyra, refraktometer, hydrometer, jäst, strike, syra)
 │   │   ├── batches.js           # Batch-CRUD, jässchema, tidslinje & .ics-export
 │   │   ├── beerxml.js           # BeerXML 1.0 parser och serializer med kolsyra & givmetadata
+│   │   ├── recipeSharing.js     # Serverlös QR- och hash-komprimering (lz-string) & SVG QR-rendering
 │   │   ├── wakelock.js          # Screen Wake Lock API manager med visibilitychange-stöd
 │   │   ├── storage.js           # safeStorage & safeSessionStorage med QuotaExceeded-skydd
 │   │   ├── data.js              # Databas-exporteringshubb
@@ -64,6 +65,7 @@ brygglabbet/
 │   └── ui/
 │       ├── batches.js           # Mina bryggningar (historik, tidslinje, logg, flaskning & betyg)
 │       ├── brewday.js           # Interaktivt bryggdagsläge, monoton timestamp-timer, Wake Lock & humlelarm
+│       ├── shareQr.js           # Serverlös QR-delningsdialog, URL-kopiering & startup-hashavlyssnare
 │       ├── tools.js             # Bryggverktygspanel (kolsyra, refraktometer, hydrometer, jäst, strike)
 │       ├── equipment.js         # Utrustningsprofilsvy & förlustparametrar
 │       ├── fermentables.js      # Maltlista, tillsätt/ta bort, färgbidrag
@@ -83,7 +85,7 @@ brygglabbet/
 │       ├── icons.js             # SVG-ikonsamling
 │       ├── errorBoundary.js     # Global crash recovery & error boundary
 │       ├── templates/           # Utbrutna HTML-templates (minskar index.html från 1500+ till ~900 rader)
-│       │   └── modalsTemplate.js# Modulära modaldialoger (Malt, Humle, Recept, Mallar, Skala, Guide, Verktyg)
+│       │   └── modalsTemplate.js# Modulära modaldialoger (8 modaler inkl. QR-delning)
 │       └── mobile/              # Parallellt mobiloptimerat gränssnitt med full paritet
 │           ├── mobileApp.js     # Mobilvy-initiering & skärmorkestrering
 │           ├── mobileNav.js     # Mobil bottenmeny & header-synk
@@ -102,6 +104,7 @@ brygglabbet/
     ├── storage-resilience.test.js # Tester för persistens, kvotskydd och PWA-filer
     ├── rescue-fixes.test.js     # Tester för vatten/saltskalning, BeerXML-skydd, Wake Lock & full backup
     ├── architecture-modularization.test.js # Tester för index.html modularisering och desktop-mobil synk
+    ├── recipe-sharing.test.js   # Tester för serverlös receptdelning, URL-hash & offline QR-kod
     └── ui-smoke.test.js         # Rök- och integrationsfälttester (desktop + mobil)
 ```
 
@@ -288,14 +291,50 @@ VitePWA({
 
 ---
 
-## 8. Testsvit & Kvalitetssäkring
+## 8. Serverlös QR-synk & URL-hash (Sprint 3)
+
+För att flytta recept från en dator i kontoret till en mobil i brygghörnan utan krav på inloggning, användarkonton eller externa servrar implementerar Brygglabbet en helt serverlös URL- och QR-synk:
+
+```
+[Dator / Receptredigerare]
+       │
+       ▼
+serializeRecipePayload(state)  ──>  Kompakterar schemat (r, f, h, y, m, w, e)
+       │
+       ▼
+LZString.compressToEncodedURIComponent()  ──>  URL-säker sträng (~350–1000 tecken)
+       │
+       ▼
+qrcode.toString(url, { type: 'svg' })  ──>  Lokal, skarp vektor-SVG (100% offline)
+       │
+       ▼
+[Mobilkameraskanning av QR-koden]
+       │
+       ▼
+https://brygglabbet.se/#brew=<payload> (eller #recipe=)
+       │
+       ▼
+handleIncomingShareHash() på mobilen
+       ├─ Avkodar & dekomprimerar med LZString
+       ├─ Validerar & normaliserar med normalizeState()
+       ├─ Återställer State och anropar syncUIFromState() + recalculate()
+       ├─ Vid #brew=: Växlar automatiskt till Bryggdagsläget
+       └─ history.replaceState(): Rensar URL-hashen så sidomladdning ej skriver över data
+```
+
+- **Säkerhet & Integritet**: Allt sker på klientsidan. Inga receptdata skickas någonsin till någon tredje part.
+- **Robust felhantering**: Korrupta eller ofullständiga QR-koder fångas upp i `try/catch` och varnar användaren utan att krascha appen eller korrumpera befintligt recept i minnet.
+
+---
+
+## 9. Testsvit & Kvalitetssäkring
 
 Tester körs med **Vitest**:
 ```bash
 npm test
 ```
 
-### Testmoduler (147 tester i 13 testfiler):
+### Testmoduler (155 tester i 14 testfiler):
 1. `tests/calculations.test.js` – 28 tester för OG, FG, ABV, IBU (Tinseth & Malowicki), EBC (Morey), vattenkalkyler och kemi.
 2. `tests/brewtools.test.js` – 45 tester för kolsyra (flaskor & fat), refraktometer (Terrill), hydrometer 20°C, pitch rate, strike-temp, infusion och syradosering.
 3. `tests/batches.test.js` – 11 tester för batch-CRUD, jässcheman, tidslinjer, mätningar, flaskning, påminnelser och RFC 5545 .ics kalenderexport.
@@ -308,11 +347,12 @@ npm test
 10. `tests/storage-resilience.test.js` – 13 tester för persistensresiliens, kvotskydd och PWA-filer.
 11. `tests/rescue-fixes.test.js` – 4 tester för vatten/saltskalning, BeerXML-skydd, Wake Lock och full backup.
 12. `tests/architecture-modularization.test.js` – 13 tester för index.html modularisering, dynamisk montering, selector-synk och event delegation.
-13. `tests/ui-smoke.test.js` – 9 rök- och integrationsfälttester (desktop + mobil).
+13. `tests/recipe-sharing.test.js` – 8 tester för serverlös receptdelning, URL-hash, lz-string komprimering, offline QR-kod & startup-ingest.
+14. `tests/ui-smoke.test.js` – 9 rök- och integrationsfälttester (desktop + mobil).
 
 ---
 
-## 9. Bygg- & Produktionsprocess
+## 10. Bygg- & Produktionsprocess
 
 ```bash
 # Installera beroenden
