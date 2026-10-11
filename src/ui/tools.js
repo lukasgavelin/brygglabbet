@@ -25,6 +25,7 @@ import {
   infusionVolume,
 } from '../core/brewtools.js';
 import { openModal } from './modals.js';
+import { mountModals } from './templates/modalsTemplate.js';
 import { escHtml } from './utils.js';
 
 /** Tool values kept between tab switches within a session. */
@@ -333,6 +334,7 @@ function renderTab() {
  * @param {() => void} recalculateCallback - Called when a tool updates the recipe state
  */
 export function setupToolsModal(recalculateCallback) {
+  mountModals();
   onStateChange = recalculateCallback || (() => {});
   document.getElementById('tools-tabs')?.addEventListener('click', (e) => {
     const btn = e.target.closest('.tools-tab');

@@ -77,14 +77,18 @@ brygglabbet/
 │       ├── print.js             # Utskriftsgenerator för bryggprotokoll
 │       ├── tabs.js              # Flik- & dragspelsnavigation, quick-nav scrollspy & badges
 │       ├── modals.js            # Modaldialoghantering med sök- och filtreringsstöd
+│       ├── syncBridge.js        # Unifierad tvåvägssynk & händelsedelegation mellan desktop och mobil
 │       ├── stepper.js           # Touch-vänliga inkrement/dekrement-knappar
 │       ├── toast.js             # Animerade toast-notifikationer
 │       ├── icons.js             # SVG-ikonsamling
 │       ├── errorBoundary.js     # Global crash recovery & error boundary
+│       ├── templates/           # Utbrutna HTML-templates (minskar index.html från 1500+ till ~900 rader)
+│       │   └── modalsTemplate.js# Modulära modaldialoger (Malt, Humle, Recept, Mallar, Skala, Guide, Verktyg)
 │       └── mobile/              # Parallellt mobiloptimerat gränssnitt med full paritet
 │           ├── mobileApp.js     # Mobilvy-initiering & skärmorkestrering
 │           ├── mobileNav.js     # Mobil bottenmeny & header-synk
-│           └── mobileCards.js   # Mobilanpassade kort och summeringar
+│           ├── mobileCards.js   # Mobilanpassade kort och summeringar
+│           └── mobileTemplate.js# Modulärt mobil-layouttemplate (Header, Sticky Bar, 5 Skärmar, App Bar)
 └── tests/
     ├── calculations.test.js     # Tester för alla bryggformler och kemiberäkningar
     ├── brewtools.test.js        # Tester för verktygskalkyler och syraformler
@@ -97,6 +101,7 @@ brygglabbet/
     ├── integration.test.js      # Integrationsflödestester för receptberäkning
     ├── storage-resilience.test.js # Tester för persistens, kvotskydd och PWA-filer
     ├── rescue-fixes.test.js     # Tester för vatten/saltskalning, BeerXML-skydd, Wake Lock & full backup
+    ├── architecture-modularization.test.js # Tester för index.html modularisering och desktop-mobil synk
     └── ui-smoke.test.js         # Rök- och integrationsfälttester (desktop + mobil)
 ```
 
@@ -290,7 +295,7 @@ Tester körs med **Vitest**:
 npm test
 ```
 
-### Testmoduler (134 tester i 12 testfiler):
+### Testmoduler (147 tester i 13 testfiler):
 1. `tests/calculations.test.js` – 28 tester för OG, FG, ABV, IBU (Tinseth & Malowicki), EBC (Morey), vattenkalkyler och kemi.
 2. `tests/brewtools.test.js` – 45 tester för kolsyra (flaskor & fat), refraktometer (Terrill), hydrometer 20°C, pitch rate, strike-temp, infusion och syradosering.
 3. `tests/batches.test.js` – 11 tester för batch-CRUD, jässcheman, tidslinjer, mätningar, flaskning, påminnelser och RFC 5545 .ics kalenderexport.
@@ -302,7 +307,8 @@ npm test
 9. `tests/integration.test.js` – 2 end-to-end integrationstester för kompletta receptflöden.
 10. `tests/storage-resilience.test.js` – 13 tester för persistensresiliens, kvotskydd och PWA-filer.
 11. `tests/rescue-fixes.test.js` – 4 tester för vatten/saltskalning, BeerXML-skydd, Wake Lock och full backup.
-12. `tests/ui-smoke.test.js` – 9 rök- och integrationsfälttester (desktop + mobil).
+12. `tests/architecture-modularization.test.js` – 13 tester för index.html modularisering, dynamisk montering, selector-synk och event delegation.
+13. `tests/ui-smoke.test.js` – 9 rök- och integrationsfälttester (desktop + mobil).
 
 ---
 

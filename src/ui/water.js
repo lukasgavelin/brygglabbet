@@ -53,7 +53,7 @@ export function setupWaterTab(recalculateCallback) {
     });
   });
 
-  const selIds = ['water-profile-preset', 'water-profile-select'];
+  const selIds = ['water-profile-preset', 'water-profile-select', 'mobile-water-preset'];
   selIds.forEach((id) => {
     const sel = document.getElementById(id);
     sel?.addEventListener('change', (e) => {
@@ -77,7 +77,7 @@ export function setupWaterTab(recalculateCallback) {
 }
 
 export function populateWaterProfileSelector() {
-  const selIds = ['water-profile-preset', 'water-profile-select'];
+  const selIds = ['water-profile-preset', 'water-profile-select', 'mobile-water-preset'];
   selIds.forEach((id) => {
     const sel = document.getElementById(id);
     if (!sel) return;

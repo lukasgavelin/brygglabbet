@@ -7,8 +7,10 @@ import { ebcToColor } from '../core/calculations.js';
 import { addFermentable } from './fermentables.js';
 import { addHop } from './hops.js';
 import { escHtml } from './toast.js';
+import { mountModals } from './templates/modalsTemplate.js';
 
 export function openModal(id) {
+  mountModals();
   document.getElementById(id)?.classList.remove('hidden');
 }
 
@@ -17,6 +19,7 @@ export function closeModal(id) {
 }
 
 export function setupModalClose() {
+  mountModals();
   document.querySelectorAll('[data-close]').forEach((btn) => {
     btn.addEventListener('click', () => closeModal(btn.dataset.close));
   });

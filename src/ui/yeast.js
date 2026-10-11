@@ -6,32 +6,35 @@ import { State } from '../state.js';
 import { YEASTS } from '../core/data.js';
 
 export function setupYeastTab(recalculateCallback) {
-  const yeastSelect = document.getElementById('yeast-select');
-  if (yeastSelect) {
-    yeastSelect.addEventListener('change', (e) => {
-      const y = YEASTS.find((item) => item.name === e.target.value);
-      if (!y) return;
-      State.yeast = {
-        name: y.name,
-        lab: y.lab,
-        type: y.type,
-        attMin: y.att_min,
-        attMax: y.att_max,
-        tempMin: y.temp_min,
-        tempMax: y.temp_max,
-        notes: State.yeast.notes,
-      };
-      syncYeastToUI();
+  const yeastSelectIds = ['yeast-select', 'mobile-yeast-select'];
+  yeastSelectIds.forEach((selId) => {
+    const yeastSelect = document.getElementById(selId);
+    if (yeastSelect) {
+      yeastSelect.addEventListener('change', (e) => {
+        const y = YEASTS.find((item) => item.name === e.target.value);
+        if (!y) return;
+        State.yeast = {
+          name: y.name,
+          lab: y.lab,
+          type: y.type,
+          attMin: y.att_min,
+          attMax: y.att_max,
+          tempMin: y.temp_min,
+          tempMax: y.temp_max,
+          notes: State.yeast.notes,
+        };
+        syncYeastToUI();
 
-      const card = document.getElementById('yeast-desc-card');
-      const text = document.getElementById('yeast-desc-text');
-      if (card && text) {
-        card.style.display = y.desc ? '' : 'none';
-        text.textContent = y.desc || '';
-      }
-      recalculateCallback();
-    });
-  }
+        const card = document.getElementById('yeast-desc-card');
+        const text = document.getElementById('yeast-desc-text');
+        if (card && text) {
+          card.style.display = y.desc ? '' : 'none';
+          text.textContent = y.desc || '';
+        }
+        recalculateCallback();
+      });
+    }
+  });
 
   ['yeast-name', 'yeast-lab'].forEach((id) => {
     document.getElementById(id)?.addEventListener('input', (e) => {
@@ -168,9 +171,7 @@ export function syncYeastToUI() {
 }
 
 export function populateYeastSelector() {
-  const sel = document.getElementById('yeast-select');
-  if (!sel) return;
-
+  const selIds = ['yeast-select', 'mobile-yeast-select'];
   const types = { ale: 'Ale', lager: 'Lager', wheat: 'Vete', belgian: 'Belgisk', wild: 'Vild' };
   const grouped = {};
   YEASTS.forEach((y) => {
@@ -178,15 +179,23 @@ export function populateYeastSelector() {
     grouped[y.type].push(y);
   });
 
-  Object.keys(grouped).forEach((type) => {
-    const group = document.createElement('optgroup');
-    group.label = types[type] || type;
-    grouped[type].forEach((y) => {
-      const opt = document.createElement('option');
-      opt.value = y.name;
-      opt.textContent = `${y.name} (${y.lab})`;
-      group.appendChild(opt);
+  selIds.forEach((selId) => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    sel.innerHTML = selId.startsWith('mobile-')
+      ? '<option value="">— Välj ur jästdatabas —</option>'
+      : '<option value="">— Välj ur jästdatabas —</option>';
+
+    Object.keys(grouped).forEach((type) => {
+      const group = document.createElement('optgroup');
+      group.label = types[type] || type;
+      grouped[type].forEach((y) => {
+        const opt = document.createElement('option');
+        opt.value = y.name;
+        opt.textContent = `${y.name} (${y.lab})`;
+        group.appendChild(opt);
+      });
+      sel.appendChild(group);
     });
-    sel.appendChild(group);
   });
 }

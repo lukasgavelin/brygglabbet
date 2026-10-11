@@ -59,6 +59,7 @@ Appen kombinerar ett **receptbyggarflöde i 7 logiska steg** med ett **interakti
 ### 7. 📱 Parallellt Mobil-UI & Skottsäker Offline PWA
 - Fullt responsivt gränssnitt med en skräddarsydd mobilvy (`mobileApp.js`), touch-vänliga steppers och bottenmeny.
 - Komplett paritet med desktop: mäsk-pH, syrajustering, whirlpool-temperatur, torrhumlingstid, jässcheman och Mina bryggningar.
+- **Modulariserad DOM & Sanerad Teknisk Skuld**: `index.html` har bantats med över 600 rader genom utbrytning av modaldialoger (`modalsTemplate.js`) och mobillayout (`mobileTemplate.js`). Unifierad tvåvägssynk (`syncBridge.js`) och händelsedelegation eliminerar duplicerad eventhantering och drift mellan vyerna.
 - **Vite PWA & Workbox Precaching**: Automatisk precaching av alla hashade JavaScript- och CSS-bundles vid produktionsbygge. Appen startar 100 % tillförlitligt i källare och garage utan mobiltäckning.
 
 ---
@@ -162,7 +163,7 @@ npm run dev
 ```bash
 npm test
 ```
-*Kör samtliga 134 tester över 12 testfiler.*
+*Kör samtliga 147 tester över 13 testfiler.*
 
 ### 4. Bygg för produktion (inkl. PWA Workbox bundles)
 ```bash

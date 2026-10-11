@@ -44,6 +44,8 @@ import { setupBatchesView } from './ui/batches.js';
 import { showToast } from './ui/toast.js';
 import { safeStorage, onQuotaExceeded } from './core/storage.js';
 import { initErrorBoundary } from './ui/errorBoundary.js';
+import { mountModals } from './ui/templates/modalsTemplate.js';
+import { mountMobileAppView } from './ui/mobile/mobileTemplate.js';
 
 // Initialize global crash recovery & error boundary
 initErrorBoundary();
@@ -59,6 +61,9 @@ onQuotaExceeded(() => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  mountModals();
+  mountMobileAppView();
+
   populateEquipmentSelector();
   populateStyleSelector();
   populateWaterProfileSelector();
@@ -114,20 +119,28 @@ function showIbuModelNoticeOnce(restored) {
 }
 
 function populateStyleSelector() {
-  const sel = document.getElementById('recipe-style');
-  if (!sel) return;
-
+  const selIds = ['recipe-style', 'mobile-recipe-style'];
   const categories = [...new Set(STYLES.map((s) => s.category))];
-  categories.forEach((cat) => {
-    const group = document.createElement('optgroup');
-    group.label = cat;
-    STYLES.filter((s) => s.category === cat).forEach((s) => {
-      const opt = document.createElement('option');
-      opt.value = s.id;
-      opt.textContent = `${s.id} – ${s.name}`;
-      group.appendChild(opt);
+
+  selIds.forEach((id) => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+
+    sel.innerHTML = id.startsWith('mobile-')
+      ? '<option value="">— Välj ölstil —</option>'
+      : '<option value="">— Välj stil —</option>';
+
+    categories.forEach((cat) => {
+      const group = document.createElement('optgroup');
+      group.label = cat;
+      STYLES.filter((s) => s.category === cat).forEach((s) => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = `${s.id} – ${s.name}`;
+        group.appendChild(opt);
+      });
+      sel.appendChild(group);
     });
-    sel.appendChild(group);
   });
 }
 
