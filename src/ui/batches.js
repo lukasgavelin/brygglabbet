@@ -120,9 +120,10 @@ export function openBatchesView(batchId = null) {
   mobileView?.classList.add('view-hidden');
   brewdayView?.classList.add('hidden');
   batchesView.classList.remove('hidden');
+  document.body.classList.add('in-fullscreen-view');
 
   renderBatchesView();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 /**
@@ -139,6 +140,7 @@ export function closeBatchesView() {
   activeBatchId = null;
 
   batchesView.classList.add('hidden');
+  document.body.classList.remove('in-fullscreen-view');
   const isMobile = document.body.classList.contains('mobile-mode') || window.innerWidth <= 768;
   if (isMobile && mobileView) {
     mobileView.classList.remove('view-hidden');

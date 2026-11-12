@@ -1603,6 +1603,14 @@ body.mobile-mode {
   height: 100dvh;
 }
 
+body.mobile-mode.in-fullscreen-view,
+body.in-fullscreen-view {
+  overflow-y: auto !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+}
+
 body.mobile-mode #sidebar-backdrop,
 body.mobile-mode #mobile-stats-fab {
   display: none !important;
@@ -2343,7 +2351,10 @@ body.mobile-mode #mobile-stats-fab {
    Brew Day Mode (Bryggdags-läge 2-Column Cooking View)
    --------------------------------------------------------- */
 #brewday-view {
-  padding: 16px 20px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  padding: max(20px, env(safe-area-inset-top, 20px)) 20px calc(88px + env(safe-area-inset-bottom, 0px)) 20px;
   max-width: 1350px;
   margin: 0 auto;
 }
@@ -2719,7 +2730,7 @@ body.mobile-mode #mobile-stats-fab {
 
 @media (max-width: 900px) {
   #brewday-view {
-    padding: 12px 14px 80px 14px;
+    padding: max(20px, env(safe-area-inset-top, 20px)) 14px calc(88px + env(safe-area-inset-bottom, 0px)) 14px;
   }
   .brewday-tab-switch-wrap {
     display: block;
@@ -2746,12 +2757,21 @@ body.mobile-mode #mobile-stats-fab {
     right: 0;
     background: var(--bg-card);
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
-    padding: 12px 16px;
+    padding: 10px 16px max(10px, env(safe-area-inset-bottom, 10px)) 16px;
     border-top: 1px solid var(--border);
     z-index: 1000;
   }
   .brewday-title {
     font-size: 1.05rem;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  #brewday-view {
+    padding: max(12px, env(safe-area-inset-top, 12px)) 14px calc(68px + env(safe-area-inset-bottom, 0px)) 14px;
+  }
+  .brewday-wizard-nav {
+    padding: 8px 16px max(8px, env(safe-area-inset-bottom, 8px)) 16px;
   }
 }
 

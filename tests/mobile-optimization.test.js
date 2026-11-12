@@ -18,6 +18,8 @@ import {
 } from '../src/ui/mobile/mobileCards.js';
 import { setupContinuousStepperDelegation } from '../src/ui/mobile/mobileStepper.js';
 import { updateRecipeReadinessCard } from '../src/ui/sidebar.js';
+import { toggleBrewdayView } from '../src/ui/brewday.js';
+import { initMobileApp } from '../src/ui/mobile/mobileApp.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -26,6 +28,8 @@ describe('Mobiloptimering & Touch-ergonomi', () => {
     document.body.innerHTML = `
       <div id="desktop-app-view"></div>
       <div id="mobile-app-view"></div>
+      <div id="brewday-view" class="hidden"></div>
+      <div id="batches-view" class="hidden"></div>
     `;
     Object.assign(State, createInitialState());
     mountMobileAppView();
@@ -292,6 +296,50 @@ describe('Mobiloptimering & Touch-ergonomi', () => {
       expect(title.textContent).toBe('Receptet är klart!');
       expect(card.classList.contains('is-empty')).toBe(false);
       expect(btn.classList.contains('mobile-btn-hero')).toBe(true);
+    });
+  });
+
+  describe('6. Bryggdagsläge i mobil & landscape', () => {
+    it('behåller bryggdagsläget öppet och unhidar inte receptredigeraren vid skärmrotation till landscape', () => {
+      initMobileApp(vi.fn());
+
+      const mobileView = document.getElementById('mobile-app-view');
+      const desktopView = document.getElementById('desktop-app-view');
+      const brewdayView = document.getElementById('brewday-view');
+
+      // Öppna bryggdag
+      toggleBrewdayView(vi.fn());
+
+      expect(brewdayView.classList.contains('hidden')).toBe(false);
+      expect(mobileView.classList.contains('view-hidden')).toBe(true);
+      expect(desktopView.classList.contains('view-hidden')).toBe(true);
+      expect(document.body.classList.contains('in-fullscreen-view')).toBe(true);
+
+      // Simulera rotation till landscape (t.ex. bredd 844, höjd 390)
+      window.innerWidth = 844;
+      window.innerHeight = 390;
+      window.dispatchEvent(new Event('resize'));
+
+      // Bryggdag ska fortfarande vara öppet och receptvyer förbli gömda
+      expect(brewdayView.classList.contains('hidden')).toBe(false);
+      expect(mobileView.classList.contains('view-hidden')).toBe(true);
+      expect(desktopView.classList.contains('view-hidden')).toBe(true);
+
+      // Stäng bryggdag
+      toggleBrewdayView(vi.fn());
+      expect(brewdayView.classList.contains('hidden')).toBe(true);
+      expect(document.body.classList.contains('in-fullscreen-view')).toBe(false);
+      expect(mobileView.classList.contains('view-hidden')).toBe(false);
+    });
+
+    it('style.css har safe-area insets och responsiv padding för bryggdagsläget', () => {
+      const cssPath = path.resolve(__dirname, '../style.css');
+      const css = fs.readFileSync(cssPath, 'utf-8');
+
+      expect(css).toContain('#brewday-view');
+      expect(css).toContain('safe-area-inset-top');
+      expect(css).toContain('safe-area-inset-bottom');
+      expect(css).toContain('body.in-fullscreen-view');
     });
   });
 });

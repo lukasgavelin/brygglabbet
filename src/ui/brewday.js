@@ -128,6 +128,7 @@ export function toggleBrewdayView(recalculateCallback) {
     desktopView?.classList.add('view-hidden');
     mobileView?.classList.add('view-hidden');
     brewdayView.classList.remove('hidden');
+    document.body.classList.add('in-fullscreen-view');
 
     if (btnToggle) {
       btnToggle.classList.add('btn-primary');
@@ -144,17 +145,20 @@ export function toggleBrewdayView(recalculateCallback) {
     requestNotificationPermission();
     showToast('🍺 Välkommen till Bryggdagsläget!', 'info');
 
-    // Smooth scroll to active card initially if on steps tab
-    setTimeout(() => {
-      if (activeMobileTab === 'steps') {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+
+    // Only scroll to active card initially if resuming mid-brewday (step > 0)
+    if (currentStepIndex > 0 && activeMobileTab === 'steps') {
+      setTimeout(() => {
         const activeCard = document.querySelector('.brewday-step-card.brewday-step-active');
         if (activeCard) {
           activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-      }
-    }, 150);
+      }, 150);
+    }
   } else {
     brewdayView.classList.add('hidden');
+    document.body.classList.remove('in-fullscreen-view');
     if (!isTimerRunning) {
       releaseWakeLock();
     }

@@ -317,41 +317,55 @@ function setupMobileMenuActions(recalculateCallback) {
 
 function setupViewSwitcher() {
   document.getElementById('btn-switch-to-desktop')?.addEventListener('click', () => {
-    setMode('desktop');
+    setMode('desktop', true);
   });
   document.getElementById('btn-switch-to-mobile')?.addEventListener('click', () => {
-    setMode('mobile');
+    setMode('mobile', true);
   });
 }
 
 function checkViewportMode() {
-  const isSmallScreen = window.innerWidth <= 768;
+  const isSmallScreen =
+    window.innerWidth <= 768 ||
+    (window.innerHeight <= 550 && window.innerWidth <= 1024);
   const userPref = safeStorage.getItem('brygglabbet_view_mode');
 
   if (userPref === 'desktop') {
-    setMode('desktop');
+    setMode('desktop', false);
   } else if (userPref === 'mobile' || isSmallScreen) {
-    setMode('mobile');
+    setMode('mobile', false);
   } else {
-    setMode('desktop');
+    setMode('desktop', false);
   }
 }
 
-function setMode(mode) {
+function setMode(mode, persist = false) {
   const desktopApp = document.getElementById('desktop-app-view');
   const mobileApp = document.getElementById('mobile-app-view');
+  const brewdayView = document.getElementById('brewday-view');
+  const batchesView = document.getElementById('batches-view');
+
+  const isFullscreenViewOpen =
+    (brewdayView && !brewdayView.classList.contains('hidden')) ||
+    (batchesView && !batchesView.classList.contains('hidden'));
 
   if (mode === 'mobile') {
     desktopApp?.classList.add('view-hidden');
-    mobileApp?.classList.remove('view-hidden');
+    if (!isFullscreenViewOpen) {
+      mobileApp?.classList.remove('view-hidden');
+    }
     document.body.classList.add('mobile-mode');
     isMobileViewActive = true;
   } else {
-    desktopApp?.classList.remove('view-hidden');
     mobileApp?.classList.add('view-hidden');
+    if (!isFullscreenViewOpen) {
+      desktopApp?.classList.remove('view-hidden');
+    }
     document.body.classList.remove('mobile-mode');
     isMobileViewActive = false;
   }
 
-  safeStorage.setItem('brygglabbet_view_mode', mode);
+  if (persist) {
+    safeStorage.setItem('brygglabbet_view_mode', mode);
+  }
 }
