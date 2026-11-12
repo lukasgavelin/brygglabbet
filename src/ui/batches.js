@@ -30,6 +30,7 @@ import {
   brixToSG,
 } from '../core/brewtools.js';
 import { showToast, escHtml } from './toast.js';
+import { showConfirmDialog } from './modals.js';
 import { getTiltPanelHtml, setupTiltPanel } from './tiltController.js';
 
 let activeBatchId = null;
@@ -361,10 +362,17 @@ function renderBatchList(container) {
       e.stopPropagation();
       downloadICS(id);
     });
-    card.querySelector('[data-delete-batch]')?.addEventListener('click', (e) => {
+    card.querySelector('[data-delete-batch]')?.addEventListener('click', async (e) => {
       e.stopPropagation();
       const b = getBatchById(id);
-      if (confirm(`Är du säker på att du vill radera batchen "${b?.recipeName}"?`)) {
+      const confirmed = await showConfirmDialog({
+        title: 'Radera brygglogg',
+        message: `Är du säker på att du vill radera batchen "${b?.recipeName || 'Namnlös'}"?`,
+        confirmText: 'Radera batch',
+        cancelText: 'Avbryt',
+        danger: true,
+      });
+      if (confirmed) {
         deleteBatch(id);
         showToast('🗑️ Batch raderad', 'info');
         renderBatchesView();
@@ -794,8 +802,15 @@ function renderBatchDetail(container, batchId) {
   });
 
   // Delete Batch
-  container.querySelector('#btn-detail-delete')?.addEventListener('click', () => {
-    if (confirm(`Är du säker på att du vill radera batchen "${batch.recipeName}"?`)) {
+  container.querySelector('#btn-detail-delete')?.addEventListener('click', async () => {
+    const confirmed = await showConfirmDialog({
+      title: 'Radera brygglogg',
+      message: `Är du säker på att du vill radera batchen "${batch.recipeName}"?`,
+      confirmText: 'Radera batch',
+      cancelText: 'Avbryt',
+      danger: true,
+    });
+    if (confirmed) {
       deleteBatch(batch.id);
       showToast('🗑️ Batch raderad', 'info');
       activeBatchId = null;

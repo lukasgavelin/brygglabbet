@@ -37,7 +37,7 @@ export function serializeRecipePayload(state) {
       amount: Number(item.amount) || 0,
       ebc: Number(item.ebc) || 0,
       type: item.type || 'base',
-      potential: item.potential,
+      yield: Number(item.yield) || 75,
     })),
     h: (state.hops || []).map((item) => ({
       name: item.name,
@@ -93,7 +93,12 @@ export function deserializeRecipePayload(payload) {
 
   const rawState = {
     recipe: payload.r || {},
-    fermentables: payload.f || [],
+    fermentables: Array.isArray(payload.f)
+      ? payload.f.map((f) => ({
+          ...f,
+          yield: f.yield !== undefined ? f.yield : (f.potential !== undefined ? f.potential : 75),
+        }))
+      : [],
     hops: payload.h || [],
     yeast: payload.y || {},
     mash: payload.m || [],

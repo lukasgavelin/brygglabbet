@@ -20,7 +20,7 @@ const SYNCED_FIELDS = [
   { desktopId: 'eq-boiloff', mobileId: 'mobile-eq-boiloff', path: ['equipment', 'boilOffRate'], type: 'number' },
   { desktopId: 'eq-kettle-loss', mobileId: 'mobile-eq-kettle-loss', path: ['equipment', 'kettleLoss'], type: 'number' },
   { desktopId: 'eq-grain-abs', mobileId: 'mobile-eq-grain-abs', path: ['equipment', 'grainAbsorption'], type: 'number' },
-  { desktopId: null, mobileId: 'mobile-eq-mash-thickness', path: ['equipment', 'mashRatio'], type: 'number' },
+  { desktopId: 'eq-mash-ratio', mobileId: 'mobile-eq-mash-thickness', path: ['equipment', 'mashRatio'], type: 'number' },
 
   // Yeast fields
   { desktopId: 'yeast-name', mobileId: 'mobile-yeast-name', path: ['yeast', 'name'], type: 'text' },
@@ -58,6 +58,8 @@ function setNestedValue(obj, path, val) {
   curr[path[path.length - 1]] = val;
 }
 
+const boundElements = new WeakSet();
+
 /**
  * Synchronizes all configured input values from State to both Desktop and Mobile elements.
  * Skips the currently focused element to preserve user input/caret.
@@ -89,7 +91,8 @@ export function setupSyncBridge(recalculateCallback) {
   SYNCED_FIELDS.forEach(({ desktopId, mobileId, path, type }) => {
     const bindField = (sourceId, targetId) => {
       const sourceEl = document.getElementById(sourceId);
-      if (!sourceEl) return;
+      if (!sourceEl || boundElements.has(sourceEl)) return;
+      boundElements.add(sourceEl);
 
       const eventType = sourceEl.tagName === 'SELECT' ? 'change' : 'input';
       sourceEl.addEventListener(eventType, (e) => {
@@ -97,6 +100,12 @@ export function setupSyncBridge(recalculateCallback) {
         const parsedVal = type === 'number' ? (parseFloat(rawVal) || 0) : rawVal;
 
         setNestedValue(State, path, parsedVal);
+
+        // Keep equipment batchVolume and efficiency synchronized
+        if (path[0] === 'recipe' && (path[1] === 'batchVolume' || path[1] === 'efficiency')) {
+          if (!State.equipment) State.equipment = {};
+          State.equipment[path[1]] = parsedVal;
+        }
 
         // Mirror to twin element
         if (targetId) {
@@ -120,7 +129,8 @@ export function setupSyncBridge(recalculateCallback) {
 
   // Delegated steppers on #mobile-app-view with continuous press & repeat
   const mobileContainer = document.getElementById('mobile-app-view');
-  if (mobileContainer) {
+  if (mobileContainer && !boundElements.has(mobileContainer)) {
+    boundElements.add(mobileContainer);
     setupContinuousStepperDelegation(mobileContainer, (btn) => {
       // 1. Equipment loss steppers
       if (btn.dataset.eqLoss) {

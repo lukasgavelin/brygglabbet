@@ -18,6 +18,94 @@ export function closeModal(id) {
   document.getElementById(id)?.classList.add('hidden');
 }
 
+/**
+ * Displays an in-app confirm modal returning a Promise that resolves to true or false.
+ * Ersätter blockerande window.confirm med en tillgänglig Amber UI-dialog.
+ * @param {object} [options]
+ * @param {string} [options.title='Bekräfta']
+ * @param {string} [options.message='Är du säker på att du vill fortsätta?']
+ * @param {string} [options.confirmText='Bekräfta']
+ * @param {string} [options.cancelText='Avbryt']
+ * @param {boolean} [options.danger=false]
+ * @returns {Promise<boolean>}
+ */
+export function showConfirmDialog({
+  title = 'Bekräfta',
+  message = 'Är du säker på att du vill fortsätta?',
+  confirmText = 'Bekräfta',
+  cancelText = 'Avbryt',
+  danger = false,
+} = {}) {
+  mountModals();
+  const modal = document.getElementById('modal-confirm');
+  if (!modal) {
+    return Promise.resolve(typeof window !== 'undefined' && window.confirm ? window.confirm(message) : true);
+  }
+
+  const titleEl = document.getElementById('confirm-dialog-title');
+  const msgEl = document.getElementById('confirm-dialog-message');
+  const okBtn = document.getElementById('btn-confirm-ok');
+  const cancelBtn = document.getElementById('btn-confirm-cancel');
+  const closeBtn = document.getElementById('btn-confirm-close');
+
+  if (titleEl) titleEl.textContent = title;
+  if (msgEl) msgEl.textContent = message;
+  if (okBtn) {
+    okBtn.textContent = confirmText;
+    okBtn.className = danger ? 'btn btn-danger' : 'btn btn-primary';
+  }
+  if (cancelBtn) cancelBtn.textContent = cancelText;
+
+  openModal('modal-confirm');
+  okBtn?.focus();
+
+  return new Promise((resolve) => {
+    let resolved = false;
+
+    const cleanup = () => {
+      resolved = true;
+      closeModal('modal-confirm');
+      okBtn?.removeEventListener('click', onOk);
+      cancelBtn?.removeEventListener('click', onCancel);
+      closeBtn?.removeEventListener('click', onCancel);
+      modal.removeEventListener('click', onOverlay);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+
+    const onOk = (e) => {
+      e?.preventDefault?.();
+      if (resolved) return;
+      cleanup();
+      resolve(true);
+    };
+
+    const onCancel = (e) => {
+      e?.preventDefault?.();
+      if (resolved) return;
+      cleanup();
+      resolve(false);
+    };
+
+    const onOverlay = (e) => {
+      if (e.target === modal) onCancel(e);
+    };
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onCancel(e);
+      } else if (e.key === 'Enter' && document.activeElement === okBtn) {
+        onOk(e);
+      }
+    };
+
+    okBtn?.addEventListener('click', onOk);
+    cancelBtn?.addEventListener('click', onCancel);
+    closeBtn?.addEventListener('click', onCancel);
+    modal.addEventListener('click', onOverlay);
+    window.addEventListener('keydown', onKeyDown);
+  });
+}
+
 export function setupModalClose() {
   mountModals();
   document.querySelectorAll('[data-close]').forEach((btn) => {

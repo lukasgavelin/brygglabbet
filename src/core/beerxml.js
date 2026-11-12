@@ -3,6 +3,7 @@
  */
 
 import { escHtml } from '../ui/utils.js';
+import { SRM_TO_EBC_MULTIPLIER } from '../constants.js';
 
 /**
  * Converts application state to a BeerXML formatted string.
@@ -18,15 +19,18 @@ export function exportBeerXML(state) {
 
   const fermentablesXml = (state.fermentables || [])
     .map(
-      (f) => `
+      (f) => {
+        const srmColor = (Number(f.ebc || 5) / SRM_TO_EBC_MULTIPLIER).toFixed(1);
+        return `
       <FERMENTABLE>
         <NAME>${escHtml(f.name || 'Malt')}</NAME>
         <VERSION>1</VERSION>
         <TYPE>${f.type === 'sugar' ? 'Sugar' : 'Grain'}</TYPE>
         <AMOUNT>${Number(f.amount || 0).toFixed(3)}</AMOUNT>
         <YIELD>${Number(f.yield || 75).toFixed(1)}</YIELD>
-        <COLOR>${Number(f.ebc || 5).toFixed(1)}</COLOR>
-      </FERMENTABLE>`
+        <COLOR>${srmColor}</COLOR>
+      </FERMENTABLE>`;
+      }
     )
     .join('');
 
@@ -155,7 +159,10 @@ export function importBeerXML(xmlString) {
     const fName = getText(fNode, 'NAME', `Malt ${i + 1}`);
     const amountKg = getNum(fNode, 'AMOUNT', 1.0);
     const yieldPct = getNum(fNode, 'YIELD', 75);
-    const ebc = getNum(fNode, 'COLOR', 5);
+    const srmColor = getNum(fNode, 'COLOR', 2.5);
+    const ebcRaw = srmColor * SRM_TO_EBC_MULTIPLIER;
+    const ebcRound = Math.round(ebcRaw);
+    const ebc = Math.abs(ebcRaw - ebcRound) < 0.15 ? ebcRound : Math.round(ebcRaw * 10) / 10;
     const typeStr = getText(fNode, 'TYPE', '').toLowerCase();
 
     return {
@@ -163,7 +170,7 @@ export function importBeerXML(xmlString) {
       name: fName,
       amount: Math.round(amountKg * 100) / 100,
       yield: yieldPct,
-      ebc: Math.round(ebc),
+      ebc,
       type: typeStr.includes('sugar') ? 'sugar' : 'base',
     };
   });

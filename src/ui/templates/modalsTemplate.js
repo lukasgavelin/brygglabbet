@@ -198,6 +198,23 @@ export function getModalsHtml() {
     </div>
   </div>
 </div>
+
+<!-- Modal: Bekräfta åtgärd (In-App Confirm) -->
+<div class="modal-overlay hidden" id="modal-confirm" role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h3 class="modal-title" id="confirm-dialog-title">Bekräfta</h3>
+      <button class="modal-close" data-close="modal-confirm" id="btn-confirm-close">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 0">
+      <p id="confirm-dialog-message" style="font-size:0.92rem; color:var(--text); line-height:1.5; margin:0"></p>
+    </div>
+    <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:10px; padding-top:14px; border-top:1px solid var(--border)">
+      <button type="button" class="btn btn-secondary" id="btn-confirm-cancel">Avbryt</button>
+      <button type="button" class="btn btn-primary" id="btn-confirm-ok">Bekräfta</button>
+    </div>
+  </div>
+</div>
 `;
 }
 

@@ -9,7 +9,7 @@ import { setupTabNavigation } from './ui/tabs.js';
 import { setupYeastTab, populateYeastSelector } from './ui/yeast.js';
 import { setupMashTab } from './ui/mash.js';
 import { setupWaterTab, populateWaterProfileSelector } from './ui/water.js';
-import { setupEquipmentListeners, syncEquipmentFromUI, populateEquipmentSelector } from './ui/equipment.js';
+import { setupEquipmentListeners, populateEquipmentSelector } from './ui/equipment.js';
 import {
   openFermentableModal,
   openHopModal,
@@ -41,6 +41,7 @@ import { debounce } from './ui/utils.js';
 import { setupInputSteppers } from './ui/stepper.js';
 import { setupToolsModal } from './ui/tools.js';
 import { setupBatchesView } from './ui/batches.js';
+import { initBatchStorage } from './core/batches.js';
 import { showToast } from './ui/toast.js';
 import { safeStorage, onQuotaExceeded } from './core/storage.js';
 import { initErrorBoundary } from './ui/errorBoundary.js';
@@ -48,6 +49,7 @@ import { mountModals } from './ui/templates/modalsTemplate.js';
 import { mountMobileAppView } from './ui/mobile/mobileTemplate.js';
 import { setupShareQrModal, handleIncomingShareHash } from './ui/shareQr.js';
 import { setupDashboard, switchDesktopView } from './ui/dashboard.js';
+import { setupSyncBridge } from './ui/syncBridge.js';
 
 // Initialize global crash recovery & error boundary
 initErrorBoundary();
@@ -62,7 +64,7 @@ onQuotaExceeded(() => {
   );
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   mountModals();
   mountMobileAppView();
 
@@ -74,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabNavigation();
   setupHeaderControls();
   setupKeyboardShortcuts();
-  setupRecipeInputs();
+  setupSyncBridge(debouncedRecalculate);
   setupEquipmentListeners(debouncedRecalculate);
 
   setupFermentableEvents();
@@ -88,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupPrintHandler();
   setupToolsModal(debouncedRecalculate);
+  initBatchStorage();
   setupBatchesView(recalculate);
   setupShareQrModal();
   setupDashboard(recalculate);
@@ -95,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const importedFromHash = handleIncomingShareHash(recalculate);
   let restored = false;
   if (!importedFromHash) {
-    restored = checkAndRestoreSession(recalculate);
+    restored = await checkAndRestoreSession(recalculate);
     if (!restored) {
       loadDefaultRecipe(recalculate);
     }
@@ -275,37 +278,6 @@ function openScaleModal() {
   if (volInput) volInput.value = State.recipe.batchVolume || 20;
   if (effInput) effInput.value = State.recipe.efficiency || 75;
   openModal('modal-scale-recipe');
-}
-
-function setupRecipeInputs() {
-  const ids = ['batch-volume', 'boil-volume', 'boil-time', 'efficiency', 'att-min', 'att-max'];
-  ids.forEach((id) => {
-    document.getElementById(id)?.addEventListener('input', () => {
-      syncRecipeFromUI();
-      debouncedRecalculate();
-    });
-  });
-
-  document.getElementById('recipe-notes')?.addEventListener('input', (e) => {
-    State.recipe.notes = e.target.value;
-    debouncedRecalculate();
-  });
-  document.getElementById('recipe-style')?.addEventListener('change', (e) => {
-    State.recipe.styleId = e.target.value;
-    recalculate();
-  });
-}
-
-function syncRecipeFromUI() {
-  State.recipe.batchVolume = parseFloat(document.getElementById('batch-volume')?.value) || 20;
-  State.recipe.boilVolume = parseFloat(document.getElementById('boil-volume')?.value) || 25;
-  State.recipe.boilTime = parseFloat(document.getElementById('boil-time')?.value) || 60;
-  State.recipe.efficiency = parseFloat(document.getElementById('efficiency')?.value) || 75;
-  State.yeast.attMin = parseFloat(document.getElementById('att-min')?.value) || 72;
-  State.yeast.attMax = parseFloat(document.getElementById('att-max')?.value) || 78;
-
-  // Sync back to State.equipment as well
-  syncEquipmentFromUI();
 }
 
 function setupFermentableEvents() {

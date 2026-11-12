@@ -149,6 +149,40 @@ describe('UI smoke: bryggverktyg & mäsk-pH', () => {
     expect(brewdayView.classList.contains('hidden')).toBe(true);
   });
 
+  it('växlar bryggsteg in-place och bevarar DOM-noder samt pågående timers', async () => {
+    document.getElementById('btn-toggle-brewday').click();
+    const { updateActiveStep } = await import('../src/ui/brewday.js');
+
+    // 1. Starta en timer
+    const startTimerBtn = document.querySelector('.btn-start-timer');
+    expect(startTimerBtn).not.toBeNull();
+    const timerTarget = startTimerBtn.dataset.target;
+    startTimerBtn.click();
+    expect(startTimerBtn.classList.contains('running')).toBe(true);
+
+    // Behåll referens till originalnod
+    const originalBtn = startTimerBtn;
+
+    // 2. Växla steg via updateActiveStep
+    updateActiveStep(3);
+
+    // Verifiera att knappen i DOM:en fortfarande är exakt samma nod (inte omritad/frånkopplad)
+    const currentBtn = document.querySelector(`.btn-start-timer[data-target="${timerTarget}"]`);
+    expect(currentBtn).toBe(originalBtn);
+    expect(currentBtn.classList.contains('running')).toBe(true);
+
+    // 3. Verifiera klassuppdateringar
+    const cards = document.querySelectorAll('.brewday-step-card');
+    expect(cards[3].classList.contains('brewday-step-active')).toBe(true);
+    expect(cards[0].classList.contains('brewday-step-completed')).toBe(true);
+    expect(cards[1].classList.contains('brewday-step-completed')).toBe(true);
+    expect(cards[2].classList.contains('brewday-step-completed')).toBe(true);
+
+    // Pausa timern och stäng
+    startTimerBtn.click();
+    document.getElementById('btn-close-brewday-header').click();
+  });
+
   it('genererar utskriftsvy utan fel', async () => {
     const { State } = await import('../src/state.js');
     State.hops.push({ id: 'hop-wp', name: 'Mosaic', amount: 30, alpha: 12, use: 'whirlpool', whirlpoolTemp: 85, time: 20 });

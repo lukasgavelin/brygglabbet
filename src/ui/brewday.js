@@ -185,6 +185,66 @@ function formatSeconds(totalSecs) {
 }
 
 /**
+ * Updates the active step in-place without rebuilding the DOM.
+ * Eliminates DOM thrashing, avoids layout flicker, and preserves running timers.
+ * @param {number} newIdx - Target step index (0-based)
+ */
+export function updateActiveStep(newIdx) {
+  const cards = document.querySelectorAll('.brewday-step-card');
+  const total = cards.length;
+  if (newIdx < 0 || newIdx >= total) return;
+  currentStepIndex = newIdx;
+
+  cards.forEach((card) => {
+    const idx = parseInt(card.dataset.stepIdx, 10);
+    card.classList.remove('brewday-step-active', 'brewday-step-completed', 'brewday-step-inactive');
+    if (idx === currentStepIndex) {
+      card.classList.add('brewday-step-active');
+    } else if (idx < currentStepIndex) {
+      card.classList.add('brewday-step-completed');
+    } else {
+      card.classList.add('brewday-step-inactive');
+    }
+  });
+
+  // Update progress bar
+  const progressPercent = total > 1 ? Math.round((currentStepIndex / (total - 1)) * 100) : 100;
+  const bar = document.querySelector('.brewday-progress-bar');
+  if (bar) bar.style.width = `${progressPercent}%`;
+  const progContainer = document.querySelector('.brewday-progress-container');
+  if (progContainer) progContainer.title = `Bryggdagens framsteg: ${progressPercent}%`;
+
+  // Update nav controls
+  const prevBtn = document.getElementById('btn-wizard-prev');
+  if (prevBtn) prevBtn.disabled = currentStepIndex === 0;
+
+  const counterEl = document.querySelector('.brewday-step-counter-text');
+  if (counterEl) counterEl.textContent = `Steg ${currentStepIndex + 1} av ${total}`;
+
+  const badgeStepCount = document.querySelector('.badge-step-count');
+  if (badgeStepCount) badgeStepCount.textContent = `Steg ${currentStepIndex + 1}/${total}`;
+
+  // Next / Finish button toggle
+  const nextBtn = document.getElementById('btn-wizard-next');
+  const finishBtn = document.getElementById('btn-wizard-finish');
+  if (currentStepIndex === total - 1) {
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (finishBtn) finishBtn.style.display = '';
+  } else {
+    if (nextBtn) nextBtn.style.display = '';
+    if (finishBtn) finishBtn.style.display = 'none';
+  }
+
+  // Smooth scroll to active card
+  setTimeout(() => {
+    const activeCard = document.querySelector('.brewday-step-card.brewday-step-active');
+    if (activeCard) {
+      activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 50);
+}
+
+/**
  * Triggers alarm audio (synthesized beep) and device vibration.
  */
 function playAlarmNotification() {
@@ -767,11 +827,7 @@ export function renderBrewdayContent(recalculateCallback) {
       statusClass = 'brewday-step-completed';
     }
 
-    // Only render full content for active, previous and next step
-    const isVisible = idx === currentStepIndex || idx === currentStepIndex - 1 || idx === currentStepIndex + 1;
-    const bodyContent = isVisible
-      ? step.render()
-      : '<p style="font-style:italic; font-size:0.85rem; color:var(--text-secondary);">Klicka på steget för att hoppa dit.</p>';
+    const bodyContent = step.render();
 
     return `
       <div class="brewday-step-card ${statusClass}" data-step-idx="${idx}">
@@ -946,10 +1002,8 @@ export function renderBrewdayContent(recalculateCallback) {
           <div class="brewday-step-counter-text">
             Steg ${currentStepIndex + 1} av ${totalSteps}
           </div>
-          ${currentStepIndex === totalSteps - 1
-            ? `<button class="btn btn-success" id="btn-wizard-finish" style="background:#10b981; color:#fff; border:none; font-weight:bold; padding: 8px 18px;">🎉 Slutför bryggdag</button>`
-            : `<button class="btn btn-primary" id="btn-wizard-next">Nästa steg ➡️</button>`
-          }
+          <button class="btn btn-primary" id="btn-wizard-next" style="${currentStepIndex === totalSteps - 1 ? 'display:none;' : ''}">Nästa steg ➡️</button>
+          <button class="btn btn-success" id="btn-wizard-finish" style="background:#10b981; color:#fff; border:none; font-weight:bold; padding: 8px 18px; ${currentStepIndex === totalSteps - 1 ? '' : 'display:none;'}">🎉 Slutför bryggdag</button>
         </div>
       </div>
     </div>
@@ -968,16 +1022,7 @@ export function renderBrewdayContent(recalculateCallback) {
 
       const idx = parseInt(card.dataset.stepIdx, 10);
       if (!isNaN(idx) && idx !== currentStepIndex) {
-        currentStepIndex = idx;
-        renderBrewdayContent(recalculateCallback);
-
-        // Smooth scroll to center the active card
-        setTimeout(() => {
-          const activeCard = document.querySelector('.brewday-step-card.brewday-step-active');
-          if (activeCard) {
-            activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        }, 50);
+        updateActiveStep(idx);
       }
     });
   });
@@ -1037,27 +1082,13 @@ export function renderBrewdayContent(recalculateCallback) {
   // Wizard Nav buttons
   document.getElementById('btn-wizard-prev')?.addEventListener('click', () => {
     if (currentStepIndex > 0) {
-      currentStepIndex--;
-      renderBrewdayContent(recalculateCallback);
-      setTimeout(() => {
-        const activeCard = document.querySelector('.brewday-step-card.brewday-step-active');
-        if (activeCard) {
-          activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 50);
+      updateActiveStep(currentStepIndex - 1);
     }
   });
 
   document.getElementById('btn-wizard-next')?.addEventListener('click', () => {
     if (currentStepIndex < totalSteps - 1) {
-      currentStepIndex++;
-      renderBrewdayContent(recalculateCallback);
-      setTimeout(() => {
-        const activeCard = document.querySelector('.brewday-step-card.brewday-step-active');
-        if (activeCard) {
-          activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 50);
+      updateActiveStep(currentStepIndex + 1);
     }
   });
 
@@ -1227,9 +1258,12 @@ function setupTimerControls() {
             if (currentTargetEl) {
               currentTargetEl.textContent = '00:00';
             }
-            btn.classList.remove('running');
-            btn.innerHTML = '✅ Klart!';
-            btn.classList.replace('btn-warning', 'btn-success');
+            const currentStartBtn = document.querySelector(`.btn-start-timer[data-target="${activeTimerTargetId}"]`);
+            if (currentStartBtn) {
+              currentStartBtn.classList.remove('running');
+              currentStartBtn.innerHTML = '✅ Klart!';
+              currentStartBtn.classList.replace('btn-warning', 'btn-success');
+            }
 
             playAlarmNotification();
             showSystemNotification('⏰ Timer klar – Brygglabbet', 'Timern har löpt ut!', 'timer-done');

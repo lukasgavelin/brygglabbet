@@ -149,8 +149,6 @@ export function setupEquipmentListeners(recalculateCallback) {
     'eq-fermenter-loss',
     'eq-grain-abs',
     'eq-mash-ratio',
-    'batch-volume',
-    'efficiency',
   ];
 
   eqInputIds.forEach((id) => {

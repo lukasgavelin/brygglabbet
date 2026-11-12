@@ -16,6 +16,13 @@ import {
   hydrometerTempCorrection,
 } from './brewtools.js';
 import { safeStorage } from './storage.js';
+import {
+  isIdbSupported,
+  getAllBatchesFromIDB,
+  saveAllBatchesToIDB,
+  deleteBatchFromIDB,
+  migrateBatchesFromLocalStorage,
+} from './idbStorage.js';
 
 export const BATCHES_STORAGE_KEY = 'brygglabbet_batches';
 
@@ -478,11 +485,58 @@ export function getBatches() {
 }
 
 /**
- * Saves the full batches array to storage.
+ * Saves the full batches array to storage (safeStorage and IndexedDB).
  * @param {Array<object>} batches
  */
 export function saveBatches(batches) {
   safeStorage.setJSON(BATCHES_STORAGE_KEY, batches);
+  if (isIdbSupported()) {
+    saveAllBatchesToIDB(batches).catch((err) => {
+      console.warn('[batches] Kunde inte spara till IndexedDB:', err);
+    });
+  }
+}
+
+/**
+ * Initializes batch storage: runs one-time localStorage -> IndexedDB migration
+ * and populates storage from IndexedDB if available.
+ * @returns {Promise<Array<object>>}
+ */
+export async function initBatchStorage() {
+  if (!isIdbSupported()) return getBatches();
+
+  try {
+    await migrateBatchesFromLocalStorage(BATCHES_STORAGE_KEY);
+    const idbBatches = await getAllBatchesFromIDB();
+    if (Array.isArray(idbBatches) && idbBatches.length > 0) {
+      const currentLocalStorage = safeStorage.getJSON(BATCHES_STORAGE_KEY, []);
+      if (!currentLocalStorage || currentLocalStorage.length === 0) {
+        safeStorage.setJSON(BATCHES_STORAGE_KEY, idbBatches);
+      }
+      return idbBatches.map(normalizeBatch).filter(Boolean);
+    }
+  } catch (err) {
+    console.warn('[batches] initBatchStorage fallback till localStorage:', err);
+  }
+  return getBatches();
+}
+
+/**
+ * Asynchronously loads batches with IndexedDB as primary source and safeStorage as fallback.
+ * @returns {Promise<Array<object>>}
+ */
+export async function getBatchesAsync() {
+  if (isIdbSupported()) {
+    try {
+      const fromIDB = await getAllBatchesFromIDB();
+      if (Array.isArray(fromIDB) && fromIDB.length > 0) {
+        return fromIDB.map(normalizeBatch).filter(Boolean);
+      }
+    } catch {
+      // fallback to synchronous getBatches
+    }
+  }
+  return getBatches();
 }
 
 /**
@@ -629,6 +683,9 @@ export function deleteBatch(id) {
   const filtered = batches.filter((b) => b.id !== id);
   if (filtered.length === batches.length) return false;
   saveBatches(filtered);
+  if (isIdbSupported()) {
+    deleteBatchFromIDB(id).catch(() => {});
+  }
   return true;
 }
 

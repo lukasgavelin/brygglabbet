@@ -215,5 +215,17 @@ describe('Storage & State Resilience (Robustness)', () => {
       expect(swCode).toContain('addEventListener(\'activate\'');
       expect(swCode).toContain('addEventListener(\'fetch\'');
     });
+
+    it('public/_headers definierar CSP och Permissions-Policy för Wake Lock och Bluetooth', () => {
+      const headersPath = path.resolve(process.cwd(), 'public/_headers');
+      expect(fs.existsSync(headersPath)).toBe(true);
+
+      const headersContent = fs.readFileSync(headersPath, 'utf8');
+      expect(headersContent).toContain('Content-Security-Policy:');
+      expect(headersContent).toContain("script-src 'self'");
+      expect(headersContent).toContain('Permissions-Policy:');
+      expect(headersContent).toContain('screen-wake-lock=(self)');
+      expect(headersContent).toContain('bluetooth=(self)');
+    });
   });
 });

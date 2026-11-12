@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { State, createInitialState } from '../src/state.js';
 import { mountModals } from '../src/ui/templates/modalsTemplate.js';
 import { mountMobileAppView } from '../src/ui/mobile/mobileTemplate.js';
+import { showConfirmDialog } from '../src/ui/modals.js';
 import { setupSyncBridge, syncInputsFromState } from '../src/ui/syncBridge.js';
 import { updateStyleMatch } from '../src/ui/styleMatch.js';
 import { populateEquipmentSelector } from '../src/ui/equipment.js';
@@ -18,6 +19,7 @@ describe('Arkitektur & Modularisering: index.html & Desktop-Mobil Sanering', () 
         <input type="number" id="boil-volume" value="25">
         <input type="number" id="boil-time" value="60">
         <input type="number" id="efficiency" value="75">
+        <input type="number" id="eq-mash-ratio" value="3.0">
         <select id="recipe-style"></select>
         <select id="equipment-preset"></select>
         <select id="water-profile-preset"></select>
@@ -31,7 +33,7 @@ describe('Arkitektur & Modularisering: index.html & Desktop-Mobil Sanering', () 
   });
 
   describe('Template Modularisering', () => {
-    it('genererar och monterar alla 7 modaler i #modals-root', () => {
+    it('genererar och monterar alla 8 modaler i #modals-root', () => {
       expect(document.getElementById('modal-tools')).toBeNull();
       mountModals();
 
@@ -43,16 +45,17 @@ describe('Arkitektur & Modularisering: index.html & Desktop-Mobil Sanering', () 
       expect(document.getElementById('modal-swe-info')).not.toBeNull();
       expect(document.getElementById('modal-tools')).not.toBeNull();
       expect(document.getElementById('modal-share-qr')).not.toBeNull();
+      expect(document.getElementById('modal-confirm')).not.toBeNull();
     });
 
     it('mountModals är idempotent och duplicerar inte noder', () => {
       mountModals();
       const firstCount = document.querySelectorAll('.modal-overlay').length;
-      expect(firstCount).toBe(8);
+      expect(firstCount).toBe(9);
 
       mountModals();
       const secondCount = document.querySelectorAll('.modal-overlay').length;
-      expect(secondCount).toBe(8);
+      expect(secondCount).toBe(9);
     });
 
     it('genererar och monterar mobilvyn i #mobile-app-view', () => {
@@ -145,6 +148,24 @@ describe('Arkitektur & Modularisering: index.html & Desktop-Mobil Sanering', () 
       expect(recalcSpy).toHaveBeenCalled();
     });
 
+    it('synkar mäskkvot mellan desktop och mobil dubbelriktat', () => {
+      const desktopInp = document.getElementById('eq-mash-ratio');
+      const mobileInp = document.getElementById('mobile-eq-mash-thickness');
+
+      desktopInp.value = '3.5';
+      desktopInp.dispatchEvent(new Event('input', { bubbles: true }));
+
+      expect(State.equipment.mashRatio).toBe(3.5);
+      expect(mobileInp.value).toBe('3.5');
+      expect(recalcSpy).toHaveBeenCalled();
+
+      mobileInp.value = '2.7';
+      mobileInp.dispatchEvent(new Event('input', { bubbles: true }));
+
+      expect(State.equipment.mashRatio).toBe(2.7);
+      expect(desktopInp.value).toBe('2.7');
+    });
+
     it('hanterar delegerade utrustningsförlust-steppers på mobilvyn', () => {
       State.equipment = { boilOffRate: 3.0, kettleLoss: 2.0, grainAbsorption: 0.96, mashRatio: 3.0 };
       const boilOffPlusBtn = document.querySelector('.stepper-btn[data-eq-loss="boilOffRate"][data-dir="0.5"]');
@@ -216,6 +237,57 @@ describe('Arkitektur & Modularisering: index.html & Desktop-Mobil Sanering', () 
 
       expect(document.getElementById('style-match-name').textContent).toContain('American Pale Ale');
       expect(document.getElementById('mobile-style-match-name').textContent).toContain('American Pale Ale');
+    });
+  });
+
+  describe('In-App Confirm Dialog (showConfirmDialog)', () => {
+    beforeEach(() => {
+      mountModals();
+    });
+
+    it('visar modaldialog med titel, meddelande och anpassad knapptext samt hanterar bekräftelse', async () => {
+      const dialogPromise = showConfirmDialog({
+        title: 'Radera batch?',
+        message: 'Är du säker?',
+        confirmText: 'Ja, radera',
+        cancelText: 'Nej',
+        danger: true,
+      });
+
+      const modal = document.getElementById('modal-confirm');
+      expect(modal.classList.contains('hidden')).toBe(false);
+      expect(document.getElementById('confirm-dialog-title').textContent).toBe('Radera batch?');
+      expect(document.getElementById('confirm-dialog-message').textContent).toBe('Är du säker?');
+      expect(document.getElementById('btn-confirm-ok').textContent).toBe('Ja, radera');
+      expect(document.getElementById('btn-confirm-ok').classList.contains('btn-danger')).toBe(true);
+
+      document.getElementById('btn-confirm-ok').click();
+      const result = await dialogPromise;
+      expect(result).toBe(true);
+      expect(modal.classList.contains('hidden')).toBe(true);
+    });
+
+    it('returnerar false vid klick på Avbryt', async () => {
+      const dialogPromise = showConfirmDialog({
+        title: 'Skriv över?',
+        message: 'Vill du skriva över?',
+      });
+
+      document.getElementById('btn-confirm-cancel').click();
+      const result = await dialogPromise;
+      expect(result).toBe(false);
+      expect(document.getElementById('modal-confirm').classList.contains('hidden')).toBe(true);
+    });
+
+    it('returnerar false vid Escape-tangent', async () => {
+      const dialogPromise = showConfirmDialog({
+        title: 'Avbryt med Esc',
+      });
+
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      const result = await dialogPromise;
+      expect(result).toBe(false);
+      expect(document.getElementById('modal-confirm').classList.contains('hidden')).toBe(true);
     });
   });
 });

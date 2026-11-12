@@ -5,7 +5,7 @@
 import { State, createInitialState, setNextId, generateId, pushHistory, applyState } from '../state.js';
 import { calculateOG, formatSG, scaleRecipe } from '../core/calculations.js';
 import { PRESET_RECIPES } from '../core/data.js';
-import { openModal, closeModal } from './modals.js';
+import { openModal, closeModal, showConfirmDialog } from './modals.js';
 import { showToast, escHtml } from './toast.js';
 import { recalculate } from './sidebar.js';
 import { updateAccordionBadges } from './tabs.js';
@@ -33,14 +33,20 @@ export function getSavedRecipes() {
   return {};
 }
 
-export function saveRecipe() {
+export async function saveRecipe() {
   const nameInput = document.getElementById('recipe-name-input');
   const name = nameInput ? nameInput.value.trim() || 'Namnlöst recept' : 'Namnlöst recept';
   State.recipe.name = name;
 
   const all = getSavedRecipes();
   if (all[name]) {
-    if (!confirm(`Ett recept med namnet "${name}" finns redan. Vill du skriva över det?`)) {
+    const confirmed = await showConfirmDialog({
+      title: 'Skriva över recept?',
+      message: `Ett recept med namnet "${name}" finns redan. Vill du skriva över det?`,
+      confirmText: 'Skriv över',
+      cancelText: 'Avbryt',
+    });
+    if (!confirmed) {
       return;
     }
   }
@@ -51,8 +57,14 @@ export function saveRecipe() {
   }
 }
 
-export function newRecipe(recalculateCallback) {
-  if (!confirm('Skapa ett nytt recept? Osparade ändringar försvinner.')) return;
+export async function newRecipe(recalculateCallback) {
+  const confirmed = await showConfirmDialog({
+    title: 'Nytt recept',
+    message: 'Skapa ett nytt recept? Osparade ändringar försvinner.',
+    confirmText: 'Skapa nytt',
+    cancelText: 'Avbryt',
+  });
+  if (!confirmed) return;
   applyState(State, createInitialState());
   syncUIFromState(recalculateCallback);
 }
@@ -102,9 +114,16 @@ export function openRecipeModal(recalculateCallback) {
         closeModal('modal-recipes');
       });
 
-      div.querySelector('[data-delete]')?.addEventListener('click', (e) => {
+      div.querySelector('[data-delete]')?.addEventListener('click', async (e) => {
         e.stopPropagation();
-        if (confirm(`Ta bort "${name}"?`)) {
+        const confirmed = await showConfirmDialog({
+          title: 'Ta bort recept',
+          message: `Vill du radera receptet "${name}"? Detta kan inte ångras.`,
+          confirmText: 'Ta bort',
+          cancelText: 'Avbryt',
+          danger: true,
+        });
+        if (confirmed) {
           delete all[name];
           safeStorage.setJSON(LOCAL_STORAGE_KEY, all);
           div.remove();
@@ -350,7 +369,7 @@ export function autosaveSession() {
   }
 }
 
-export function checkAndRestoreSession(recalculateCallback) {
+export async function checkAndRestoreSession(recalculateCallback) {
   try {
     const data = safeStorage.getJSON(AUTOSAVE_STORAGE_KEY, null) || safeSessionStorage.getJSON(AUTOSAVE_STORAGE_KEY, null);
     if (!data) return false;
@@ -366,11 +385,13 @@ export function checkAndRestoreSession(recalculateCallback) {
         const timeDesc = ageMinutes < 60
           ? `${Math.round(ageMinutes)} min sedan`
           : `${Math.round(ageMinutes / 60)} h sedan`;
-        if (
-          confirm(
-            `Hittade en automatisk sparfil för "${recipeName}" (från ${timeDesc}). Vill du återställa den?`
-          )
-        ) {
+        const confirmed = await showConfirmDialog({
+          title: 'Återställ session?',
+          message: `Hittade en automatisk sparfil för "${recipeName}" (från ${timeDesc}). Vill du återställa den?`,
+          confirmText: 'Återställ',
+          cancelText: 'Kasta',
+        });
+        if (confirmed) {
           applyState(State, data.state);
           let maxId = 0;
           [...(State.fermentables || []), ...(State.hops || []), ...(State.mash || [])].forEach(

@@ -44,8 +44,9 @@ describe('Serverlös Receptdelning & QR-kod Synk (Sprint 3)', () => {
         mashRatio: 3.2,
       },
       fermentables: [
-        { id: 1, name: 'Pilsnermalt', amount: 4.8, ebc: 3.5, type: 'base' },
-        { id: 2, name: 'Carapils', amount: 0.4, ebc: 5.0, type: 'cara' },
+        { id: 1, name: 'Pilsnermalt', amount: 4.8, yield: 80, ebc: 3.5, type: 'base' },
+        { id: 2, name: 'Carapils', amount: 0.4, yield: 73, ebc: 5.0, type: 'cara' },
+        { id: 3, name: 'Dextros', amount: 0.5, yield: 100, ebc: 0, type: 'sugar' },
       ],
       hops: [
         { id: 1, name: 'Magnum', amount: 20, alpha: 13.5, time: 60, use: 'kok' },
@@ -80,8 +81,11 @@ describe('Serverlös Receptdelning & QR-kod Synk (Sprint 3)', () => {
       expect(restored.recipe.name).toBe('Gyllene Garage-IPA');
       expect(restored.recipe.batchVolume).toBe(21);
       expect(restored.recipe.efficiency).toBe(78);
-      expect(restored.fermentables.length).toBe(2);
+      expect(restored.fermentables.length).toBe(3);
       expect(restored.fermentables[0].name).toBe('Pilsnermalt');
+      expect(restored.fermentables[0].yield).toBe(80);
+      expect(restored.fermentables[1].yield).toBe(73);
+      expect(restored.fermentables[2].yield).toBe(100);
       expect(restored.hops.length).toBe(3);
       expect(restored.hops[1].whirlpoolTemp).toBe(82);
       expect(restored.hops[2].dryHopDay).toBe(5);
@@ -89,6 +93,15 @@ describe('Serverlös Receptdelning & QR-kod Synk (Sprint 3)', () => {
       expect(restored.water.salts.gypsum).toBe(3.5);
       expect(restored.water.acid.enabled).toBe(true);
       expect(restored.equipment.name).toBe('Grainfather G30');
+    });
+
+    it('är bakåtkompatibel med äldre payloads som använde "potential" istället för "yield"', () => {
+      const legacyPayload = {
+        r: { name: 'Gammal Länk', batchVolume: 20 },
+        f: [{ name: 'Malt', amount: 5, potential: 82, ebc: 4, type: 'base' }],
+      };
+      const restored = deserializeRecipePayload(legacyPayload);
+      expect(restored.fermentables[0].yield).toBe(82);
     });
 
     it('kodar till en url-säker hash och avkodar korrekt (#brew och #recipe)', () => {
