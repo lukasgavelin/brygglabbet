@@ -33,7 +33,7 @@ import { openBatchesView } from '../batches.js';
 import { triggerPrint } from '../print.js';
 import { openToolsModal } from '../tools.js';
 import { renderMashTable } from '../mash.js';
-import { escHtml } from '../toast.js';
+import { escHtml, showToast } from '../toast.js';
 import { safeStorage } from '../../core/storage.js';
 import { updateStyleMatch } from '../styleMatch.js';
 import { setupSyncBridge, syncInputsFromState } from '../syncBridge.js';
@@ -126,6 +126,10 @@ function setupMobileActionButtons(recalculateCallback) {
     openBatchesView();
   });
   document.getElementById('mobile-btn-start-brewday')?.addEventListener('click', () => {
+    const totalMaltKg = State.fermentables.reduce((s, f) => s + (f.amount || 0), 0);
+    if (totalMaltKg === 0) {
+      showToast('ℹ️ Receptet är tomt. Tips: Välj ett exempelrecept eller lägg till malt i flik 2!', 'info', 4000);
+    }
     toggleBrewdayView(recalculateCallback);
   });
   document.getElementById('mobile-btn-print-brewday')?.addEventListener('click', triggerPrint);

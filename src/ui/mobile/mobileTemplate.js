@@ -420,12 +420,12 @@ export function getMobileAppTemplate() {
       </div>
 
       <!-- Ready To Brew CTA -->
-      <div class="mobile-ready-card">
+      <div class="mobile-ready-card" id="mobile-ready-card">
         <div class="mobile-ready-header">
-          <div class="mobile-ready-icon">🍺</div>
+          <div class="mobile-ready-icon" id="mobile-ready-icon">🍺</div>
           <div class="mobile-ready-title">
-            <h3>Receptet är klart!</h3>
-            <p>Starta bryggdagsläget med aktiva humlelarm, timers och steg-för-steg-guidning.</p>
+            <h3 id="mobile-ready-title">Receptet är klart!</h3>
+            <p id="mobile-ready-desc">Starta bryggdagsläget med aktiva humlelarm, timers och steg-för-steg-guidning.</p>
           </div>
         </div>
         <div class="mobile-ready-actions">

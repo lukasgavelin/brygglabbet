@@ -17,6 +17,7 @@ import {
   renderMobileHopsCards,
 } from '../src/ui/mobile/mobileCards.js';
 import { setupContinuousStepperDelegation } from '../src/ui/mobile/mobileStepper.js';
+import { updateRecipeReadinessCard } from '../src/ui/sidebar.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -237,6 +238,60 @@ describe('Mobiloptimering & Touch-ergonomi', () => {
       expect(css).toContain('touch-action: manipulation');
       expect(css).toContain('min-width: 44px');
       expect(css).toContain('min-height: 44px');
+    });
+
+    it('style.css konfigurerar mobil dropdown-meny med scrollbar max-height och overflow för att förhindra avklippning', () => {
+      const cssPath = path.resolve(__dirname, '../style.css');
+      const css = fs.readFileSync(cssPath, 'utf-8');
+
+      expect(css).toContain('.mobile-menu-dropdown');
+      expect(css).toContain('max-height: calc(100vh - 66px)');
+      expect(css).toContain('overflow-y: auto');
+      expect(css).toContain('overscroll-behavior: contain');
+    });
+  });
+
+  describe('5. Dynamisk Recept-status (Recept readiness)', () => {
+    it('visar "Receptet är tomt" när inga ingredienser lagts till', () => {
+      State.fermentables = [];
+      State.hops = [];
+      updateRecipeReadinessCard({ og: 1.000 });
+
+      const title = document.getElementById('mobile-ready-title');
+      const desc = document.getElementById('mobile-ready-desc');
+      const card = document.getElementById('mobile-ready-card');
+      const btn = document.getElementById('mobile-btn-start-brewday');
+
+      expect(title.textContent).toBe('Receptet är tomt');
+      expect(desc.textContent).toContain('Lägg till malt och humle');
+      expect(card.classList.contains('is-empty')).toBe(true);
+      expect(btn.classList.contains('mobile-btn-subtle')).toBe(true);
+    });
+
+    it('visar "Receptet saknar humle" när endast malt finns', () => {
+      State.fermentables = [{ id: 1, name: 'Pilsnermalt', amount: 5 }];
+      State.hops = [];
+      updateRecipeReadinessCard({ og: 1.050 });
+
+      const title = document.getElementById('mobile-ready-title');
+      const desc = document.getElementById('mobile-ready-desc');
+
+      expect(title.textContent).toBe('Receptet saknar humle');
+      expect(desc.textContent).toContain('inga humlegivor');
+    });
+
+    it('visar "Receptet är klart" när både malt och humle finns', () => {
+      State.fermentables = [{ id: 1, name: 'Pilsnermalt', amount: 5 }];
+      State.hops = [{ id: 1, name: 'Saaz', amount: 30 }];
+      updateRecipeReadinessCard({ og: 1.050 });
+
+      const title = document.getElementById('mobile-ready-title');
+      const card = document.getElementById('mobile-ready-card');
+      const btn = document.getElementById('mobile-btn-start-brewday');
+
+      expect(title.textContent).toBe('Receptet är klart!');
+      expect(card.classList.contains('is-empty')).toBe(false);
+      expect(btn.classList.contains('mobile-btn-hero')).toBe(true);
     });
   });
 });

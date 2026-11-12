@@ -59,6 +59,7 @@ export function recalculate() {
   safeRun('WaterPanel', () => renderWaterPanel(waterResult));
   safeRun('WaterRequirement', () => renderWaterRequirementCard(volumes));
   safeRun('AccordionBadges', () => updateAccordionBadges());
+  safeRun('RecipeReadiness', () => updateRecipeReadinessCard(m));
   safeRun('MobileUI', () => updateMobileUI(recalculate));
   safeRun('Autosave', () => autosaveSession());
 }
@@ -164,4 +165,88 @@ function updatePreboilDisplay(preboilSG, preboilPlato, evapPct) {
   if (preboilPlatoEl)
     {preboilPlatoEl.textContent = preboilPlato > 0 ? `${preboilPlato.toFixed(1)} °P` : '—';}
   if (evapRateEl) evapRateEl.textContent = `${evapPct} %`;
+}
+
+/**
+ * Updates the Recipe Readiness CTA card dynamically based on recipe composition.
+ * Ensures the app accurately displays whether the recipe is empty, missing hops/malt,
+ * or ready to brew.
+ * @param {object} [metrics] - Computed recipe metrics
+ */
+export function updateRecipeReadinessCard(_metrics) {
+  const totalMaltKg = State.fermentables.reduce((s, f) => s + (f.amount || 0), 0);
+  const totalHopsG = State.hops.reduce((s, h) => s + (h.amount || 0), 0);
+
+  let state = 'ready';
+  let icon = '🍺';
+  let title = 'Receptet är klart – Dags att brygga!';
+  let mobileTitle = 'Receptet är klart!';
+  let desc = 'Starta det interaktiva bryggdagsläget med integrerade timers, aktiva humlelarm och steg-för-steg-guidning.';
+  let btnText = 'Starta Bryggdagsläget →';
+  let isHero = true;
+
+  if (totalMaltKg === 0 && totalHopsG === 0) {
+    state = 'empty';
+    icon = '🌾';
+    title = 'Receptet är tomt';
+    mobileTitle = 'Receptet är tomt';
+    desc = 'Lägg till malt och humle i receptet för att beräkna alkoholstyrka, beska och vattenmängd innan du brygger.';
+    btnText = 'Starta Bryggdagsläget ändå →';
+    isHero = false;
+  } else if (totalMaltKg === 0) {
+    state = 'missing-malt';
+    icon = '🌾';
+    title = 'Receptet saknar malt eller extrakt';
+    mobileTitle = 'Receptet saknar malt';
+    desc = 'Du har humle men ingen malt eller jäsbart socker. Lägg till basmalt för att ge ölet stamvörtstyrka.';
+    btnText = 'Starta Bryggdagsläget ändå →';
+    isHero = false;
+  } else if (totalHopsG === 0) {
+    state = 'missing-hops';
+    icon = '🌿';
+    title = 'Receptet saknar humle';
+    mobileTitle = 'Receptet saknar humle';
+    desc = `Du har ${totalMaltKg.toFixed(1)} kg malt i receptet, men inga humlegivor tillagda än. Lägg till humle för beska och arom.`;
+    btnText = 'Starta Bryggdagsläget →';
+    isHero = true;
+  }
+
+  // Update Mobile Card
+  const mobileCard = document.getElementById('mobile-ready-card');
+  const mobileIcon = document.getElementById('mobile-ready-icon');
+  const mobileTitleEl = document.getElementById('mobile-ready-title');
+  const mobileDescEl = document.getElementById('mobile-ready-desc');
+  const mobileBtn = document.getElementById('mobile-btn-start-brewday');
+
+  if (mobileCard) {
+    mobileCard.dataset.readinessState = state;
+    mobileCard.classList.toggle('is-empty', !isHero);
+  }
+  if (mobileIcon) mobileIcon.textContent = icon;
+  if (mobileTitleEl) mobileTitleEl.textContent = mobileTitle;
+  if (mobileDescEl) mobileDescEl.textContent = desc;
+  if (mobileBtn) {
+    mobileBtn.innerHTML = `<span class="quick-icon">${icon}</span> ${btnText}`;
+    mobileBtn.className = isHero ? 'mobile-btn-hero' : 'mobile-btn-subtle';
+  }
+
+  // Update Desktop Card
+  const deskCard = document.getElementById('ready-to-brew-card');
+  const deskIcon = document.getElementById('ready-to-brew-icon');
+  const deskTitleEl = document.getElementById('ready-to-brew-title');
+  const deskDescEl = document.getElementById('ready-to-brew-desc');
+  const deskBtn = document.getElementById('cta-btn-start-brewday');
+
+  if (deskCard) {
+    deskCard.dataset.readinessState = state;
+    deskCard.classList.toggle('is-empty', !isHero);
+  }
+  if (deskIcon) deskIcon.textContent = icon;
+  if (deskTitleEl) deskTitleEl.textContent = title;
+  if (deskDescEl) deskDescEl.textContent = desc;
+  if (deskBtn) {
+    deskBtn.innerHTML = `<span class="quick-icon">${icon}</span> ${btnText}`;
+    deskBtn.classList.toggle('btn-hero-brewday', isHero);
+    deskBtn.classList.toggle('btn-secondary', !isHero);
+  }
 }

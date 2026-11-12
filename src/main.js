@@ -227,6 +227,10 @@ function setupHeaderControls() {
 
   // Recipe action triggers inside Section 7 (Anteckningar & CTA)
   document.getElementById('cta-btn-start-brewday')?.addEventListener('click', () => {
+    const totalMaltKg = State.fermentables.reduce((s, f) => s + (f.amount || 0), 0);
+    if (totalMaltKg === 0) {
+      showToast('ℹ️ Receptet är tomt. Tips: Välj ett exempelrecept eller lägg till malt i flik 2!', 'info', 4000);
+    }
     toggleBrewdayView(recalculate);
   });
   document.getElementById('cta-btn-print')?.addEventListener('click', triggerPrint);
