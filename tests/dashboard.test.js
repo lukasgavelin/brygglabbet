@@ -27,6 +27,20 @@ describe('Desktop Start-Hubb & Navigation (dashboard.js)', () => {
             <button class="desktop-nav-btn" id="nav-btn-batches" data-nav-view="batches">Mina bryggningar</button>
             <button class="desktop-nav-btn" id="nav-btn-brewday" data-nav-view="brewday">Bryggdag</button>
           </nav>
+          <div class="header-recipe-controls hidden" id="header-recipe-controls">
+            <input type="text" id="recipe-name-input" value="Mitt nya öl">
+            <button id="btn-toggle-brewday">Bryggdag</button>
+            <button id="btn-save">Spara</button>
+            <button id="btn-batches" style="display:none;"></button>
+          </div>
+          <div class="header-hub-controls" id="header-hub-controls">
+            <button id="btn-hub-header-tools">Bryggverktyg</button>
+            <button id="btn-switch-to-mobile-header">Mobilvy</button>
+          </div>
+          <div class="header-actions">
+            <button id="btn-header-menu">Meny</button>
+            <button id="btn-switch-to-mobile"></button>
+          </div>
         </header>
         <div id="dashboard-view" class="dashboard-view"></div>
         <div id="app-body" class="hidden">
@@ -140,5 +154,77 @@ describe('Desktop Start-Hubb & Navigation (dashboard.js)', () => {
 
     document.getElementById('header-logo').click();
     expect(getActiveDesktopView()).toBe('hub');
+  });
+
+  it('manages contextual header controls when switching views', () => {
+    setupDashboard(vi.fn());
+
+    const recipeControls = document.getElementById('header-recipe-controls');
+    const hubControls = document.getElementById('header-hub-controls');
+
+    // On hub view: recipe controls hidden, hub controls visible
+    expect(getActiveDesktopView()).toBe('hub');
+    expect(recipeControls.classList.contains('hidden')).toBe(true);
+    expect(hubControls.classList.contains('hidden')).toBe(false);
+
+    // On recipe view: recipe controls visible, hub controls hidden
+    switchDesktopView('recipe');
+    expect(getActiveDesktopView()).toBe('recipe');
+    expect(recipeControls.classList.contains('hidden')).toBe(false);
+    expect(hubControls.classList.contains('hidden')).toBe(true);
+
+    // On batches view: both hidden
+    switchDesktopView('batches');
+    expect(getActiveDesktopView()).toBe('batches');
+    expect(recipeControls.classList.contains('hidden')).toBe(true);
+    expect(hubControls.classList.contains('hidden')).toBe(true);
+  });
+
+  it('renders 3-zone cockpit with spotlight, telemetry and grouped tools', () => {
+    setupDashboard(vi.fn());
+    renderDashboard();
+
+    const dashboardEl = document.getElementById('dashboard-view');
+
+    // Verify 3 distinct zone headers
+    const zoneTags = Array.from(dashboardEl.querySelectorAll('.hub-zone-tag')).map((el) => el.textContent);
+    expect(zoneTags).toEqual(['Zon 1', 'Zon 2', 'Zon 3']);
+
+    // Zon 1 Spotlight
+    const spotlightCard = dashboardEl.querySelector('#hub-card-active-recipe');
+    expect(spotlightCard).not.toBeNull();
+    expect(spotlightCard.textContent).toContain('Test IPA');
+    expect(dashboardEl.querySelector('.hub-spotlight-metrics')).not.toBeNull();
+
+    // Quick tags
+    const quickTags = dashboardEl.querySelectorAll('.hub-tag[data-preset]');
+    expect(quickTags.length).toBeGreaterThanOrEqual(4);
+
+    // Zon 2 Active batches & Tilt
+    expect(dashboardEl.querySelector('#hub-btn-all-batches')).not.toBeNull();
+    expect(dashboardEl.querySelector('#hub-tilt-panel')).not.toBeNull();
+
+    // Zon 3 Archive & Grouped Tools
+    expect(dashboardEl.querySelector('#hub-btn-manage-recipes')).not.toBeNull();
+    expect(dashboardEl.querySelector('#hub-btn-all-tools')).not.toBeNull();
+    expect(dashboardEl.querySelector('#hub-tool-carb')).not.toBeNull();
+    expect(dashboardEl.querySelector('#hub-tool-refrac')).not.toBeNull();
+    expect(dashboardEl.querySelector('#hub-tool-yeast')).not.toBeNull();
+    expect(dashboardEl.querySelector('#hub-tool-strike')).not.toBeNull();
+  });
+
+  it('clicking a preset quicktag loads the preset and routes to recipe view', () => {
+    const recalcSpy = vi.fn();
+    setupDashboard(recalcSpy);
+    renderDashboard();
+
+    const pilsnerTag = document.querySelector('.hub-tag[data-preset="klassisk_pilsner"]');
+    expect(pilsnerTag).not.toBeNull();
+
+    pilsnerTag.click();
+
+    expect(getActiveDesktopView()).toBe('recipe');
+    expect(State.recipe.name).toBe('Klassisk Lager / Pilsner');
+    expect(recalcSpy).toHaveBeenCalled();
   });
 });

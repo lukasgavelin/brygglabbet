@@ -196,15 +196,15 @@ export function normalizeState(raw = {}, baseState = null) {
     : [];
 
   const water = {
-    volume: Math.max(1, num(rawWater.volume, initial.water.volume)),
+    volume: Math.max(1, num(rawWater.volume, initial.water?.volume ?? 25)),
     base: {
-      name: rawWater.base?.name || initial.water.base.name,
-      ca: num(rawWater.base?.ca, initial.water.base.ca),
-      mg: num(rawWater.base?.mg, initial.water.base.mg),
-      na: num(rawWater.base?.na, initial.water.base.na),
-      cl: num(rawWater.base?.cl, initial.water.base.cl),
-      so4: num(rawWater.base?.so4, initial.water.base.so4),
-      hco3: num(rawWater.base?.hco3, initial.water.base.hco3),
+      name: rawWater.base?.name || initial.water?.base?.name || 'Kommunalt kranvatten',
+      ca: num(rawWater.base?.ca, initial.water?.base?.ca ?? 0),
+      mg: num(rawWater.base?.mg, initial.water?.base?.mg ?? 0),
+      na: num(rawWater.base?.na, initial.water?.base?.na ?? 0),
+      cl: num(rawWater.base?.cl, initial.water?.base?.cl ?? 0),
+      so4: num(rawWater.base?.so4, initial.water?.base?.so4 ?? 0),
+      hco3: num(rawWater.base?.hco3, initial.water?.base?.hco3 ?? 0),
     },
     salts: {
       gypsum,

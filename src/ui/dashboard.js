@@ -19,6 +19,7 @@ import {
   openPresetRecipesModal,
   openRecipeModal,
   loadRecipe,
+  loadPresetRecipe,
   exportFullWorkspaceBackup,
 } from './recipes.js';
 import { openBatchesView } from './batches.js';
@@ -70,9 +71,13 @@ export function switchDesktopView(viewName, options = {}) {
   const appBody = document.getElementById('app-body');
   const batchesView = document.getElementById('batches-view');
   const brewdayView = document.getElementById('brewday-view');
+  const recipeControls = document.getElementById('header-recipe-controls');
+  const hubControls = document.getElementById('header-hub-controls');
 
   if (viewName === 'batches') {
     activeView = 'batches';
+    recipeControls?.classList.add('hidden');
+    hubControls?.classList.add('hidden');
     updateNavButtons('batches');
     openBatchesView(options.batchId || null);
     return;
@@ -80,6 +85,8 @@ export function switchDesktopView(viewName, options = {}) {
 
   if (viewName === 'brewday') {
     activeView = 'brewday';
+    recipeControls?.classList.add('hidden');
+    hubControls?.classList.add('hidden');
     updateNavButtons('brewday');
     toggleBrewdayView(globalRecalculate);
     return;
@@ -103,13 +110,20 @@ export function switchDesktopView(viewName, options = {}) {
   if (viewName === 'hub') {
     dashboardView?.classList.remove('hidden');
     appBody?.classList.add('hidden');
+    recipeControls?.classList.add('hidden');
+    hubControls?.classList.remove('hidden');
     renderDashboard();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  } else {
-    // 'recipe'
+  } else if (viewName === 'recipe') {
     dashboardView?.classList.add('hidden');
     appBody?.classList.remove('hidden');
+    recipeControls?.classList.remove('hidden');
+    hubControls?.classList.add('hidden');
     if (globalRecalculate) globalRecalculate();
+  } else {
+    // batches or brewday
+    recipeControls?.classList.add('hidden');
+    hubControls?.classList.add('hidden');
   }
 }
 
@@ -144,6 +158,17 @@ export function setupDashboard(recalculateCallback) {
   document.getElementById('header-logo')?.addEventListener('click', (e) => {
     e.preventDefault();
     switchDesktopView('hub');
+  });
+
+  // Hub Header actions
+  document.getElementById('btn-hub-header-tools')?.addEventListener('click', () => {
+    openToolsModal();
+  });
+  document.getElementById('btn-switch-to-mobile-header')?.addEventListener('click', () => {
+    document.getElementById('btn-switch-to-mobile')?.click();
+  });
+  document.getElementById('btn-batches')?.addEventListener('click', () => {
+    switchDesktopView('batches');
   });
 
   // Determine initial desktop view
@@ -211,98 +236,120 @@ export function renderDashboard() {
         </div>
       </section>
 
-      <!-- ==================== 4 PRIMARY ACTION CARDS ==================== -->
-      <section class="hub-actions-grid">
-
-        <!-- 1. Skapa Nytt Recept -->
-        <div class="hub-action-card" id="hub-card-new-recipe" role="button" tabindex="0">
-          <div class="hub-action-icon-wrap" style="background:#fef3c7; color:#d97706;">➕</div>
-          <div class="hub-action-body">
-            <h3 class="hub-action-title">Nytt recept</h3>
-            <p class="hub-action-desc">Börja från grunden med standardvolym (20 L) och tomma givor.</p>
-          </div>
-          <div class="hub-action-footer">
-            <span class="hub-action-link">Skapa tomt recept →</span>
-          </div>
+      <!-- ==================== ZON 1: RECEPTVERKSTAD & SNABBSTART ==================== -->
+      <section class="hub-zone-section">
+        <div class="hub-zone-header">
+          <span class="hub-zone-tag">Zon 1</span>
+          <h2 class="hub-zone-title">Receptverkstad &amp; Snabbstart</h2>
         </div>
-
-        <!-- 2. Välj bland stilmallar -->
-        <div class="hub-action-card" id="hub-card-templates" role="button" tabindex="0">
-          <div class="hub-action-icon-wrap" style="background:#e0f2fe; color:#0284c7;">📋</div>
-          <div class="hub-action-body">
-            <h3 class="hub-action-title">Färdiga stilmallar</h3>
-            <p class="hub-action-desc">Pilsner, West Coast IPA, Dry Stout, Hefeweizen, Saison m.fl.</p>
-          </div>
-          <div class="hub-action-footer">
-            <span class="hub-action-link">Välj bland mallar →</span>
-          </div>
-        </div>
-
-        <!-- 3. Aktivt Recept (Resume) -->
-        <div class="hub-action-card hub-action-active-recipe" id="hub-card-active-recipe" role="button" tabindex="0">
-          <div class="hub-action-icon-wrap" style="background:#fef08a; color:#854d0e;">🍺</div>
-          <div class="hub-action-body">
-            <div class="hub-active-badge">Aktivt i redigeraren</div>
-            <h3 class="hub-action-title">${escHtml(recipeName)}</h3>
-            <div class="hub-recipe-specs">
-              <span>${metrics.styleName || 'Valfri stil'}</span> · 
-              <span>${State.recipe?.batchVolume || 20}L</span> · 
-              <span>${formatSG(metrics.og)} OG</span> · 
-              <span>${metrics.abv ? `${metrics.abv.toFixed(1)}%` : '—'}</span> · 
-              <span>${metrics.ibu ? `${metrics.ibu.toFixed(0)} IBU` : '—'}</span>
+        <div class="hub-zone-grid-spotlight">
+          <!-- Spotlight: Aktivt Recept -->
+          <div class="hub-spotlight-card" id="hub-card-active-recipe" role="button" tabindex="0">
+            <div class="hub-spotlight-badge">🍺 Pågående i redigeraren</div>
+            <div class="hub-spotlight-header">
+              <h3 class="hub-spotlight-title">${escHtml(recipeName)}</h3>
+              <span class="hub-spotlight-style">${escHtml(metrics.styleName || 'Valfri ölstil')}</span>
+            </div>
+            <div class="hub-spotlight-metrics">
+              <div class="hub-metric-tile">
+                <span class="lbl">Volym</span>
+                <span class="val">${State.recipe?.batchVolume || 20} L</span>
+              </div>
+              <div class="hub-metric-tile">
+                <span class="lbl">OG</span>
+                <span class="val">${formatSG(metrics.og)}</span>
+              </div>
+              <div class="hub-metric-tile">
+                <span class="lbl">Est. ABV</span>
+                <span class="val highlight">${metrics.abv ? `${metrics.abv.toFixed(1)}%` : '—'}</span>
+              </div>
+              <div class="hub-metric-tile">
+                <span class="lbl">Beska</span>
+                <span class="val">${metrics.ibu ? `${metrics.ibu.toFixed(0)} IBU` : '—'}</span>
+              </div>
+              <div class="hub-metric-tile">
+                <span class="lbl">Färg</span>
+                <span class="val">${metrics.ebc ? `${metrics.ebc.toFixed(0)} EBC` : '—'}</span>
+              </div>
+            </div>
+            <div class="hub-spotlight-actions">
+              <button type="button" class="btn btn-primary" id="hub-btn-resume-recipe">
+                Fortsätt redigera →
+              </button>
+              <button type="button" class="btn btn-secondary" id="hub-card-start-brewday">
+                ⏱️ Starta bryggdag
+              </button>
             </div>
           </div>
-          <div class="hub-action-footer">
-            <span class="hub-action-link">Fortsätt redigera →</span>
+
+          <!-- Snabbstart & Mallar -->
+          <div class="hub-quickstart-panel">
+            <div class="hub-quick-action-item" id="hub-card-new-recipe" role="button" tabindex="0">
+              <div class="hub-quick-icon" style="background:#fef3c7; color:#d97706;">➕</div>
+              <div class="hub-quick-content">
+                <strong>Skapa tomt recept</strong>
+                <span>Börja från grunden med standardvolym (20 L)</span>
+              </div>
+              <span class="hub-quick-arrow">→</span>
+            </div>
+
+            <div class="hub-quick-action-item" id="hub-card-templates" role="button" tabindex="0">
+              <div class="hub-quick-icon" style="background:#e0f2fe; color:#0284c7;">📋</div>
+              <div class="hub-quick-content">
+                <strong>Välj stilmall</strong>
+                <span>Klassiska receptmallar med beprövade proportioner</span>
+                <div class="hub-template-quicktags">
+                  <span class="hub-tag" data-preset="west_coast_ipa">West Coast IPA</span>
+                  <span class="hub-tag" data-preset="hazy_neipa">NEIPA</span>
+                  <span class="hub-tag" data-preset="klassisk_pilsner">Pilsner</span>
+                  <span class="hub-tag" data-preset="choklad_porter">Porter</span>
+                  <span class="hub-tag" data-preset="hefeweizen">Veteöl</span>
+                </div>
+              </div>
+              <span class="hub-quick-arrow">→</span>
+            </div>
+
+            <div class="hub-quick-action-item" id="hub-card-import-quick" role="button" tabindex="0">
+              <div class="hub-quick-icon" style="background:#ede9fe; color:#7c3aed;">📥</div>
+              <div class="hub-quick-content">
+                <strong>Importera receptfil</strong>
+                <span>Öppna BeerXML 1.0 eller Brygglabbet JSON</span>
+              </div>
+              <span class="hub-quick-arrow">→</span>
+            </div>
           </div>
         </div>
-
-        <!-- 4. Starta Bryggdagsläge -->
-        <div class="hub-action-card" id="hub-card-start-brewday" role="button" tabindex="0">
-          <div class="hub-action-icon-wrap" style="background:#dcfce7; color:#15803d;">⏱️</div>
-          <div class="hub-action-body">
-            <h3 class="hub-action-title">Bryggdagsläget</h3>
-            <p class="hub-action-desc">Interaktiv guide med timers, humlelarm, Wake Lock och checklistor.</p>
-          </div>
-          <div class="hub-action-footer">
-            <span class="hub-action-link">Starta bryggning →</span>
-          </div>
-        </div>
-
       </section>
 
-      <!-- ==================== MAIN DASHBOARD TWO-COLUMN GRID ==================== -->
-      <div class="hub-main-grid">
-
-        <!-- LEFT COLUMN: AKTIVA JÄSNINGAR & SPARADE RECEPT -->
-        <div class="hub-column">
-
-          <!-- KORT: AKTIVA JÄSNINGAR & BATCHER -->
-          <div class="hub-section-card">
-            <div class="hub-section-header">
-              <div class="hub-section-title-wrap">
-                <span class="hub-section-icon">📒</span>
-                <h2>Mina bryggningar & Jäsning</h2>
+      <!-- ==================== ZON 2: I BRYGGERIET JUST NU ==================== -->
+      <section class="hub-zone-section">
+        <div class="hub-zone-header">
+          <span class="hub-zone-tag">Zon 2</span>
+          <h2 class="hub-zone-title">I bryggeriet just nu (Jäsning &amp; Telemetri)</h2>
+        </div>
+        <div class="hub-zone-grid-two">
+          <!-- Kort A: Aktiva Jäsningar & Schema -->
+          <div class="hub-card">
+            <div class="hub-card-header">
+              <div class="hub-card-title-wrap">
+                <span class="hub-card-icon">⏳</span>
+                <h3>Aktiva jäsningar &amp; schema</h3>
                 <span class="badge ${activeBatches.length > 0 ? 'badge-success' : 'badge-secondary'}">
                   ${activeBatches.length} aktiva
                 </span>
               </div>
               <button type="button" class="btn btn-secondary btn-sm" id="hub-btn-all-batches">
-                Visa alla (${allBatches.length}) →
+                Mina bryggningar (${allBatches.length}) →
               </button>
             </div>
-
-            <div class="hub-section-body">
+            <div class="hub-card-body">
               ${activeBatches.length === 0 ? `
-                <div class="hub-empty-box">
+                <div class="hub-empty-state">
                   <span style="font-size:2rem; margin-bottom:6px;">🍾</span>
                   <strong>Inga aktiva jäsningar just nu</strong>
-                  <p class="text-muted" style="margin-top:4px; font-size:0.86rem;">
-                    När du brygger ett öl kan du spara det till "Mina bryggningar" för att logga temperatur, jässchema och flaskning här.
+                  <p class="text-muted" style="font-size:0.85rem; margin-top:4px;">
+                    Starta en bryggning och spara till "Mina bryggningar" för att logga temperatur, jässchema och flaskning här.
                   </p>
-                  <button type="button" class="btn btn-secondary btn-sm" id="hub-btn-goto-batches-empty" style="margin-top:10px;">
-                    Öppna Mina bryggningar
-                  </button>
                 </div>
               ` : `
                 <div class="hub-batch-list">
@@ -342,26 +389,50 @@ export function renderDashboard() {
             </div>
           </div>
 
-          <!-- KORT: SPARADE RECEPT I ARKIVET -->
-          <div class="hub-section-card">
-            <div class="hub-section-header">
-              <div class="hub-section-title-wrap">
-                <span class="hub-section-icon">📂</span>
-                <h2>Sparade recept i arkivet</h2>
+          <!-- Kort B: Tilt Hydrometer IoT Bluetooth -->
+          <div class="hub-card">
+            <div class="hub-card-header">
+              <div class="hub-card-title-wrap">
+                <span class="hub-card-icon">📡</span>
+                <h3>Tilt Hydrometer (IoT Telemetri)</h3>
+              </div>
+            </div>
+            <div class="hub-card-body">
+              <p class="tool-hint" style="margin-bottom:12px; font-size:0.86rem;">
+                Trådlös realtidsövervakning av densitet och temperatur via Web Bluetooth direkt i webbläsaren.
+              </p>
+              ${getTiltPanelHtml('hub')}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== ZON 3: ARKIV & BRYGGARVERKTYG ==================== -->
+      <section class="hub-zone-section">
+        <div class="hub-zone-header">
+          <span class="hub-zone-tag">Zon 3</span>
+          <h2 class="hub-zone-title">Receptarkiv &amp; Bryggarverktyg</h2>
+        </div>
+        <div class="hub-zone-grid-two">
+          <!-- Kort A: Sparade Recept (Arkiv) -->
+          <div class="hub-card">
+            <div class="hub-card-header">
+              <div class="hub-card-title-wrap">
+                <span class="hub-card-icon">📂</span>
+                <h3>Sparade recept i arkivet</h3>
                 <span class="badge badge-secondary">${savedKeys.length} st</span>
               </div>
               <button type="button" class="btn btn-secondary btn-sm" id="hub-btn-manage-recipes">
                 Hantera arkiv →
               </button>
             </div>
-
-            <div class="hub-section-body">
+            <div class="hub-card-body">
               ${savedKeys.length === 0 ? `
-                <div class="hub-empty-box">
+                <div class="hub-empty-state">
                   <span style="font-size:1.8rem; margin-bottom:4px;">🌾</span>
                   <strong>Inga sparade recept i arkivet ännu</strong>
                   <p class="text-muted" style="font-size:0.85rem; margin-top:4px;">
-                    Skapa ett recept eller välj en färdig mall och klicka på "Spara" så visas dina recept här.
+                    Skapa ett recept eller välj en färdig mall och klicka på "Spara" för att bygga upp ditt receptarkiv.
                   </p>
                 </div>
               ` : `
@@ -384,100 +455,71 @@ export function renderDashboard() {
             </div>
           </div>
 
-        </div>
-
-        <!-- RIGHT COLUMN: TILT IOT TELEMETRY & SNABBVERKTYG -->
-        <div class="hub-column">
-
-          <!-- KORT: TILT HYDROMETER IOT LIVE PANEL -->
-          <div class="hub-section-card">
-            <div class="hub-section-header">
-              <div class="hub-section-title-wrap">
-                <span class="hub-section-icon">🧲</span>
-                <h2>Tilt Hydrometer (IoT Bluetooth)</h2>
+          <!-- Kort B: Bryggarverktyg uppdelade i kategorier -->
+          <div class="hub-card">
+            <div class="hub-card-header">
+              <div class="hub-card-title-wrap">
+                <span class="hub-card-icon">🧰</span>
+                <h3>Bryggarverktyg &amp; Data</h3>
               </div>
+              <button type="button" class="btn btn-secondary btn-sm" id="hub-btn-all-tools">
+                Alla verktyg →
+              </button>
             </div>
-            <div class="hub-section-body" style="padding-top:4px;">
-              <p class="tool-hint" style="margin-bottom:12px; font-size:0.86rem;">
-                Realtids telemetri direkt i webbläsaren. Anslut din digitala hydrometer eller testa den interaktiva simulatorn.
-              </p>
-              ${getTiltPanelHtml('hub')}
-            </div>
-          </div>
-
-          <!-- KORT: SNABBVERKTYG & DOKUMENTATION -->
-          <div class="hub-section-card">
-            <div class="hub-section-header">
-              <div class="hub-section-title-wrap">
-                <span class="hub-section-icon">⚡</span>
-                <h2>Snabbverktyg & Data</h2>
-              </div>
-            </div>
-
-            <div class="hub-section-body">
-              <div class="hub-tools-grid">
-                <button type="button" class="hub-tool-btn" id="hub-tool-carb">
+            <div class="hub-card-body">
+              <span class="section-label" style="margin-bottom:6px;">Mätning &amp; Beräkningar</span>
+              <div class="hub-tools-grouped-grid" style="margin-bottom:14px;">
+                <button type="button" class="hub-tool-compact-btn" id="hub-tool-carb">
                   <span class="hub-tool-icon">🍾</span>
-                  <div class="hub-tool-text">
-                    <strong>Kolsyra & Flaskning</strong>
-                    <span>Primingsocker & fatkolsyra</span>
+                  <div>
+                    <strong>Kolsyra &amp; Flaskning</strong>
+                    <span>Sockermängd &amp; fatkolsyra</span>
                   </div>
                 </button>
-
-                <button type="button" class="hub-tool-btn" id="hub-tool-refrac">
+                <button type="button" class="hub-tool-compact-btn" id="hub-tool-refrac">
                   <span class="hub-tool-icon">🔍</span>
-                  <div class="hub-tool-text">
+                  <div>
                     <strong>Refraktometer</strong>
                     <span>Terrills formel för jäst vört</span>
                   </div>
                 </button>
-
-                <button type="button" class="hub-tool-btn" id="hub-tool-yeast">
+                <button type="button" class="hub-tool-compact-btn" id="hub-tool-yeast">
                   <span class="hub-tool-icon">🧫</span>
-                  <div class="hub-tool-text">
-                    <strong>Jäst & Förkultur</strong>
-                    <span>Pitch rate och cellbehov</span>
+                  <div>
+                    <strong>Jäst &amp; Förkultur</strong>
+                    <span>Cellberäkning &amp; pitch rate</span>
                   </div>
                 </button>
-
-                <button type="button" class="hub-tool-btn" id="hub-tool-strike">
+                <button type="button" class="hub-tool-compact-btn" id="hub-tool-strike">
                   <span class="hub-tool-icon">🌡️</span>
-                  <div class="hub-tool-text">
+                  <div>
                     <strong>Inmäskning (Strike)</strong>
                     <span>Palmers temperaturformel</span>
                   </div>
                 </button>
+              </div>
 
-                <button type="button" class="hub-tool-btn" id="hub-tool-import">
-                  <span class="hub-tool-icon">📤</span>
-                  <div class="hub-tool-text">
-                    <strong>Importera Recept</strong>
-                    <span>BeerXML 1.0 eller JSON</span>
-                  </div>
-                </button>
-
-                <button type="button" class="hub-tool-btn" id="hub-tool-backup">
-                  <span class="hub-tool-icon">💾</span>
-                  <div class="hub-tool-text">
-                    <strong>Säkerhetskopia</strong>
-                    <span>Fullständig JSON-backup</span>
-                  </div>
-                </button>
-
-                <button type="button" class="hub-tool-btn" id="hub-tool-qr" style="grid-column: 1 / -1;">
+              <span class="section-label" style="margin-bottom:6px;">Data &amp; Mobil</span>
+              <div class="hub-tools-grouped-grid">
+                <button type="button" class="hub-tool-compact-btn" id="hub-tool-qr">
                   <span class="hub-tool-icon">📱</span>
-                  <div class="hub-tool-text">
-                    <strong>Dela till mobilen (QR-kod)</strong>
-                    <span>Serverlös överföring direkt till telefonen</span>
+                  <div>
+                    <strong>Dela till mobilen</strong>
+                    <span>Serverlös QR-överföring</span>
+                  </div>
+                </button>
+                <button type="button" class="hub-tool-compact-btn" id="hub-tool-backup">
+                  <span class="hub-tool-icon">💾</span>
+                  <div>
+                    <strong>Säkerhetskopia</strong>
+                    <span>Fullständig JSON-export</span>
                   </div>
                 </button>
               </div>
             </div>
           </div>
-
         </div>
-
-      </div>
+      </section>
 
       <!-- ==================== FOOTER PREFERENCES ==================== -->
       <footer class="hub-footer">
@@ -505,7 +547,7 @@ function setupDashboardEvents(container) {
     switchDesktopView('recipe');
   });
 
-  // 2. Templates
+  // 2. Templates Modal
   container.querySelector('#hub-card-templates')?.addEventListener('click', () => {
     openPresetRecipesModal((_presetId) => {
       if (globalRecalculate) globalRecalculate();
@@ -513,13 +555,35 @@ function setupDashboardEvents(container) {
     });
   });
 
+  // 2b. Quick Preset Tags (direct load)
+  container.querySelectorAll('.hub-tag[data-preset]').forEach((tag) => {
+    tag.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const presetId = tag.dataset.preset;
+      if (presetId) {
+        loadPresetRecipe(presetId, globalRecalculate);
+        switchDesktopView('recipe');
+      }
+    });
+  });
+
+  // 2c. Quick Import Recipe
+  container.querySelector('#hub-card-import-quick')?.addEventListener('click', () => {
+    document.getElementById('import-file-input')?.click();
+  });
+
   // 3. Resume Active Recipe
   container.querySelector('#hub-card-active-recipe')?.addEventListener('click', () => {
     switchDesktopView('recipe');
   });
+  container.querySelector('#hub-btn-resume-recipe')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    switchDesktopView('recipe');
+  });
 
   // 4. Start Brew Day
-  container.querySelector('#hub-card-start-brewday')?.addEventListener('click', () => {
+  container.querySelector('#hub-card-start-brewday')?.addEventListener('click', (e) => {
+    e.stopPropagation();
     switchDesktopView('brewday');
   });
 
@@ -536,6 +600,15 @@ function setupDashboardEvents(container) {
     item.addEventListener('click', () => {
       const batchId = item.dataset.batchId;
       switchDesktopView('batches', { batchId });
+    });
+  });
+  container.querySelectorAll('[data-open-batch]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const batchId = btn.dataset.openBatch;
+      if (batchId) {
+        switchDesktopView('batches', { batchId });
+      }
     });
   });
 
@@ -555,7 +628,10 @@ function setupDashboardEvents(container) {
     });
   });
 
-  // Quick Tools
+  // Quick Tools & All Tools
+  container.querySelector('#hub-btn-all-tools')?.addEventListener('click', () => {
+    openToolsModal();
+  });
   container.querySelector('#hub-tool-carb')?.addEventListener('click', () => openToolsModal('carb'));
   container.querySelector('#hub-tool-refrac')?.addEventListener('click', () => openToolsModal('refrac'));
   container.querySelector('#hub-tool-yeast')?.addEventListener('click', () => openToolsModal('yeast'));

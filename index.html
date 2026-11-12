@@ -44,19 +44,27 @@
     </button>
   </nav>
 
-  <div style="display:flex; align-items:center; gap:8px;">
+  <!-- Recipe-Specific Header Controls (shown in Recipe Editor) -->
+  <div class="header-recipe-controls hidden" id="header-recipe-controls">
     <div class="recipe-name-wrapper" title="Klicka för att byta receptnamn">
       <input type="text" id="recipe-name-input" placeholder="Receptnamn..." value="Mitt nya öl" autocomplete="off">
       <span class="recipe-name-edit-icon" aria-hidden="true">✏️</span>
     </div>
     <span id="recipe-brew-badge" class="badge-tag hidden" style="cursor:pointer; background:var(--accent-muted); color:var(--accent); font-weight:600; padding:4px 8px; font-size:0.78rem;" title="Klicka för att se sparade bryggningar av detta recept">Bryggd 0 ggr</span>
-  </div>
-  <div class="header-actions">
-    <button class="btn btn-secondary btn-sm" id="btn-batches" title="Visa alla bryggningar (batcher)"><span class="quick-icon">📒</span> Mina bryggningar</button>
     <button class="btn btn-secondary btn-sm" id="btn-toggle-brewday" title="Växla till Bryggdagsläget"><span class="quick-icon">🍺</span> Bryggdag</button>
-    <button class="btn btn-secondary btn-sm" id="btn-presets" title="Välj bland färdiga exempelrecept"><span class="quick-icon">📋</span> Exempelrecept</button>
+    <button class="btn btn-secondary btn-sm" id="btn-presets" title="Välj bland färdiga exempelrecept"><span class="quick-icon">📋</span> Exempel</button>
     <button class="btn btn-primary btn-sm" id="btn-save" title="Spara recept"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Spara</button>
-    <button class="btn btn-secondary btn-sm" id="btn-share-qr" title="Dela recept eller öppna direkt i mobilen via QR-kod"><span class="quick-icon">📱</span> Mobil / QR</button>
+    <button class="btn btn-secondary btn-sm" id="btn-share-qr" title="Dela recept eller öppna direkt i mobilen via QR-kod"><span class="quick-icon">📱</span> Dela</button>
+    <button id="btn-batches" style="display:none;" aria-hidden="true" tabindex="-1"></button>
+  </div>
+
+  <!-- Hub/Overview-Specific Header Controls (shown on Startsidan/Hub) -->
+  <div class="header-hub-controls" id="header-hub-controls">
+    <button class="btn btn-secondary btn-sm" id="btn-hub-header-tools" title="Öppna bryggarverktyg"><span class="quick-icon">🧰</span> Bryggverktyg</button>
+    <button class="btn btn-secondary btn-sm" id="btn-switch-to-mobile-header" title="Växla till mobilvy"><span class="quick-icon">📱</span> Mobilvy</button>
+  </div>
+
+  <div class="header-actions">
     
     <!-- Kebab / Header Dropdown Menu -->
     <div class="header-menu-wrap">

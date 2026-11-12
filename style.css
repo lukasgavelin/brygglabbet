@@ -227,7 +227,23 @@ body {
 #recipe-name-input:focus { border-color: var(--accent); }
 #recipe-name-input::placeholder { color: var(--text-dim); font-weight: 400; }
 
+.header-recipe-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.header-hub-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
 .header-actions { display: flex; gap: 8px; margin-left: auto; }
+.header-hub-controls ~ .header-actions { margin-left: 0; }
 
 /* --- Buttons -------------------------------------------- */
 .btn {
@@ -1438,13 +1454,26 @@ textarea {
     font-size: 1.15rem;
   }
 
-  #recipe-name-input {
+  .header-recipe-controls {
     order: 3;
     width: 100%;
+    margin-top: 4px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .recipe-name-wrapper {
+    flex: 1 1 100%;
+  }
+  #recipe-name-input {
+    width: 100%;
     max-width: 100%;
-    margin-top: 2px;
     font-size: 0.95rem;
     padding: 6px 4px;
+  }
+  .header-hub-controls {
+    order: 2;
+    margin-left: auto;
+    gap: 6px;
   }
 
   .header-actions {
@@ -3951,158 +3980,297 @@ body.mobile-mode #mobile-stats-fab {
   text-align: center;
 }
 
-/* --- 4 Primary Action Cards Grid --- */
-.hub-actions-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-.hub-action-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 20px 18px;
+/* ==================== 3-ZONE COCKPIT LAYOUT ==================== */
+.hub-zone-section {
   display: flex;
   flex-direction: column;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-  user-select: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  gap: 14px;
 }
 
-.hub-action-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  border-color: var(--accent);
-}
-
-.hub-action-icon-wrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+.hub-zone-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 1.35rem;
-  margin-bottom: 12px;
-}
-
-.hub-action-body {
-  flex: 1;
-}
-
-.hub-action-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 6px 0;
-}
-
-.hub-action-desc {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.hub-action-footer {
-  margin-top: 14px;
-  padding-top: 10px;
-  border-top: 1px dashed var(--border);
-}
-
-.hub-action-link {
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: var(--accent);
-  transition: color 0.15s ease;
-}
-
-.hub-action-card:hover .hub-action-link {
-  color: var(--accent-bright);
-}
-
-/* Special Active Recipe Card */
-.hub-action-active-recipe {
-  border-color: var(--accent);
-  background: linear-gradient(180deg, var(--bg-card) 0%, rgba(217, 119, 6, 0.03) 100%);
-}
-
-.hub-active-badge {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--accent-bright);
-  letter-spacing: 0.04em;
-  margin-bottom: 2px;
-}
-
-.hub-recipe-specs {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-top: 4px;
-}
-
-/* --- Main Dashboard Two-Column Grid --- */
-.hub-main-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 24px;
-}
-
-.hub-column {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.hub-section-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.hub-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
   gap: 10px;
 }
 
-.hub-section-title-wrap {
+.hub-zone-tag {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(217, 119, 6, 0.12);
+  color: var(--accent);
+}
+
+.hub-zone-title {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* --- Zon 1: Receptverkstad & Snabbstart Grid --- */
+.hub-zone-grid-spotlight {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* Spotlight: Aktivt Recept */
+.hub-spotlight-card {
+  background: linear-gradient(145deg, var(--bg-card) 0%, rgba(217, 119, 6, 0.04) 100%);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  position: relative;
+}
+
+.hub-spotlight-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.12);
+  transform: translateY(-2px);
+}
+
+.hub-spotlight-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.hub-spotlight-header {
+  margin-bottom: 16px;
+}
+
+.hub-spotlight-title {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  line-height: 1.25;
+}
+
+.hub-spotlight-style {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.hub-spotlight-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+
+.hub-metric-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hub-metric-tile .lbl {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.hub-metric-tile .val {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.15;
+}
+
+.hub-spotlight-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+
+/* Quickstart Panel */
+.hub-quickstart-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.hub-quick-action-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.hub-quick-action-item:hover {
+  background: var(--bg-card);
+  border-color: var(--accent);
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.hub-quick-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.hub-quick-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.hub-quick-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 2px 0;
+  line-height: 1.2;
+}
+
+.hub-quick-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.hub-quick-arrow {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.hub-quick-action-item:hover .hub-quick-arrow {
+  transform: translateX(3px);
+}
+
+.hub-template-quicktags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.hub-tag {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.hub-tag:hover {
+  border-color: var(--accent);
+  color: var(--accent-bright);
+  background: rgba(217, 119, 6, 0.06);
+}
+
+/* --- Zon 2 & Zon 3: Two-Column Grids --- */
+.hub-zone-grid-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.hub-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.hub-card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.hub-card-title-wrap {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.hub-section-icon {
-  font-size: 1.25rem;
+.hub-card-icon {
+  font-size: 1.2rem;
 }
 
-.hub-section-title-wrap h2 {
-  font-size: 1.1rem;
+.hub-card-title-wrap h3 {
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
 }
 
-.hub-section-body {
+.hub-card-body {
+  padding: 18px;
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* Empty Box */
-.hub-empty-box {
+.hub-empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  justify-content: center;
   padding: 24px 16px;
   background: var(--bg-secondary);
   border: 1px dashed var(--border);
@@ -4204,7 +4372,51 @@ body.mobile-mode #mobile-stats-fab {
   font-size: 1rem;
 }
 
-/* Quick Tools Grid in Hub */
+/* Grouped Tools in Hub */
+.hub-tools-grouped-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.hub-tool-compact-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.hub-tool-compact-btn:hover {
+  background: var(--bg-card);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.hub-tool-compact-btn strong {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.hub-tool-compact-btn span {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+/* Legacy Tools Grid (backwards compatibility) */
 .hub-tools-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -4280,10 +4492,10 @@ body.mobile-mode #mobile-stats-fab {
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
-  .hub-actions-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .hub-zone-grid-spotlight {
+    grid-template-columns: 1fr;
   }
-  .hub-main-grid {
+  .hub-zone-grid-two {
     grid-template-columns: 1fr;
   }
 }
@@ -4291,6 +4503,21 @@ body.mobile-mode #mobile-stats-fab {
 @media (max-width: 768px) {
   .desktop-nav-bar {
     display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .hub-spotlight-metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .hub-tools-grouped-grid {
+    grid-template-columns: 1fr;
+  }
+  .hub-recipes-grid {
+    grid-template-columns: 1fr;
+  }
+  .hub-spotlight-actions {
+    flex-direction: column;
   }
 }
 
